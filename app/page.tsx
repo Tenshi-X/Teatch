@@ -1,65 +1,238 @@
-import Image from "next/image";
+import Link from 'next/link';
+import {
+  BookOpen,
+  Sparkles,
+  Brain,
+  BarChart3,
+  FileText,
+  Users,
+  ArrowRight,
+  CheckCircle,
+} from 'lucide-react';
 
-export default function Home() {
+export default function LandingPage() {
+  const features = [
+    {
+      icon: Brain,
+      title: 'AI-Powered',
+      description: 'Generate soal otomatis sesuai usia, jenjang, dan mata pelajaran anak',
+      gradient: 'from-primary-500 to-primary-700',
+    },
+    {
+      icon: FileText,
+      title: 'Beragam Tipe Soal',
+      description: 'Pilihan ganda, uraian, isian singkat, menghubungkan, dan lainnya',
+      gradient: 'from-secondary-500 to-secondary-700',
+    },
+    {
+      icon: BarChart3,
+      title: 'Statistik Lengkap',
+      description: 'Pantau perkembangan belajar anak dengan grafik dan data terperinci',
+      gradient: 'from-purple-500 to-purple-700',
+    },
+    {
+      icon: Users,
+      title: 'Multi-Anak',
+      description: 'Satu akun untuk semua anak. Setiap anak punya profil dan progress sendiri',
+      gradient: 'from-warning-500 to-warning-600',
+    },
+  ];
+
+  const levels = [
+    'PAUD',
+    'TK A',
+    'TK B',
+    'SD Kelas 1-6',
+    'SMP Kelas 7-9',
+    'SMA Kelas 10-12',
+  ];
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
+    <div className="min-h-screen bg-[var(--bg)]">
+      {/* Header */}
+      <header className="sticky top-0 z-50 bg-[var(--card-bg)]/80 backdrop-blur-xl border-b border-[var(--card-border)]">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-2">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center shadow-md">
+              <BookOpen className="w-5 h-5 text-white" />
+            </div>
+            <span className="text-xl font-bold bg-gradient-to-r from-primary-600 to-secondary-500 bg-clip-text text-transparent">
+              Teatch
+            </span>
+          </Link>
+          <div className="flex items-center gap-3">
+            <Link
+              href="/login"
+              className="text-sm font-medium text-surface-500 hover:text-surface-700 dark:hover:text-surface-300 transition-colors"
+            >
+              Masuk
+            </Link>
+            <Link
+              href="/register"
+              className="px-4 py-2 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-xl transition-colors shadow-md hover:shadow-lg"
+            >
+              Daftar Gratis
+            </Link>
+          </div>
+        </div>
+      </header>
+
+      {/* Hero */}
+      <section className="relative overflow-hidden py-20 sm:py-28 px-4">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary-600/10 via-transparent to-secondary-500/10" />
+        <div className="absolute top-20 left-10 w-72 h-72 bg-primary-500/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-10 right-10 w-80 h-80 bg-secondary-500/10 rounded-full blur-3xl" />
+
+        <div className="max-w-4xl mx-auto text-center relative z-10">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 text-sm font-medium mb-6 animate-fade-in">
+            <Sparkles size={16} />
+            Platform Belajar AI #1 untuk Anak Indonesia
+          </div>
+
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight mb-6 animate-fade-in-up">
+            Bantu Anak Belajar dengan
+            <span className="bg-gradient-to-r from-primary-600 to-secondary-500 bg-clip-text text-transparent">
+              {' '}
+              Kecerdasan Buatan
+            </span>
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+
+          <p className="text-lg sm:text-xl text-surface-400 max-w-2xl mx-auto mb-8 animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
+            Generate soal latihan otomatis sesuai usia dan kurikulum. Pantau perkembangan belajar anak dengan mudah.
+          </p>
+
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
+            <Link
+              href="/register"
+              className="inline-flex items-center gap-2 px-8 py-3.5 text-base font-semibold text-white bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 rounded-2xl shadow-xl shadow-primary-500/25 hover:shadow-primary-500/40 transition-all active:scale-[0.98]"
             >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+              Mulai Sekarang — Gratis
+              <ArrowRight size={18} />
+            </Link>
+            <Link
+              href="/login"
+              className="inline-flex items-center gap-2 px-6 py-3 text-sm font-medium text-surface-600 dark:text-surface-300 hover:text-surface-800 dark:hover:text-white transition-colors"
             >
-              Learning
-            </a>{" "}
-            center.
+              Sudah punya akun? Masuk
+            </Link>
+          </div>
+
+          {/* Levels */}
+          <div className="flex flex-wrap justify-center gap-2 mt-10 animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
+            {levels.map((level) => (
+              <span
+                key={level}
+                className="px-3 py-1.5 rounded-full text-xs font-medium bg-surface-100 dark:bg-surface-800 text-surface-500"
+              >
+                {level}
+              </span>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Features */}
+      <section className="py-16 px-4">
+        <div className="max-w-6xl mx-auto">
+          <h2 className="text-2xl sm:text-3xl font-bold text-center mb-4">
+            Fitur Unggulan
+          </h2>
+          <p className="text-surface-400 text-center mb-12 max-w-lg mx-auto">
+            Semua yang Anda butuhkan untuk mendampingi belajar anak di rumah
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {features.map((feature) => (
+              <div
+                key={feature.title}
+                className="card p-6 text-center group hover:scale-[1.03] transition-all duration-200"
+              >
+                <div
+                  className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center mx-auto mb-4 shadow-lg group-hover:shadow-xl transition-shadow`}
+                >
+                  <feature.icon className="w-7 h-7 text-white" />
+                </div>
+                <h3 className="font-semibold mb-2">{feature.title}</h3>
+                <p className="text-sm text-surface-400">{feature.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* How it works */}
+      <section className="py-16 px-4 bg-surface-50 dark:bg-surface-900/50">
+        <div className="max-w-4xl mx-auto">
+          <h2 className="text-2xl sm:text-3xl font-bold text-center mb-12">
+            Cara Kerja
+          </h2>
+          <div className="space-y-6">
+            {[
+              {
+                step: '1',
+                title: 'Daftar & Tambah Profil Anak',
+                desc: 'Masukkan data anak: nama, usia, jenjang, dan minat.',
+              },
+              {
+                step: '2',
+                title: 'Pilih Mata Pelajaran & Generate Soal',
+                desc: 'AI akan membuat soal yang sesuai dengan kemampuan anak.',
+              },
+              {
+                step: '3',
+                title: 'Kerjakan & Pantau Progress',
+                desc: 'Anak mengerjakan soal langsung di browser. Orang tua pantau hasilnya.',
+              },
+            ].map((item) => (
+              <div
+                key={item.step}
+                className="flex items-start gap-4 card p-5"
+              >
+                <div className="w-10 h-10 rounded-xl bg-primary-600 text-white flex items-center justify-center font-bold text-lg shrink-0">
+                  {item.step}
+                </div>
+                <div>
+                  <h3 className="font-semibold mb-1">{item.title}</h3>
+                  <p className="text-sm text-surface-400">{item.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className="py-20 px-4 text-center">
+        <div className="max-w-2xl mx-auto">
+          <h2 className="text-3xl font-bold mb-4">
+            Siap Membantu Anak Belajar?
+          </h2>
+          <p className="text-surface-400 mb-8">
+            Gratis untuk dicoba. Tidak perlu kartu kredit.
+          </p>
+          <Link
+            href="/register"
+            className="inline-flex items-center gap-2 px-8 py-3.5 text-base font-semibold text-white bg-gradient-to-r from-primary-600 to-primary-700 rounded-2xl shadow-xl shadow-primary-500/25 hover:shadow-primary-500/40 transition-all active:scale-[0.98]"
+          >
+            Daftar Gratis Sekarang
+            <ArrowRight size={18} />
+          </Link>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="border-t border-[var(--card-border)] py-8 px-4">
+        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center">
+              <BookOpen className="w-4 h-4 text-white" />
+            </div>
+            <span className="font-semibold text-sm">Teatch</span>
+          </div>
+          <p className="text-xs text-surface-400">
+            © 2026 Teatch. Platform Belajar AI untuk Anak Indonesia.
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+      </footer>
     </div>
   );
 }
