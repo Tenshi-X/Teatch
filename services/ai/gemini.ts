@@ -12,7 +12,7 @@ export async function generateWorksheet(
   params: AIGenerateParams
 ): Promise<AIGeneratedWorksheet> {
   const model = genAI.getGenerativeModel({
-    model: 'gemini-2.0-flash',
+    model: 'gemini-1.5-flash',
     generationConfig: {
       temperature: 0.7,
       topP: 0.9,
@@ -46,6 +46,11 @@ export async function generateWorksheet(
       throw new Error('AI mengembalikan format yang tidak valid. Silakan coba lagi.');
     }
 
-    throw new Error('Gagal menggenerate soal. Pastikan API key valid dan coba lagi.');
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    if (errorMessage.includes('429')) {
+      throw new Error('Terlalu banyak permintaan (Rate Limit). Silakan tunggu sebentar dan coba lagi.');
+    }
+
+    throw new Error(`Gagal menggenerate soal: ${errorMessage}`);
   }
 }
