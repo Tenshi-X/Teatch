@@ -86,9 +86,34 @@ export function QuizEngine({
 
       for (const q of questions) {
         const userAnswer = answers[q.id] || '';
-        const isCorrect =
-          userAnswer.toLowerCase().trim() ===
-          (q.answer || '').toLowerCase().trim();
+        
+        let isCorrect = false;
+
+        if (q.type === 'essay') {
+          // Assume correct if they wrote at least 10 characters
+          isCorrect = userAnswer.trim().length >= 10;
+        } else if (q.type === 'matching' || q.type === 'image_matching') {
+          try {
+            const parsedAnswer = JSON.parse(userAnswer);
+            const pairs = q.options as any[];
+            let allCorrect = true;
+            for (const pair of pairs) {
+              if (parsedAnswer[pair.left] !== pair.right) {
+                allCorrect = false;
+                break;
+              }
+            }
+            isCorrect = allCorrect && Object.keys(parsedAnswer).length === pairs.length;
+          } catch (e) {
+            isCorrect = false;
+          }
+        } else {
+          // Short answer / multiple choice / guess_image
+          const cleanUser = userAnswer.toLowerCase().replace(/[^a-z0-9]/g, '');
+          const cleanAnswer = (q.answer || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+          isCorrect = cleanUser === cleanAnswer;
+        }
+
         if (isCorrect) correct++;
         answerRecords.push({
           question_id: q.id,
@@ -254,6 +279,19 @@ export function QuizEngine({
           <p className="text-base font-medium leading-relaxed">{currentQ.question}</p>
         </div>
 
+        {/* Image */}
+        {currentQ.image_url && (
+          <div className="mb-4 rounded-xl overflow-hidden border border-surface-200 dark:border-surface-700 bg-surface-50 dark:bg-surface-800/50">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img 
+              src={currentQ.image_url} 
+              alt="Pertanyaan visual" 
+              className="w-full h-auto max-h-[300px] object-contain mx-auto"
+              loading="lazy"
+            />
+          </div>
+        )}
+
         {/* Multiple choice */}
         {currentQ.type === 'multiple_choice' && Array.isArray(currentQ.options) && (
           <div className="space-y-2">
@@ -311,6 +349,55 @@ export function QuizEngine({
             rows={6}
             className="input-base text-sm resize-none"
           />
+        )}
+
+        {/* Guess Image */}
+        {currentQ.type === 'guess_image' && (
+          <input
+            type="text"
+            value={answers[currentQ.id] || ''}
+            onChange={(e) => setAnswer(currentQ.id, e.target.value)}
+            placeholder="Tebak gambar ini..."
+            className="input-base text-base"
+          />
+        )}
+
+        {/* Matching */}
+        {(currentQ.type === 'matching' || currentQ.type === 'image_matching') && Array.isArray(currentQ.options) && (
+          <div className="space-y-3">
+            {(currentQ.options as any[]).map((pair, i) => {
+              const allRightOptions = (currentQ.options as any[]).map(p => p.right).sort();
+              
+              let currentSelections: Record<string, string> = {};
+              try {
+                if (answers[currentQ.id]) {
+                  currentSelections = JSON.parse(answers[currentQ.id]);
+                }
+              } catch(e) {}
+              
+              const handleSelect = (left: string, right: string) => {
+                const newSelections = { ...currentSelections, [left]: right };
+                setAnswer(currentQ.id, JSON.stringify(newSelections));
+              };
+
+              return (
+                <div key={i} className="flex flex-col sm:flex-row sm:items-center gap-2 p-3 rounded-lg bg-surface-50 dark:bg-surface-800/30 border border-surface-200 dark:border-surface-700">
+                  <span className="font-medium flex-1 bg-white dark:bg-surface-900 p-2 rounded-md border border-surface-200 dark:border-surface-700">{pair.left}</span>
+                  <span className="text-surface-400 hidden sm:block">→</span>
+                  <select
+                    className="input-base text-sm flex-1 bg-white dark:bg-surface-900 cursor-pointer"
+                    value={currentSelections[pair.left] || ''}
+                    onChange={(e) => handleSelect(pair.left, e.target.value)}
+                  >
+                    <option value="" disabled>Pilih pasangan...</option>
+                    {allRightOptions.map((opt, idx) => (
+                      <option key={idx} value={opt}>{opt}</option>
+                    ))}
+                  </select>
+                </div>
+              );
+            })}
+          </div>
         )}
       </Card>
 

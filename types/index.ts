@@ -78,6 +78,7 @@ export interface AIGeneratedQuestion {
   options?: string[];
   answer: string;
   explanation: string;
+  image_prompt?: string;
   pairs?: { left: string; right: string }[];
 }
 

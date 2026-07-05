@@ -98,12 +98,14 @@ function getTypeInstructions(type: QuestionType): string {
       return `- Buat deskripsi gambar yang jelas
 - Anak harus menebak apa yang ada di gambar
 - Berikan petunjuk jika perlu
-- Field "question" berisi deskripsi gambar`;
+- Field "question" berisi pertanyaan
+- WAJIB tambahkan field "image_prompt" (dalam bahasa Inggris) berisi deskripsi visual detail dari gambar yang dimaksud agar bisa digenerate oleh AI gambar.`;
 
     case 'image_matching':
-      return `- Buat soal mencocokkan gambar
-- Berikan deskripsi gambar yang jelas
-- Gunakan format pairs`;
+      return `- Buat soal mencocokkan teks dengan gambar
+- Berikan deskripsi instruksi yang jelas pada "question"
+- Gunakan format pairs
+- WAJIB tambahkan field "image_prompt" (dalam bahasa Inggris) yang menjelaskan elemen visual utama untuk konteks latihan ini.`;
 
     default:
       return `- Buat soal sesuai tipe yang diminta
@@ -168,6 +170,25 @@ function getQuestionSchema(type: QuestionType): string {
       "question": "Instruksi: Hubungkan pasangan yang tepat",
       "pairs": [{"left": "Item kiri", "right": "Item kanan"}],
       "answer": "Penjelasan pasangan yang benar",
+      "explanation": "Pembahasan"
+    }`;
+
+    case 'guess_image':
+      return `{
+      "type": "guess_image",
+      "question": "Pertanyaan tentang gambar...",
+      "image_prompt": "detailed english description of the image to generate",
+      "answer": "Jawaban yang benar",
+      "explanation": "Pembahasan"
+    }`;
+
+    case 'image_matching':
+      return `{
+      "type": "image_matching",
+      "question": "Instruksi: Hubungkan pasangan berikut",
+      "image_prompt": "detailed english description of the main context image",
+      "pairs": [{"left": "Item kiri", "right": "Item kanan"}],
+      "answer": "Penjelasan",
       "explanation": "Pembahasan"
     }`;
 

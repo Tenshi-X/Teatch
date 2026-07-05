@@ -45,9 +45,12 @@ export async function saveWorksheet(
     worksheet_id: worksheet.id,
     type: q.type,
     question: q.question,
-    options: q.options || [],
+    options: q.pairs ? q.pairs : (q.options || []),
     answer: q.answer,
     explanation: q.explanation,
+    image_url: q.image_prompt 
+      ? `https://image.pollinations.ai/prompt/${encodeURIComponent(q.image_prompt)}?width=800&height=600&nologo=true`
+      : null,
     order_index: index,
   }));
 

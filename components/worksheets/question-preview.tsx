@@ -36,6 +36,19 @@ export function QuestionPreview({ question, index, showAnswer = false }: Questio
             {question.question}
           </p>
 
+          {/* Image */}
+          {(question as any).image_url && (
+            <div className="mb-4 rounded-xl overflow-hidden border border-surface-200 dark:border-surface-700 bg-surface-50 dark:bg-surface-800/50">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img 
+                src={(question as any).image_url} 
+                alt="Pertanyaan visual" 
+                className="w-full h-auto max-h-[300px] object-contain"
+                loading="lazy"
+              />
+            </div>
+          )}
+
           {/* Multiple choice options */}
           {question.type === 'multiple_choice' && question.options && (
             <div className="space-y-2 mb-3">
