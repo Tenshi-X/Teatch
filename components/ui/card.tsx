@@ -28,8 +28,8 @@ const Card = forwardRef<HTMLDivElement, CardProps>(
         className={cn(
           variants[variant],
           paddings[padding],
-          hover && 'hover:scale-[1.02] hover:shadow-lg cursor-pointer',
-          'transition-all duration-200',
+          hover && 'hover:-translate-y-[2px] hover:shadow-md cursor-pointer',
+          'transition-all duration-300 ease-out',
           className
         )}
         {...props}
