@@ -5,9 +5,12 @@ import { Badge } from '@/components/ui/badge';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Button } from '@/components/ui/button';
 import { ProgressRing } from '@/components/dashboard/progress-ring';
-import { BarChart3, TrendingUp, Award, BookOpen } from 'lucide-react';
+import { BarChart3, TrendingUp, Award, BookOpen, SearchX } from 'lucide-react';
 import Link from 'next/link';
 import type { Attempt } from '@/types';
+import { useChildStore } from '@/lib/stores/child-store';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { formatDate } from '@/lib/utils';
 
 interface StatisticsViewProps {
   attempts: (Attempt & {
@@ -19,12 +22,28 @@ interface StatisticsViewProps {
 }
 
 export function StatisticsView({ attempts }: StatisticsViewProps) {
-  if (attempts.length === 0) {
+  const { activeChild } = useChildStore();
+
+  const childAttempts = activeChild
+    ? attempts.filter((a) => a.child_id === activeChild.id)
+    : [];
+
+  if (!activeChild) {
+    return (
+      <EmptyState
+        icon={<SearchX size={48} />}
+        title="Pilih Anak"
+        description="Silakan pilih profil anak di atas untuk melihat statistik perkembangannya."
+      />
+    );
+  }
+
+  if (childAttempts.length === 0) {
     return (
       <EmptyState
         icon={<BarChart3 size={48} />}
         title="Belum ada data statistik"
-        description="Kerjakan latihan terlebih dahulu untuk melihat statistik perkembangan."
+        description={`Kerjakan latihan terlebih dahulu untuk melihat statistik perkembangan ${activeChild.name}.`}
         action={
           <Link href="/worksheets/new">
             <Button>Buat Latihan</Button>
@@ -35,11 +54,11 @@ export function StatisticsView({ attempts }: StatisticsViewProps) {
   }
 
   // Calculate statistics
-  const totalAttempts = attempts.length;
+  const totalAttempts = childAttempts.length;
   const avgScore =
-    attempts.reduce((sum, a) => sum + (a.score || 0), 0) / totalAttempts;
-  const totalCorrect = attempts.reduce((sum, a) => sum + a.correct_answers, 0);
-  const totalQuestions = attempts.reduce(
+    childAttempts.reduce((sum, a) => sum + (a.score || 0), 0) / totalAttempts;
+  const totalCorrect = childAttempts.reduce((sum, a) => sum + a.correct_answers, 0);
+  const totalQuestions = childAttempts.reduce(
     (sum, a) => sum + a.total_questions,
     0
   );
@@ -49,7 +68,7 @@ export function StatisticsView({ attempts }: StatisticsViewProps) {
     string,
     { name: string; icon: string; total: number; sumScore: number }
   > = {};
-  for (const a of attempts) {
+  for (const a of childAttempts) {
     const subject = a.worksheets?.subjects;
     if (!subject) continue;
     if (!subjectStats[subject.name]) {
@@ -74,8 +93,16 @@ export function StatisticsView({ attempts }: StatisticsViewProps) {
   const bestSubject = subjectList[0];
   const worstSubject = subjectList[subjectList.length - 1];
 
-  // Recent scores (last 10)
-  const recentScores = attempts.slice(0, 10).reverse();
+  // Recent scores for Chart (last 15, chronological)
+  const chartData = childAttempts
+    .slice(0, 15)
+    .reverse()
+    .map((a, index) => ({
+      name: `Lat. ${index + 1}`,
+      date: formatDate(a.created_at),
+      score: a.score || 0,
+      title: a.worksheets?.title || 'Latihan',
+    }));
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -217,35 +244,64 @@ export function StatisticsView({ attempts }: StatisticsViewProps) {
         )}
       </div>
 
-      {/* Recent Scores */}
+      {/* Progress Chart */}
       <Card padding="lg">
-        <h3 className="text-base font-semibold mb-4">Skor Terakhir</h3>
-        <div className="flex items-end gap-2 h-32">
-          {recentScores.map((a, i) => {
-            const height = Math.max(8, ((a.score || 0) / 100) * 100);
-            return (
-              <div
-                key={a.id}
-                className="flex-1 flex flex-col items-center gap-1"
-              >
-                <span className="text-[10px] text-surface-400 font-medium">
-                  {a.score}%
-                </span>
-                <div
-                  className="w-full rounded-t-md transition-all duration-500"
-                  style={{
-                    height: `${height}%`,
-                    background:
-                      (a.score || 0) >= 80
-                        ? '#22C55E'
-                        : (a.score || 0) >= 60
-                        ? '#F59E0B'
-                        : '#EF4444',
-                  }}
-                />
-              </div>
-            );
-          })}
+        <h3 className="text-base font-semibold mb-6">Grafik Perkembangan Nilai</h3>
+        <div className="h-72 w-full">
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart
+              data={chartData}
+              margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+            >
+              <defs>
+                <linearGradient id="colorScore" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#14B8A6" stopOpacity={0.3} />
+                  <stop offset="95%" stopColor="#14B8A6" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#374151" opacity={0.2} />
+              <XAxis 
+                dataKey="name" 
+                axisLine={false}
+                tickLine={false}
+                tick={{ fontSize: 12, fill: '#9CA3AF' }}
+                dy={10}
+              />
+              <YAxis 
+                axisLine={false}
+                tickLine={false}
+                tick={{ fontSize: 12, fill: '#9CA3AF' }}
+                domain={[0, 100]}
+              />
+              <Tooltip
+                contentStyle={{ 
+                  backgroundColor: '#1F2937', 
+                  border: 'none',
+                  borderRadius: '8px',
+                  color: '#F9FAFB',
+                  boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'
+                }}
+                itemStyle={{ color: '#14B8A6' }}
+                labelStyle={{ color: '#9CA3AF', marginBottom: '4px' }}
+                formatter={(value: number) => [`${value}%`, 'Skor']}
+                labelFormatter={(label, payload) => {
+                  if (payload && payload.length > 0) {
+                    return payload[0].payload.title;
+                  }
+                  return label;
+                }}
+              />
+              <Area
+                type="monotone"
+                dataKey="score"
+                stroke="#14B8A6"
+                strokeWidth={3}
+                fillOpacity={1}
+                fill="url(#colorScore)"
+                activeDot={{ r: 6, fill: '#14B8A6', stroke: '#fff', strokeWidth: 2 }}
+              />
+            </AreaChart>
+          </ResponsiveContainer>
         </div>
       </Card>
     </div>

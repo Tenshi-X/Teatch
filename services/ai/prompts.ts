@@ -99,13 +99,13 @@ function getTypeInstructions(type: QuestionType): string {
 - Anak harus menebak apa objek tersebut
 - Berikan petunjuk jika perlu
 - Field "question" berisi pertanyaan
-- WAJIB tambahkan field "emoji" berisi 1-3 karakter emoji yang merepresentasikan objek yang dimaksud secara visual.`;
+- WAJIB tambahkan field "search_keyword" berisi 1-2 kata kunci dalam Bahasa Inggris (English) yang merepresentasikan objek tersebut secara visual (contoh: "apple", "elephant", "car"). Kata kunci ini akan digunakan untuk mencari gambar di Google/API.`;
 
     case 'image_matching':
       return `- Buat soal mencocokkan teks dengan gambar/objek
 - Berikan deskripsi instruksi yang jelas pada "question"
 - Gunakan format pairs
-- WAJIB tambahkan field "emoji" yang berisi emoji relevan dengan konteks latihan ini.`;
+- WAJIB tambahkan field "search_keyword" berisi kata kunci dalam Bahasa Inggris (English) untuk ilustrasi soal ini.`;
 
     default:
       return `- Buat soal sesuai tipe yang diminta
@@ -177,7 +177,7 @@ function getQuestionSchema(type: QuestionType): string {
       return `{
       "type": "guess_image",
       "question": "Pertanyaan tentang objek...",
-      "emoji": "🐘 (contoh emoji)",
+      "search_keyword": "elephant",
       "answer": "Jawaban yang benar",
       "explanation": "Pembahasan"
     }`;
@@ -186,7 +186,7 @@ function getQuestionSchema(type: QuestionType): string {
       return `{
       "type": "image_matching",
       "question": "Instruksi: Hubungkan pasangan berikut",
-      "emoji": "🌟",
+      "search_keyword": "stars",
       "pairs": [{"left": "Item kiri", "right": "Item kanan"}],
       "answer": "Penjelasan",
       "explanation": "Pembahasan"

@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { EmptyState } from '@/components/ui/empty-state';
@@ -13,7 +14,7 @@ import {
   History,
 } from 'lucide-react';
 import Link from 'next/link';
-import type { Worksheet, Attempt } from '@/types';
+import type { Worksheet, Attempt, Child } from '@/types';
 
 interface HistoryListProps {
   worksheets: (Worksheet & {
@@ -21,9 +22,12 @@ interface HistoryListProps {
     children: { name: string } | null;
   })[];
   attempts: Attempt[];
+  childrenData: Child[];
 }
 
-export function HistoryList({ worksheets, attempts }: HistoryListProps) {
+export function HistoryList({ worksheets, attempts, childrenData }: HistoryListProps) {
+  const [activeChildId, setActiveChildId] = useState<string>(childrenData[0]?.id || '');
+
   const attemptsByWorksheet = attempts.reduce(
     (acc, a) => {
       if (!acc[a.worksheet_id]) acc[a.worksheet_id] = [];
@@ -33,15 +37,35 @@ export function HistoryList({ worksheets, attempts }: HistoryListProps) {
     {} as Record<string, Attempt[]>
   );
 
+  const filteredWorksheets = worksheets.filter((ws) => ws.child_id === activeChildId);
+
   return (
     <div className="max-w-4xl mx-auto animate-fade-in">
       <h1 className="text-2xl font-bold mb-6">Riwayat Belajar</h1>
 
-      {worksheets.length === 0 ? (
+      {childrenData.length > 0 && (
+        <div className="flex overflow-x-auto hide-scrollbar gap-2 mb-6 pb-2">
+          {childrenData.map((child) => (
+            <button
+              key={child.id}
+              onClick={() => setActiveChildId(child.id)}
+              className={`px-4 py-2 rounded-full whitespace-nowrap text-sm font-medium transition-all ${
+                activeChildId === child.id
+                  ? 'bg-primary-600 text-white shadow-md'
+                  : 'bg-surface-100 dark:bg-surface-800 text-surface-600 dark:text-surface-300 hover:bg-surface-200 dark:hover:bg-surface-700'
+              }`}
+            >
+              {child.name}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {filteredWorksheets.length === 0 ? (
         <EmptyState
           icon={<History size={48} />}
           title="Belum ada riwayat"
-          description="Mulai buat latihan dan kerjakan soal untuk melihat riwayat belajar."
+          description="Belum ada riwayat latihan untuk anak ini."
           action={
             <Link href="/worksheets/new">
               <Button>Buat Latihan Pertama</Button>
@@ -50,7 +74,7 @@ export function HistoryList({ worksheets, attempts }: HistoryListProps) {
         />
       ) : (
         <div className="space-y-3 stagger-children">
-          {worksheets.map((ws) => {
+          {filteredWorksheets.map((ws) => {
             const wsAttempts = attemptsByWorksheet[ws.id] || [];
             const bestAttempt = wsAttempts.sort(
               (a, b) => (b.score || 0) - (a.score || 0)

@@ -62,7 +62,7 @@ export function ChildSelector() {
 
       {/* Dropdown */}
       {isOpen && (
-        <div className="absolute right-0 top-full mt-2 w-64 card p-2 shadow-xl animate-scale-in z-50">
+        <div className="absolute left-1/2 -translate-x-1/2 lg:left-0 lg:translate-x-0 top-full mt-2 w-64 card p-2 shadow-xl animate-scale-in z-50">
           <p className="px-3 py-1.5 text-xs font-medium text-surface-400 uppercase tracking-wider">
             Pilih Anak
           </p>

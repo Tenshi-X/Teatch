@@ -48,7 +48,9 @@ export async function saveWorksheet(
     options: q.pairs ? q.pairs : (q.options || []),
     answer: q.answer,
     explanation: q.explanation,
-    image_url: q.emoji || null,
+    image_url: q.search_keyword 
+      ? `https://loremflickr.com/800/600/${encodeURIComponent(q.search_keyword)}?lock=${Math.floor(Math.random() * 10000)}`
+      : (q.emoji || null),
     order_index: index,
   }));
 

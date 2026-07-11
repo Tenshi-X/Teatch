@@ -62,6 +62,7 @@ export default async function HistoryPage() {
     <HistoryList
       worksheets={worksheets || []}
       attempts={attempts || []}
+      childrenData={children || []}
     />
   );
 }
