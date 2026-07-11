@@ -57,8 +57,8 @@ export default function DashboardPage() {
         .eq('child_id', activeChild.id)
         .eq('status', 'completed');
 
-      const wsData = worksheets || [];
-      const attData = attempts || [];
+      const wsData = (worksheets as any[]) || [];
+      const attData = (attempts as any[]) || [];
 
       // Calculate Stats
       const totalWorksheets = wsData.length;
