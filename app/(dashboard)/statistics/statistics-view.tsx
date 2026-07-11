@@ -283,7 +283,7 @@ export function StatisticsView({ attempts }: StatisticsViewProps) {
                 }}
                 itemStyle={{ color: '#14B8A6' }}
                 labelStyle={{ color: '#9CA3AF', marginBottom: '4px' }}
-                formatter={(value: number) => [`${value}%`, 'Skor']}
+                formatter={(value: any) => [`${value}%`, 'Skor']}
                 labelFormatter={(label, payload) => {
                   if (payload && payload.length > 0) {
                     return payload[0].payload.title;
