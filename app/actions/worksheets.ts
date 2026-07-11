@@ -48,9 +48,7 @@ export async function saveWorksheet(
     options: q.pairs ? q.pairs : (q.options || []),
     answer: q.answer,
     explanation: q.explanation,
-    image_url: q.image_prompt 
-      ? `https://image.pollinations.ai/prompt/${encodeURIComponent(q.image_prompt)}?width=800&height=600&nologo=true`
-      : null,
+    image_url: q.emoji || null,
     order_index: index,
   }));
 

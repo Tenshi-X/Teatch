@@ -36,16 +36,22 @@ export function QuestionPreview({ question, index, showAnswer = false }: Questio
             {question.question}
           </p>
 
-          {/* Image */}
+          {/* Image or Emoji */}
           {(question as any).image_url && (
-            <div className="mb-4 rounded-xl overflow-hidden border border-surface-200 dark:border-surface-700 bg-surface-50 dark:bg-surface-800/50">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img 
-                src={(question as any).image_url} 
-                alt="Pertanyaan visual" 
-                className="w-full h-auto max-h-[300px] object-contain"
-                loading="lazy"
-              />
+            <div className="mb-4 rounded-xl overflow-hidden border border-surface-200 dark:border-surface-700 bg-surface-50 dark:bg-surface-800/50 flex items-center justify-center min-h-[150px]">
+              {(question as any).image_url.startsWith('http') || (question as any).image_url.startsWith('data:') ? (
+                /* eslint-disable-next-line @next/next/no-img-element */
+                <img 
+                  src={(question as any).image_url} 
+                  alt="Pertanyaan visual" 
+                  className="w-full h-auto max-h-[300px] object-contain"
+                  loading="lazy"
+                />
+              ) : (
+                <div className="text-8xl py-8">
+                  {(question as any).image_url}
+                </div>
+              )}
             </div>
           )}
 

@@ -95,17 +95,17 @@ function getTypeInstructions(type: QuestionType): string {
 - Acak urutan sisi kanan`;
 
     case 'guess_image':
-      return `- Buat deskripsi gambar yang jelas
-- Anak harus menebak apa yang ada di gambar
+      return `- Buat deskripsi objek yang jelas
+- Anak harus menebak apa objek tersebut
 - Berikan petunjuk jika perlu
 - Field "question" berisi pertanyaan
-- WAJIB tambahkan field "image_prompt" (dalam bahasa Inggris) berisi deskripsi visual detail dari gambar yang dimaksud agar bisa digenerate oleh AI gambar.`;
+- WAJIB tambahkan field "emoji" berisi 1-3 karakter emoji yang merepresentasikan objek yang dimaksud secara visual.`;
 
     case 'image_matching':
-      return `- Buat soal mencocokkan teks dengan gambar
+      return `- Buat soal mencocokkan teks dengan gambar/objek
 - Berikan deskripsi instruksi yang jelas pada "question"
 - Gunakan format pairs
-- WAJIB tambahkan field "image_prompt" (dalam bahasa Inggris) yang menjelaskan elemen visual utama untuk konteks latihan ini.`;
+- WAJIB tambahkan field "emoji" yang berisi emoji relevan dengan konteks latihan ini.`;
 
     default:
       return `- Buat soal sesuai tipe yang diminta
@@ -176,8 +176,8 @@ function getQuestionSchema(type: QuestionType): string {
     case 'guess_image':
       return `{
       "type": "guess_image",
-      "question": "Pertanyaan tentang gambar...",
-      "image_prompt": "detailed english description of the image to generate",
+      "question": "Pertanyaan tentang objek...",
+      "emoji": "🐘 (contoh emoji)",
       "answer": "Jawaban yang benar",
       "explanation": "Pembahasan"
     }`;
@@ -186,7 +186,7 @@ function getQuestionSchema(type: QuestionType): string {
       return `{
       "type": "image_matching",
       "question": "Instruksi: Hubungkan pasangan berikut",
-      "image_prompt": "detailed english description of the main context image",
+      "emoji": "🌟",
       "pairs": [{"left": "Item kiri", "right": "Item kanan"}],
       "answer": "Penjelasan",
       "explanation": "Pembahasan"

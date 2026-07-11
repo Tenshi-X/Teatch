@@ -54,6 +54,24 @@ export const WorksheetPrintable = forwardRef<HTMLDivElement, WorksheetPrintableP
                 <div className="flex-1 space-y-4">
                   <div className="text-surface-900 leading-relaxed font-medium">{q.question}</div>
                   
+                  {/* Image or Emoji */}
+                  {q.image_url && (
+                    <div className="my-4 flex items-center justify-center p-4 border border-surface-200 rounded-lg min-h-[120px]">
+                      {q.image_url.startsWith('http') || q.image_url.startsWith('data:') ? (
+                        /* eslint-disable-next-line @next/next/no-img-element */
+                        <img 
+                          src={q.image_url} 
+                          alt="Pertanyaan visual" 
+                          className="max-h-[250px] object-contain"
+                        />
+                      ) : (
+                        <div className="text-7xl">
+                          {q.image_url}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
                   {/* Options for multiple choice */}
                   {q.type === 'multiple_choice' && Array.isArray(q.options) && (
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4">
@@ -80,8 +98,30 @@ export const WorksheetPrintable = forwardRef<HTMLDivElement, WorksheetPrintableP
                     </div>
                   )}
 
+                  {/* Matching Pairs */}
+                  {(q.type === 'matching' || q.type === 'image_matching') && Array.isArray(q.options) && (
+                    <div className="mt-6 flex justify-between px-8">
+                      <div className="space-y-6 flex-1 text-left">
+                        {q.options.map((pair: any, optIdx) => (
+                          <div key={`left-${optIdx}`} className="p-3 border-2 border-surface-300 rounded-lg bg-surface-50 inline-block font-medium min-w-[150px] text-center">
+                            {pair.left}
+                          </div>
+                        ))}
+                      </div>
+                      
+                      {/* Randomize the right side for the printable if not showing answers */}
+                      <div className="space-y-6 flex-1 text-right flex flex-col items-end">
+                        {(showAnswers ? q.options : [...q.options].sort(() => Math.random() - 0.5)).map((pair: any, optIdx) => (
+                          <div key={`right-${optIdx}`} className="p-3 border-2 border-surface-300 rounded-lg bg-surface-50 inline-block font-medium min-w-[150px] text-center">
+                            {pair.right}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
                   {/* Empty space for writing answers */}
-                  {q.type !== 'multiple_choice' && !showAnswers && (
+                  {(q.type === 'short_answer' || q.type === 'guess_image' || q.type === 'essay') && !showAnswers && (
                     <div className="mt-4 space-y-6">
                       <div className="border-b border-surface-300 border-dashed w-full"></div>
                       <div className="border-b border-surface-300 border-dashed w-full"></div>

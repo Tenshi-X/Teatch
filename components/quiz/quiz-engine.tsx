@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { Card } from '@/components/ui/card';
@@ -364,40 +364,11 @@ export function QuizEngine({
 
         {/* Matching */}
         {(currentQ.type === 'matching' || currentQ.type === 'image_matching') && Array.isArray(currentQ.options) && (
-          <div className="space-y-3">
-            {(currentQ.options as any[]).map((pair, i) => {
-              const allRightOptions = (currentQ.options as any[]).map(p => p.right).sort();
-              
-              let currentSelections: Record<string, string> = {};
-              try {
-                if (answers[currentQ.id]) {
-                  currentSelections = JSON.parse(answers[currentQ.id]);
-                }
-              } catch(e) {}
-              
-              const handleSelect = (left: string, right: string) => {
-                const newSelections = { ...currentSelections, [left]: right };
-                setAnswer(currentQ.id, JSON.stringify(newSelections));
-              };
-
-              return (
-                <div key={i} className="flex flex-col sm:flex-row sm:items-center gap-2 p-3 rounded-lg bg-surface-50 dark:bg-surface-800/30 border border-surface-200 dark:border-surface-700">
-                  <span className="font-medium flex-1 bg-white dark:bg-surface-900 p-2 rounded-md border border-surface-200 dark:border-surface-700">{pair.left}</span>
-                  <span className="text-surface-400 hidden sm:block">→</span>
-                  <select
-                    className="input-base text-sm flex-1 bg-white dark:bg-surface-900 cursor-pointer"
-                    value={currentSelections[pair.left] || ''}
-                    onChange={(e) => handleSelect(pair.left, e.target.value)}
-                  >
-                    <option value="" disabled>Pilih pasangan...</option>
-                    {allRightOptions.map((opt, idx) => (
-                      <option key={idx} value={opt}>{opt}</option>
-                    ))}
-                  </select>
-                </div>
-              );
-            })}
-          </div>
+          <InteractiveMatching 
+            options={currentQ.options as any[]}
+            value={answers[currentQ.id] || '{}'}
+            onChange={(val) => setAnswer(currentQ.id, val)}
+          />
         )}
       </Card>
 
@@ -433,3 +404,113 @@ export function QuizEngine({
     </div>
   );
 }
+
+const InteractiveMatching = ({ options, value, onChange }: { options: any[], value: string, onChange: (val: string) => void }) => {
+  const [selectedLeft, setSelectedLeft] = useState<string | null>(null);
+  
+  // Create a stable shuffled version of the right options based on the options
+  const rightOptions = useMemo(() => {
+    return [...options].map(p => p.right).sort(() => Math.random() - 0.5);
+  }, [options]);
+
+  let currentSelections: Record<string, string> = {};
+  try {
+    currentSelections = JSON.parse(value);
+  } catch(e) {}
+
+  const handleLeftClick = (left: string) => {
+    if (selectedLeft === left) {
+      setSelectedLeft(null);
+    } else {
+      setSelectedLeft(left);
+    }
+  };
+
+  const handleRightClick = (right: string) => {
+    if (selectedLeft) {
+      const newSelections = { ...currentSelections, [selectedLeft]: right };
+      onChange(JSON.stringify(newSelections));
+      setSelectedLeft(null);
+    } else {
+      const linkedLeft = Object.keys(currentSelections).find(key => currentSelections[key] === right);
+      if (linkedLeft) {
+         const newSelections = { ...currentSelections };
+         delete newSelections[linkedLeft];
+         onChange(JSON.stringify(newSelections));
+      }
+    }
+  };
+
+  const getConnectedRight = (left: string) => {
+    return currentSelections[left];
+  };
+
+  const colors = [
+    'bg-primary-100 dark:bg-primary-900/30 border-primary-500 text-primary-700 dark:text-primary-300',
+    'bg-secondary-100 dark:bg-secondary-900/30 border-secondary-500 text-secondary-700 dark:text-secondary-300',
+    'bg-warning-100 dark:bg-warning-900/30 border-warning-500 text-warning-700 dark:text-warning-300',
+    'bg-danger-100 dark:bg-danger-900/30 border-danger-500 text-danger-700 dark:text-danger-300',
+    'bg-blue-100 dark:bg-blue-900/30 border-blue-500 text-blue-700 dark:text-blue-300',
+    'bg-purple-100 dark:bg-purple-900/30 border-purple-500 text-purple-700 dark:text-purple-300',
+  ];
+
+  const getColorIndex = (left: string) => {
+    const idx = options.findIndex(o => o.left === left);
+    return idx % colors.length;
+  };
+
+  return (
+    <div className="flex gap-4 sm:gap-8 justify-between mt-4 relative">
+      {/* Left Column */}
+      <div className="flex-1 space-y-3">
+        {options.map((pair, i) => {
+          const isSelected = selectedLeft === pair.left;
+          const connectedRight = getConnectedRight(pair.left);
+          const hasConnection = !!connectedRight;
+          const colorClass = hasConnection ? colors[getColorIndex(pair.left)] : 'bg-surface-50 dark:bg-surface-800 border-surface-200 dark:border-surface-700 hover:border-surface-400 dark:hover:border-surface-500';
+          const activeClass = isSelected ? 'ring-2 ring-primary-500 border-primary-500 shadow-md' : '';
+
+          return (
+            <button
+              key={`left-${i}`}
+              onClick={() => handleLeftClick(pair.left)}
+              className={cn(
+                "w-full p-4 rounded-xl border-2 text-left font-medium transition-all cursor-pointer",
+                colorClass,
+                activeClass
+              )}
+            >
+              <div className="flex justify-between items-center">
+                 <span>{pair.left}</span>
+                 {hasConnection && <CheckCircle size={18} className="shrink-0 opacity-75" />}
+              </div>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Right Column */}
+      <div className="flex-1 space-y-3">
+        {rightOptions.map((right, i) => {
+          const linkedLeft = Object.keys(currentSelections).find(key => currentSelections[key] === right);
+          const hasConnection = !!linkedLeft;
+          const colorClass = hasConnection ? colors[getColorIndex(linkedLeft)] : 'bg-surface-50 dark:bg-surface-800 border-surface-200 dark:border-surface-700 hover:border-surface-400 dark:hover:border-surface-500';
+          
+          return (
+            <button
+              key={`right-${i}`}
+              onClick={() => handleRightClick(right)}
+              className={cn(
+                "w-full p-4 rounded-xl border-2 text-center font-medium transition-all cursor-pointer",
+                colorClass,
+                selectedLeft && !hasConnection ? 'animate-pulse border-primary-300 shadow-sm' : ''
+              )}
+            >
+               {right}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
