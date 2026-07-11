@@ -15,7 +15,7 @@ export async function updateProfile(formData: FormData) {
     return { error: 'Unauthorized' };
   }
 
-  const { error } = await supabase
+  const { error } = await (supabase as any)
     .from('profiles')
     .update({ full_name: fullName })
     .eq('auth_user_id', user.id);
