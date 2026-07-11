@@ -79,6 +79,7 @@ export interface AIGeneratedQuestion {
   answer: string;
   explanation: string;
   emoji?: string;
+  search_keyword?: string;
   pairs?: { left: string; right: string }[];
 }
 
