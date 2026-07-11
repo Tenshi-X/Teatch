@@ -1,10 +1,13 @@
 'use client';
 
+import { useState, useEffect } from 'react';
+
 import { useChildStore } from '@/lib/stores/child-store';
 import { StatsCard } from '@/components/dashboard/stats-card';
 import { ActivityFeed } from '@/components/dashboard/activity-feed';
 import { ProgressRing } from '@/components/dashboard/progress-ring';
 import { QuickActions } from '@/components/dashboard/quick-actions';
+import { createClient } from '@/lib/supabase/client';
 import { Card } from '@/components/ui/card';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Button } from '@/components/ui/button';
@@ -26,15 +29,81 @@ import type { RecentActivity, DashboardStats } from '@/types';
 export default function DashboardPage() {
   const { activeChild, children } = useChildStore();
 
-  // Placeholder stats — will be replaced by real data fetching
-  const stats: DashboardStats = {
+  const [stats, setStats] = useState<DashboardStats>({
     totalWorksheets: 0,
     totalAttempts: 0,
     averageScore: 0,
     totalQuestions: 0,
-  };
+  });
+  const [activities, setActivities] = useState<RecentActivity[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const activities: RecentActivity[] = [];
+  useEffect(() => {
+    async function loadDashboardData() {
+      if (!activeChild) return;
+      setIsLoading(true);
+      const supabase = createClient();
+
+      // Fetch Worksheets
+      const { data: worksheets } = await supabase
+        .from('worksheets')
+        .select('id, title, created_at, subjects(name)')
+        .eq('child_id', activeChild.id);
+
+      // Fetch Attempts
+      const { data: attempts } = await supabase
+        .from('attempts')
+        .select('id, score, total_questions, created_at, worksheets(title, subjects(name))')
+        .eq('child_id', activeChild.id)
+        .eq('status', 'completed');
+
+      const wsData = worksheets || [];
+      const attData = attempts || [];
+
+      // Calculate Stats
+      const totalWorksheets = wsData.length;
+      const totalAttempts = attData.length;
+      const totalQuestions = attData.reduce((sum, a) => sum + (a.total_questions || 0), 0);
+      const averageScore = totalAttempts > 0 
+        ? Math.round(attData.reduce((sum, a) => sum + (a.score || 0), 0) / totalAttempts)
+        : 0;
+
+      setStats({
+        totalWorksheets,
+        totalAttempts,
+        averageScore,
+        totalQuestions,
+      });
+
+      // Build Activities
+      const allActivities: RecentActivity[] = [];
+      wsData.forEach(ws => {
+        allActivities.push({
+          id: `ws-${ws.id}`,
+          type: 'worksheet_created',
+          title: ws.title,
+          subject: (ws.subjects as any)?.name || 'Latihan',
+          createdAt: ws.created_at
+        });
+      });
+      attData.forEach(att => {
+        allActivities.push({
+          id: `att-${att.id}`,
+          type: 'attempt_completed',
+          title: (att.worksheets as any)?.title || 'Latihan Selesai',
+          subject: ((att.worksheets as any)?.subjects as any)?.name || 'Latihan',
+          score: att.score || 0,
+          createdAt: att.created_at
+        });
+      });
+
+      allActivities.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      setActivities(allActivities.slice(0, 5));
+      setIsLoading(false);
+    }
+
+    loadDashboardData();
+  }, [activeChild]);
 
   if (children.length === 0) {
     return (

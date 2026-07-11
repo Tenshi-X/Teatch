@@ -4,6 +4,23 @@ import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 import type { AIGeneratedWorksheet, AIGenerateParams } from '@/types';
 
+async function getWikimediaImageUrl(keyword: string): Promise<string | null> {
+  try {
+    const res = await fetch(`https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrnamespace=6&gsrsearch=${encodeURIComponent(keyword)}&gsrlimit=1&prop=imageinfo&iiprop=url&format=json`);
+    const data = await res.json();
+    const pages = data?.query?.pages;
+    if (pages) {
+      const pageId = Object.keys(pages)[0];
+      if (pageId && pageId !== '-1') {
+        return pages[pageId].imageinfo?.[0]?.url || null;
+      }
+    }
+    return null;
+  } catch (e) {
+    return null;
+  }
+}
+
 export async function saveWorksheet(
   params: AIGenerateParams & { subjectId: string; childId: string },
   aiResult: AIGeneratedWorksheet,
@@ -41,17 +58,29 @@ export async function saveWorksheet(
   const worksheet = worksheetData as any;
 
   // Create questions
-  const questions = aiResult.questions.map((q, index) => ({
-    worksheet_id: worksheet.id,
-    type: q.type,
-    question: q.question,
-    options: q.pairs ? q.pairs : (q.options || []),
-    answer: q.answer,
-    explanation: q.explanation,
-    image_url: q.search_keyword 
-      ? `https://loremflickr.com/800/600/${encodeURIComponent(q.search_keyword)}?lock=${Math.floor(Math.random() * 10000)}`
-      : (q.emoji || null),
-    order_index: index,
+  const questions = await Promise.all(aiResult.questions.map(async (q, index) => {
+    let imageUrl = q.emoji || null;
+    
+    if (q.search_keyword) {
+      const wikiUrl = await getWikimediaImageUrl(q.search_keyword);
+      if (wikiUrl) {
+        imageUrl = wikiUrl;
+      } else {
+        // Fallback
+        imageUrl = `https://loremflickr.com/800/600/${encodeURIComponent(q.search_keyword)}?lock=${Math.floor(Math.random() * 10000)}`;
+      }
+    }
+
+    return {
+      worksheet_id: worksheet.id,
+      type: q.type,
+      question: q.question,
+      options: q.pairs ? q.pairs : (q.options || []),
+      answer: q.answer,
+      explanation: q.explanation,
+      image_url: imageUrl,
+      order_index: index,
+    };
   }));
 
   const { error: qError } = await (supabase as any).from('questions').insert(questions);
