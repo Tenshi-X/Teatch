@@ -21,7 +21,7 @@ export default function LoginPage() {
         <h1 className="text-3xl font-bold text-primary-600 dark:text-primary-500">
           Teatch
         </h1>
-        <p className="text-surface-400 mt-1 text-sm">Platform Belajar AI untuk Anak</p>
+        <p className="text-surface-400 mt-1 text-sm">Platform Belajar Berbasis AI untuk Anak</p>
       </div>
 
       {/* Login Card */}
