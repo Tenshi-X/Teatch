@@ -254,6 +254,7 @@ export default function NewWorksheetPage() {
             options={questionTypeOptions}
             value={questionType}
             onChange={(e) => setQuestionType(e.target.value)}
+            disabled={!selectedSubject}
           />
 
           <Select
