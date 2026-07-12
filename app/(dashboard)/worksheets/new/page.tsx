@@ -154,6 +154,7 @@ export default function NewWorksheetPage() {
     if (!result || !activeChild) return;
 
     setIsSaving(true);
+    const toastId = toast.loading('Menyimpan soal, harap tunggu sebentar...');
 
     try {
       const subject = subjects.find((s) => s.id === selectedSubject);
@@ -176,11 +177,12 @@ export default function NewWorksheetPage() {
         buildGeneratePrompt(params)
       );
 
-      toast.success('Worksheet berhasil disimpan!');
+      toast.success('Worksheet berhasil disimpan!', { id: toastId });
       router.push(`/worksheets/${worksheet.id}`);
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : 'Gagal menyimpan worksheet'
+        error instanceof Error ? error.message : 'Gagal menyimpan worksheet',
+        { id: toastId }
       );
     } finally {
       setIsSaving(false);
@@ -325,8 +327,8 @@ export default function NewWorksheetPage() {
               </p>
             </div>
             <Button onClick={handleSave} isLoading={isSaving}>
-              <Save size={16} />
-              Simpan & Lanjutkan
+              {!isSaving && <Save size={16} />}
+              {isSaving ? 'Menyimpan...' : 'Simpan & Lanjutkan'}
             </Button>
           </div>
 
