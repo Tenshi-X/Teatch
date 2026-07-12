@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useChildStore } from '@/lib/stores/child-store';
 import { createClient } from '@/lib/supabase/client';
@@ -35,7 +35,6 @@ export default function NewWorksheetPage() {
   const router = useRouter();
   const { activeChild } = useChildStore();
   const [subjects, setSubjects] = useState<Subject[]>([]);
-  const [selectedSegment, setSelectedSegment] = useState(LEARNING_SEGMENTS[0].id);
   const [selectedSubject, setSelectedSubject] = useState('');
   const [questionType, setQuestionType] = useState('multiple_choice');
   const [difficulty, setDifficulty] = useState('sedang');
@@ -60,6 +59,34 @@ export default function NewWorksheetPage() {
     };
     fetchSubjects();
   }, [activeChild]);
+
+  // Derive Segment implicitly from selected Subject
+  const derivedSegmentId = useMemo(() => {
+    const subjectName = subjects.find(s => s.id === selectedSubject)?.name?.toLowerCase() || '';
+    if (subjectName.includes('matematika')) return 'math';
+    if (subjectName.includes('indonesia')) return 'language';
+    if (subjectName.includes('inggris')) return 'english';
+    if (subjectName.includes('ipa') || subjectName.includes('sains')) return 'science';
+    if (subjectName.includes('ips') || subjectName.includes('sejarah')) return 'social';
+    if (subjectName.includes('logika')) return 'logic';
+    return 'general';
+  }, [selectedSubject, subjects]);
+
+  const derivedSegment = useMemo(() => {
+    return LEARNING_SEGMENTS.find(s => s.id === derivedSegmentId) || LEARNING_SEGMENTS[0];
+  }, [derivedSegmentId]);
+
+  // Filter allowed question types
+  const filteredQuestionTypes = useMemo(() => {
+    return QUESTION_TYPES.filter(t => derivedSegment.allowedQuestionTypes.includes(t.value as any));
+  }, [derivedSegment]);
+
+  // Auto-select first valid type if current is invalid
+  useEffect(() => {
+    if (filteredQuestionTypes.length > 0 && !filteredQuestionTypes.some(t => t.value === questionType)) {
+      setQuestionType(filteredQuestionTypes[0].value);
+    }
+  }, [filteredQuestionTypes, questionType]);
 
   if (!activeChild) {
     return (
@@ -88,7 +115,7 @@ export default function NewWorksheetPage() {
     const subject = subjects.find((s) => s.id === selectedSubject);
 
     const params: AIGenerateParams = {
-      segmentId: selectedSegment,
+      segmentId: derivedSegmentId,
       childName: activeChild.name,
       age: calculateAge(activeChild.birth_date),
       level: activeChild.level,
@@ -132,7 +159,7 @@ export default function NewWorksheetPage() {
     try {
       const subject = subjects.find((s) => s.id === selectedSubject);
       const params: AIGenerateParams = {
-        segmentId: selectedSegment,
+        segmentId: derivedSegmentId,
         childName: activeChild.name,
         age: calculateAge(activeChild.birth_date),
         level: activeChild.level,
@@ -166,7 +193,7 @@ export default function NewWorksheetPage() {
     label: `${s.icon || ''} ${s.name}`,
   }));
 
-  const questionTypeOptions = QUESTION_TYPES.map((t) => ({
+  const questionTypeOptions = filteredQuestionTypes.map((t) => ({
     value: t.value,
     label: `${t.icon} ${t.label}`,
   }));
@@ -174,11 +201,6 @@ export default function NewWorksheetPage() {
   const difficultyOptions = DIFFICULTIES.map((d) => ({
     value: d.value,
     label: d.label,
-  }));
-
-  const segmentOptions = LEARNING_SEGMENTS.map((seg) => ({
-    value: seg.id,
-    label: `${seg.icon} ${seg.name}`,
   }));
 
   return (
@@ -197,16 +219,6 @@ export default function NewWorksheetPage() {
 
       {/* Form */}
       <Card padding="lg">
-        <div className="mb-4">
-          <Select
-            label="Segmen Pembelajaran"
-            options={segmentOptions}
-            value={selectedSegment}
-            onChange={(e) => setSelectedSegment(e.target.value)}
-            required
-          />
-        </div>
-
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Select
             label="Mata Pelajaran (Database)"
