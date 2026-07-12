@@ -44,6 +44,16 @@ export const QUESTION_TYPES: { value: QuestionType; label: string; icon: string 
   { value: 'matching', label: 'Menghubungkan', icon: '🔗' },
   { value: 'guess_image', label: 'Tebak Gambar', icon: '🖼️' },
   { value: 'image_matching', label: 'Cocokkan Gambar', icon: '🧩' },
+  { value: 'true_false', label: 'Benar / Salah', icon: '✅' },
+  { value: 'word_jumble', label: 'Susun Kata', icon: '🔠' },
+  { value: 'sentence_jumble', label: 'Susun Kalimat', icon: '📝' },
+  { value: 'ordering', label: 'Urutkan', icon: '🔢' },
+  { value: 'pattern_completion', label: 'Lengkapi Pola', icon: '🔄' },
+  { value: 'count_image', label: 'Hitung Gambar', icon: '🧮' },
+  { value: 'choose_image', label: 'Pilih Gambar yang Benar', icon: '🎯' },
+  { value: 'image_label', label: 'Label Gambar', icon: '🏷️' },
+  { value: 'grouping', label: 'Kelompokkan Objek', icon: '📦' },
+  { value: 'story_qa', label: 'Cerita Pendek', icon: '📚' },
 ];
 
 // ============================================================
@@ -61,6 +71,7 @@ export type Difficulty = 'mudah' | 'sedang' | 'sulit';
 // AI Generation Types
 // ============================================================
 export interface AIGenerateParams {
+  segmentId?: string;
   childName: string;
   age: number;
   level: EducationLevel;
@@ -80,7 +91,12 @@ export interface AIGeneratedQuestion {
   explanation: string;
   emoji?: string;
   search_keyword?: string;
+  image_options?: string[]; // for choose_image (array of search keywords)
   pairs?: { left: string; right: string }[];
+  categories?: string[]; // for grouping
+  items?: { name: string; category: string }[]; // for grouping
+  correct_order?: string[]; // for ordering
+  story?: string; // for story_qa
 }
 
 export interface AIGeneratedWorksheet {

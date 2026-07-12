@@ -4,28 +4,21 @@ import type {
   EducationLevel,
   Difficulty,
 } from '@/types';
+import { LEARNING_SEGMENTS } from '@/lib/config/segments';
 
-/**
- * Build the system instruction for the AI to generate educational content.
- */
 export function buildSystemPrompt(): string {
-  return `Kamu adalah asisten AI pendidikan Indonesia yang membantu orang tua membuat soal latihan untuk anaknya.
-
+  return `Kamu adalah asisten AI pendidikan Indonesia yang ahli dalam membuat soal latihan untuk anak.
 ATURAN PENTING:
-1. Selalu gunakan Bahasa Indonesia yang baik dan benar.
-2. Sesuaikan tingkat kesulitan dan bahasa dengan usia dan jenjang pendidikan anak.
-3. Berikan pembahasan yang jelas dan mudah dipahami.
-4. Untuk anak TK/PAUD, gunakan bahasa yang sangat sederhana dan menyenangkan.
-5. Pastikan soal bersifat edukatif dan tidak mengandung unsur negatif.
-6. SELALU kembalikan response dalam format JSON yang valid. JANGAN gunakan markdown.
-7. Jangan tambahkan komentar, penjelasan, atau teks di luar JSON.`;
+1. Selalu gunakan Bahasa Indonesia yang baik dan benar (kecuali materi Bahasa Inggris).
+2. Sesuaikan tingkat kesulitan dengan jenjang usia anak.
+3. Berikan pembahasan yang jelas.
+4. SELALU kembalikan response dalam format JSON yang valid tanpa backtick (tanpa \`\`\`json).
+5. Jangan ada teks di luar JSON.`;
 }
 
-/**
- * Build the user prompt for generating a worksheet.
- */
 export function buildGeneratePrompt(params: AIGenerateParams): string {
   const {
+    segmentId,
     childName,
     age,
     level,
@@ -36,6 +29,9 @@ export function buildGeneratePrompt(params: AIGenerateParams): string {
     questionCount,
     topic,
   } = params;
+
+  const segment = LEARNING_SEGMENTS.find(s => s.id === segmentId);
+  const segmentInstruction = segment ? `INSTRUKSI SEGMEN KHUSUS (${segment.name}):\n${segment.aiPromptInstruction}` : '';
 
   const typeInstructions = getTypeInstructions(questionType);
   const difficultyGuide = getDifficultyGuide(difficulty, level);
@@ -54,15 +50,17 @@ DETAIL SOAL:
 - Tingkat Kesulitan: ${difficulty}
 ${topic ? `- Topik Spesifik: ${topic}` : ''}
 
+${segmentInstruction}
+
 PANDUAN KESULITAN:
 ${difficultyGuide}
 
-FORMAT TIPE SOAL:
+FORMAT TIPE SOAL (${questionType}):
 ${typeInstructions}
 
-Kembalikan HANYA JSON valid dengan format berikut (tanpa markdown, tanpa backtick, tanpa penjelasan):
+Kembalikan HANYA JSON valid dengan format persis seperti di bawah ini (GANTI isinya dengan soal buatanmu):
 {
-  "title": "Judul latihan yang menarik",
+  "title": "Judul Latihan yang menarik",
   "questions": [
     ${getQuestionSchema(questionType)}
   ]
@@ -72,132 +70,118 @@ Kembalikan HANYA JSON valid dengan format berikut (tanpa markdown, tanpa backtic
 function getTypeInstructions(type: QuestionType): string {
   switch (type) {
     case 'multiple_choice':
-      return `- Berikan 4 pilihan jawaban (A, B, C, D)
-- Pastikan hanya ada 1 jawaban benar
-- Acak posisi jawaban benar (jangan selalu di A)
-- Berikan pembahasan yang menjelaskan mengapa jawaban tersebut benar`;
-
+      return '- Berikan 4 pilihan (options)\n- Pastikan hanya 1 jawaban benar\n- answer harus sama persis dengan salah satu options';
     case 'short_answer':
-      return `- Buat soal dengan jawaban singkat (1-3 kata)
-- Jawaban harus jelas dan tidak ambigu
-- Contoh: "2 + 3 = ___" jawaban: "5"
-- Berikan pembahasan singkat`;
-
+      return '- Pertanyaan yang jawabannya sangat singkat (1-3 kata)';
     case 'essay':
-      return `- Buat soal uraian yang memerlukan penjelasan
-- Berikan contoh jawaban ideal yang lengkap
-- Berikan pembahasan dan poin-poin penting jawaban`;
-
+      return '- Pertanyaan uraian yang butuh penjelasan';
     case 'matching':
-      return `- Buat pasangan yang harus dihubungkan
-- Minimal 4 pasangan
-- Berikan dalam format pairs: [{left: "...", right: "..."}]
-- Acak urutan sisi kanan`;
-
+      return '- Berikan minimal 4 pasangan (pairs)\n- Acak urutan logika (kiri dan kanan harus mix & match)';
     case 'guess_image':
-      return `- Buat deskripsi objek yang jelas
-- Anak harus menebak apa objek tersebut
-- Berikan petunjuk jika perlu
-- Field "question" berisi pertanyaan
-- WAJIB tambahkan field "search_keyword" berisi 1-2 kata kunci dalam Bahasa Inggris (English) yang merepresentasikan objek tersebut secara visual (contoh: "apple", "elephant", "car"). Kata kunci ini akan digunakan untuk mencari gambar di Google/API.`;
-
+      return '- Pertanyaan menebak sebuah benda visual\n- WAJIB beri 1-2 kata kunci Bahasa Inggris (search_keyword) untuk mencari gambar benda aslinya di internet';
     case 'image_matching':
-      return `- Buat soal mencocokkan teks dengan gambar/objek
-- Berikan deskripsi instruksi yang jelas pada "question"
-- Gunakan format pairs
-- WAJIB tambahkan field "search_keyword" berisi kata kunci dalam Bahasa Inggris (English) untuk ilustrasi soal ini.`;
+      return '- Seperti mencocokkan biasa, tapi tambahkan 1 search_keyword benda visual (bahasa Inggris) sebagai ilustrasi umum soal';
+    
+    // NEW TYPES
+    case 'true_false':
+      return '- Berikan pernyataan faktual\n- Jawaban mutlak "Benar" atau "Salah"';
+    case 'word_jumble':
+      return '- Berikan sebuah kalimat yang dipotong-potong per kata ke dalam "options"\n- "options" harus dalam keadaan ACAK/JUMBLED\n- "answer" adalah susunan kalimat utuh yang benar';
+    case 'sentence_jumble':
+      return '- Berikan beberapa kalimat ke dalam "options" yang jika disusun berurutan akan menjadi sebuah cerita/paragraf\n- "options" harus ACAK\n- "answer" adalah paragraf gabungan yang benar';
+    case 'ordering':
+      return '- Berikan daftar urutan (bilangan, langkah, proses)\n- "options" adalah daftarnya dalam keadaan ACAK\n- "correct_order" adalah array dari item tersebut yang sudah terurut dengan benar dari awal-akhir/kecil-besar\n- "answer" adalah string penjelasnya';
+    case 'pattern_completion':
+      return '- Berikan deret pola (huruf, angka, logika) dengan bagian rumpang (misal ...)\n- "answer" adalah bagian pengisi rumpang tersebut';
+    case 'count_image':
+      return '- Minta anak menghitung jumlah suatu objek. "search_keyword" adalah objeknya (B. Inggris plurals misal "3 apples" atau sekadar "apples" atau "birds"). "answer" adalah angkanya';
+    case 'choose_image':
+      return '- Berikan pertanyaan memilih gambar. "image_options" berisi 3-4 kata kunci benda dalam B.Inggris. "answer" adalah kata kunci benda yang benar.';
+    case 'image_label':
+      return '- "search_keyword" adalah objek visual (B.Inggris). Pertanyaannya menunjuk/menanyakan bagian dari objek itu (misal: "Apa benda yang dikendarai orang ini?")';
+    case 'grouping':
+      return '- Berikan 2 atau lebih kategori di "categories"\n- Berikan 4-6 item, dan petakan masing-masing item ke kategorinya di dalam "items"\n- Pastikan nama kategori di items persis sama dengan yang ada di "categories"';
+    case 'story_qa':
+      return '- "story" berisi teks/cerita pendek 2-3 paragraf\n- "question" berisi pertanyaan spesifik yang jawabannya ada di cerita tersebut';
 
     default:
-      return `- Buat soal sesuai tipe yang diminta
-- Berikan jawaban dan pembahasan yang jelas`;
+      return '- Buat soal sesuai format standar';
   }
 }
 
 function getDifficultyGuide(difficulty: Difficulty, level: EducationLevel): string {
   if (level === 'PAUD' || level === 'TK A' || level === 'TK B') {
-    return `- Gunakan bahasa yang sangat sederhana dan ceria
-- Tambahkan emoji untuk membuatnya menarik
-- Soal harus visual dan konkret
-- Hindari konsep abstrak`;
+    return '- Gunakan bahasa sangat sederhana, konkret, dan ceria\n- Hindari konsep abstrak.';
   }
-
-  switch (difficulty) {
-    case 'mudah':
-      return `- Soal dasar sesuai kurikulum
-- Konsep fundamental
-- Tidak memerlukan pemikiran kompleks`;
-    case 'sedang':
-      return `- Soal menengah yang menguji pemahaman
-- Memerlukan penerapan konsep
-- Mungkin memerlukan 2-3 langkah penyelesaian`;
-    case 'sulit':
-      return `- Soal tingkat tinggi yang menantang
-- Memerlukan analisis dan penerapan lanjutan
-- Soal HOTS (Higher Order Thinking Skills)`;
-  }
+  return difficulty === 'mudah' ? '- Soal dasar, mudah dicerna' : difficulty === 'sedang' ? '- Butuh sedikit pemikiran' : '- Soal menantang / HOTS';
 }
 
 function getQuestionSchema(type: QuestionType): string {
-  switch (type) {
-    case 'multiple_choice':
-      return `{
-      "type": "multiple_choice",
-      "question": "Teks pertanyaan",
-      "options": ["Pilihan A", "Pilihan B", "Pilihan C", "Pilihan D"],
-      "answer": "Pilihan yang benar (exact match dengan salah satu options)",
-      "explanation": "Pembahasan lengkap"
-    }`;
-
-    case 'short_answer':
-      return `{
-      "type": "short_answer",
-      "question": "Teks pertanyaan dengan ___ untuk bagian yang harus diisi",
-      "answer": "Jawaban singkat",
-      "explanation": "Pembahasan singkat"
-    }`;
-
-    case 'essay':
-      return `{
-      "type": "essay",
-      "question": "Teks pertanyaan uraian",
-      "answer": "Contoh jawaban ideal yang lengkap",
-      "explanation": "Poin-poin penting dan pembahasan"
-    }`;
-
-    case 'matching':
-      return `{
-      "type": "matching",
-      "question": "Instruksi: Hubungkan pasangan yang tepat",
-      "pairs": [{"left": "Item kiri", "right": "Item kanan"}],
-      "answer": "Penjelasan pasangan yang benar",
-      "explanation": "Pembahasan"
-    }`;
-
-    case 'guess_image':
-      return `{
-      "type": "guess_image",
-      "question": "Pertanyaan tentang objek...",
-      "search_keyword": "elephant",
-      "answer": "Jawaban yang benar",
-      "explanation": "Pembahasan"
-    }`;
-
-    case 'image_matching':
-      return `{
-      "type": "image_matching",
-      "question": "Instruksi: Hubungkan pasangan berikut",
-      "search_keyword": "stars",
-      "pairs": [{"left": "Item kiri", "right": "Item kanan"}],
-      "answer": "Penjelasan",
-      "explanation": "Pembahasan"
-    }`;
-
-    default:
-      return `{
+  const baseSchema = `
       "type": "${type}",
       "question": "Teks pertanyaan",
-      "answer": "Jawaban",
-      "explanation": "Pembahasan"
+      "explanation": "Pembahasan"`;
+
+  switch (type) {
+    case 'multiple_choice':
+      return `{${baseSchema},
+      "options": ["A", "B", "C", "D"],
+      "answer": "A"
+    }`;
+    case 'short_answer':
+    case 'essay':
+    case 'pattern_completion':
+      return `{${baseSchema},
+      "answer": "Jawaban"
+    }`;
+    case 'matching':
+    case 'image_matching':
+      return `{${baseSchema},
+      ${type === 'image_matching' ? '"search_keyword": "english word",\n' : ''}      "pairs": [{"left": "A", "right": "B"}],
+      "answer": "A-B"
+    }`;
+    case 'guess_image':
+    case 'image_label':
+    case 'count_image':
+      return `{${baseSchema},
+      "search_keyword": "english word",
+      "answer": "Jawaban singkat"
+    }`;
+    case 'true_false':
+      return `{${baseSchema},
+      "answer": "Benar"
+    }`;
+    case 'word_jumble':
+    case 'sentence_jumble':
+      return `{${baseSchema},
+      "options": ["acak 2", "acak 1", "acak 3"],
+      "answer": "acak 1 acak 2 acak 3"
+    }`;
+    case 'ordering':
+      return `{${baseSchema},
+      "options": ["B", "C", "A"],
+      "correct_order": ["A", "B", "C"],
+      "answer": "A, B, C"
+    }`;
+    case 'choose_image':
+      return `{${baseSchema},
+      "image_options": ["apple", "banana", "orange"],
+      "answer": "banana"
+    }`;
+    case 'grouping':
+      return `{${baseSchema},
+      "categories": ["Karnivora", "Herbivora"],
+      "items": [{"name": "Sapi", "category": "Herbivora"}, {"name": "Harimau", "category": "Karnivora"}],
+      "answer": "Sapi(Herbivora), Harimau(Karnivora)"
+    }`;
+    case 'story_qa':
+      return `{${baseSchema},
+      "story": "Teks cerita...",
+      "answer": "Jawaban pertanyaan"
+    }`;
+    default:
+      return `{${baseSchema},
+      "answer": "Jawaban"
     }`;
   }
 }

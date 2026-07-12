@@ -15,6 +15,7 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { QuestionPreview } from '@/components/worksheets/question-preview';
 import { calculateAge } from '@/lib/utils';
 import { QUESTION_TYPES, DIFFICULTIES } from '@/types';
+import { LEARNING_SEGMENTS } from '@/lib/config/segments';
 import {
   Sparkles,
   Loader2,
@@ -34,6 +35,7 @@ export default function NewWorksheetPage() {
   const router = useRouter();
   const { activeChild } = useChildStore();
   const [subjects, setSubjects] = useState<Subject[]>([]);
+  const [selectedSegment, setSelectedSegment] = useState(LEARNING_SEGMENTS[0].id);
   const [selectedSubject, setSelectedSubject] = useState('');
   const [questionType, setQuestionType] = useState('multiple_choice');
   const [difficulty, setDifficulty] = useState('sedang');
@@ -86,6 +88,7 @@ export default function NewWorksheetPage() {
     const subject = subjects.find((s) => s.id === selectedSubject);
 
     const params: AIGenerateParams = {
+      segmentId: selectedSegment,
       childName: activeChild.name,
       age: calculateAge(activeChild.birth_date),
       level: activeChild.level,
@@ -129,6 +132,7 @@ export default function NewWorksheetPage() {
     try {
       const subject = subjects.find((s) => s.id === selectedSubject);
       const params: AIGenerateParams = {
+        segmentId: selectedSegment,
         childName: activeChild.name,
         age: calculateAge(activeChild.birth_date),
         level: activeChild.level,
@@ -172,6 +176,11 @@ export default function NewWorksheetPage() {
     label: d.label,
   }));
 
+  const segmentOptions = LEARNING_SEGMENTS.map((seg) => ({
+    value: seg.id,
+    label: `${seg.icon} ${seg.name}`,
+  }));
+
   return (
     <div className="max-w-4xl mx-auto space-y-6 animate-fade-in">
       {/* Header */}
@@ -188,28 +197,24 @@ export default function NewWorksheetPage() {
 
       {/* Form */}
       <Card padding="lg">
+        <div className="mb-4">
+          <Select
+            label="Segmen Pembelajaran"
+            options={segmentOptions}
+            value={selectedSegment}
+            onChange={(e) => setSelectedSegment(e.target.value)}
+            required
+          />
+        </div>
+
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Select
-            label="Mata Pelajaran"
+            label="Mata Pelajaran (Database)"
             options={subjectOptions}
             value={selectedSubject}
             onChange={(e) => setSelectedSubject(e.target.value)}
             placeholder="Pilih mata pelajaran"
             required
-          />
-
-          <Select
-            label="Tipe Soal"
-            options={questionTypeOptions}
-            value={questionType}
-            onChange={(e) => setQuestionType(e.target.value)}
-          />
-
-          <Select
-            label="Tingkat Kesulitan"
-            options={difficultyOptions}
-            value={difficulty}
-            onChange={(e) => setDifficulty(e.target.value)}
           />
 
           <div>
@@ -232,6 +237,20 @@ export default function NewWorksheetPage() {
               <span>20</span>
             </div>
           </div>
+
+          <Select
+            label="Tipe Soal"
+            options={questionTypeOptions}
+            value={questionType}
+            onChange={(e) => setQuestionType(e.target.value)}
+          />
+
+          <Select
+            label="Tingkat Kesulitan"
+            options={difficultyOptions}
+            value={difficulty}
+            onChange={(e) => setDifficulty(e.target.value)}
+          />
         </div>
 
         <div className="mt-4">

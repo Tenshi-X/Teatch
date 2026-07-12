@@ -255,4 +255,14 @@ export type QuestionType =
   | 'guess_image'
   | 'coloring'
   | 'matching'
-  | 'image_matching';
+  | 'image_matching'
+  | 'true_false'
+  | 'word_jumble'
+  | 'sentence_jumble'
+  | 'ordering'
+  | 'pattern_completion'
+  | 'count_image'
+  | 'choose_image'
+  | 'image_label'
+  | 'grouping'
+  | 'story_qa';

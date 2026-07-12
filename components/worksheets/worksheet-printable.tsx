@@ -2,12 +2,20 @@ import React, { forwardRef } from 'react';
 import type { Worksheet, Question } from '@/types';
 import { formatDate } from '@/lib/utils';
 import { BookOpen } from 'lucide-react';
+import { MathText } from '@/components/ui/math-text';
 
 interface WorksheetPrintableProps {
   worksheet: Worksheet & { subjects: { name: string; icon: string; color: string } | null };
   questions: Question[];
   showAnswers?: boolean;
 }
+
+type ExtendedQuestion = Question & {
+  story?: string;
+  image_options?: string[];
+  categories?: string[];
+  items?: any[];
+};
 
 export const WorksheetPrintable = forwardRef<HTMLDivElement, WorksheetPrintableProps>(
   ({ worksheet, questions, showAnswers = false }, ref) => {
@@ -47,12 +55,19 @@ export const WorksheetPrintable = forwardRef<HTMLDivElement, WorksheetPrintableP
 
         {/* Questions */}
         <div className="space-y-8">
-          {questions.map((q, i) => (
+          {questions.map((question, i) => {
+            const q = question as ExtendedQuestion;
+            return (
             <div key={q.id} className="break-inside-avoid">
               <div className="flex gap-4">
                 <div className="font-bold text-surface-800 shrink-0">{i + 1}.</div>
                 <div className="flex-1 space-y-4">
-                  <div className="text-surface-900 leading-relaxed font-medium">{q.question}</div>
+                  {q.type === 'story_qa' && q.story && (
+                    <div className="mb-4 p-4 bg-surface-50 border border-surface-200 rounded-lg text-sm leading-relaxed italic text-surface-800">
+                      {q.story}
+                    </div>
+                  )}
+                  <MathText content={q.question} className="text-surface-900 leading-relaxed font-medium" />
                   
                   {/* Image or Emoji */}
                   {q.image_url && (
@@ -75,7 +90,7 @@ export const WorksheetPrintable = forwardRef<HTMLDivElement, WorksheetPrintableP
                   {/* Options for multiple choice */}
                   {q.type === 'multiple_choice' && Array.isArray(q.options) && (
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4">
-                      {q.options.map((opt, optIdx) => {
+                      {q.options.map((opt: any, optIdx: number) => {
                         const letter = String.fromCharCode(65 + optIdx);
                         const isCorrectAnswer = showAnswers && q.answer === opt;
                         
@@ -91,7 +106,7 @@ export const WorksheetPrintable = forwardRef<HTMLDivElement, WorksheetPrintableP
                             <span className={`font-semibold ${isCorrectAnswer ? 'text-primary-700' : 'text-surface-500'}`}>
                               {letter}.
                             </span>
-                            <span>{String(opt)}</span>
+                            <span className="flex-1"><MathText content={String(opt)} /></span>
                           </div>
                         );
                       })}
@@ -120,12 +135,82 @@ export const WorksheetPrintable = forwardRef<HTMLDivElement, WorksheetPrintableP
                     </div>
                   )}
 
+                  {/* True False */}
+                  {q.type === 'true_false' && !showAnswers && (
+                    <div className="flex gap-8 mt-4 font-medium text-surface-600">
+                      <div className="flex items-center gap-2">
+                        <div className="w-5 h-5 border-2 border-surface-400 rounded"></div> Benar
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="w-5 h-5 border-2 border-surface-400 rounded"></div> Salah
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Jumbles & Ordering */}
+                  {(q.type === 'word_jumble' || q.type === 'sentence_jumble' || q.type === 'ordering') && Array.isArray(q.options) && (
+                    <div className="mt-4">
+                      <div className="flex flex-wrap gap-2 mb-4">
+                        {q.options.map((opt: any, optIdx: number) => (
+                          <div key={optIdx} className="px-3 py-1 border-2 border-surface-300 rounded-md bg-surface-50 text-sm">
+                            <MathText content={String(opt)} />
+                          </div>
+                        ))}
+                      </div>
+                      {!showAnswers && <div className="border-b border-surface-300 border-dashed w-full mt-8"></div>}
+                    </div>
+                  )}
+
+                  {/* Choose Image */}
+                  {q.type === 'choose_image' && Array.isArray(q.image_options) && (
+                    <div className="grid grid-cols-2 gap-4 mt-4">
+                      {q.image_options.map((opt: any, optIdx: number) => (
+                        <div key={optIdx} className="border-2 border-surface-200 rounded-lg p-2 text-center">
+                          <img 
+                            src={`https://loremflickr.com/400/300/${encodeURIComponent(String(opt))}?lock=${optIdx + 1}`}
+                            alt={String(opt)}
+                            className="w-full h-auto aspect-[4/3] object-cover rounded mb-2"
+                          />
+                          {!showAnswers && <div className="w-6 h-6 border-2 border-surface-400 rounded-full mx-auto mt-2"></div>}
+                          {showAnswers && q.answer === opt && <div className="text-primary-600 font-bold mt-2">✅ Jawaban Benar</div>}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Grouping */}
+                  {q.type === 'grouping' && Array.isArray(q.categories) && Array.isArray(q.items) && (
+                    <div className="mt-4">
+                      <div className="flex flex-wrap gap-2 mb-4">
+                        {q.items.map((item: any, optIdx: number) => (
+                          <div key={optIdx} className="px-3 py-1 border border-surface-300 rounded bg-surface-50 text-sm">
+                            {item.name}
+                          </div>
+                        ))}
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        {q.categories.map((cat: any, catIdx: number) => (
+                          <div key={catIdx} className="border-2 border-surface-300 rounded-lg p-4 min-h-[150px]">
+                            <div className="font-bold text-center border-b border-surface-300 pb-2 mb-4">{String(cat)}</div>
+                            {showAnswers && (
+                              <ul className="list-disc pl-4 text-sm">
+                                {q.items!.filter((i: any) => i.category === cat).map((item: any, i: number) => (
+                                  <li key={i}>{item.name}</li>
+                                ))}
+                              </ul>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
                   {/* Empty space for writing answers */}
-                  {(q.type === 'short_answer' || q.type === 'guess_image' || q.type === 'essay') && !showAnswers && (
+                  {(q.type === 'short_answer' || q.type === 'guess_image' || q.type === 'essay' || q.type === 'pattern_completion' || q.type === 'count_image' || q.type === 'image_label' || q.type === 'story_qa') && !showAnswers && (
                     <div className="mt-4 space-y-6">
                       <div className="border-b border-surface-300 border-dashed w-full"></div>
                       <div className="border-b border-surface-300 border-dashed w-full"></div>
-                      {q.type === 'essay' && (
+                      {(q.type === 'essay' || q.type === 'story_qa') && (
                         <>
                           <div className="border-b border-surface-300 border-dashed w-full"></div>
                           <div className="border-b border-surface-300 border-dashed w-full"></div>
@@ -151,7 +236,8 @@ export const WorksheetPrintable = forwardRef<HTMLDivElement, WorksheetPrintableP
                 </div>
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     );

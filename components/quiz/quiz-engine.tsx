@@ -20,6 +20,8 @@ import { toast } from 'sonner';
 import { cn, formatDuration } from '@/lib/utils';
 import type { Question } from '@/types';
 import Link from 'next/link';
+import { MathText } from '@/components/ui/math-text';
+import { InteractiveJumble, InteractiveOrdering, InteractiveGrouping, InteractiveImageOptions } from './interactions';
 
 interface QuizEngineProps {
   worksheetId: string;
@@ -27,6 +29,13 @@ interface QuizEngineProps {
   questions: Question[];
   worksheetTitle: string;
 }
+
+type ExtendedQuestion = Question & {
+  story?: string;
+  image_options?: string[];
+  categories?: string[];
+  items?: any[];
+};
 
 export function QuizEngine({
   worksheetId,
@@ -46,7 +55,7 @@ export function QuizEngine({
     total: number;
   } | null>(null);
 
-  const currentQ = questions[currentIndex];
+  const currentQ = questions[currentIndex] as ExtendedQuestion;
   const answeredCount = Object.keys(answers).length;
 
   // Timer
@@ -276,7 +285,12 @@ export function QuizEngine({
           <Badge variant="outline" size="sm" className="mb-3">
             Soal {currentIndex + 1}
           </Badge>
-          <p className="text-base font-medium leading-relaxed">{currentQ.question}</p>
+          {currentQ.type === 'story_qa' && currentQ.story && (
+            <div className="mb-4 p-4 bg-surface-50 dark:bg-surface-800 rounded-xl text-sm leading-relaxed border border-surface-200 dark:border-surface-700 italic">
+              {currentQ.story}
+            </div>
+          )}
+          <MathText content={currentQ.question} className="text-base font-medium leading-relaxed" />
         </div>
 
         {/* Image */}
@@ -319,7 +333,7 @@ export function QuizEngine({
                   >
                     {letter}
                   </span>
-                  <span className="flex-1">{option}</span>
+                  <span className="flex-1"><MathText content={option} /></span>
                   {isSelected && (
                     <CheckCircle size={18} className="text-primary-600 shrink-0" />
                   )}
@@ -358,6 +372,78 @@ export function QuizEngine({
             value={answers[currentQ.id] || ''}
             onChange={(e) => setAnswer(currentQ.id, e.target.value)}
             placeholder="Tebak gambar ini..."
+            className="input-base text-base"
+          />
+        )}
+
+        {/* True False */}
+        {currentQ.type === 'true_false' && (
+          <div className="flex gap-4">
+            <button
+              onClick={() => setAnswer(currentQ.id, 'Benar')}
+              className={cn(
+                "flex-1 p-4 rounded-xl border-2 font-bold text-lg transition-all cursor-pointer",
+                answers[currentQ.id] === 'Benar' ? "bg-primary-600 border-primary-600 text-white shadow-md" : "bg-surface-50 dark:bg-surface-800 border-surface-200 dark:border-surface-700 hover:border-primary-400"
+              )}
+            >
+              ✅ Benar
+            </button>
+            <button
+              onClick={() => setAnswer(currentQ.id, 'Salah')}
+              className={cn(
+                "flex-1 p-4 rounded-xl border-2 font-bold text-lg transition-all cursor-pointer",
+                answers[currentQ.id] === 'Salah' ? "bg-danger-600 border-danger-600 text-white shadow-md" : "bg-surface-50 dark:bg-surface-800 border-surface-200 dark:border-surface-700 hover:border-danger-400"
+              )}
+            >
+              ❌ Salah
+            </button>
+          </div>
+        )}
+
+        {/* Jumbles */}
+        {(currentQ.type === 'word_jumble' || currentQ.type === 'sentence_jumble') && Array.isArray(currentQ.options) && (
+          <InteractiveJumble 
+            options={currentQ.options as string[]}
+            value={answers[currentQ.id] || ''}
+            onChange={(val) => setAnswer(currentQ.id, val)}
+          />
+        )}
+
+        {/* Ordering */}
+        {currentQ.type === 'ordering' && Array.isArray(currentQ.options) && (
+          <InteractiveOrdering 
+            options={currentQ.options as string[]}
+            value={answers[currentQ.id] || ''}
+            onChange={(val) => setAnswer(currentQ.id, val)}
+          />
+        )}
+
+        {/* Choose Image */}
+        {currentQ.type === 'choose_image' && Array.isArray(currentQ.image_options) && (
+          <InteractiveImageOptions 
+            options={currentQ.image_options as string[]}
+            value={answers[currentQ.id] || ''}
+            onChange={(val) => setAnswer(currentQ.id, val)}
+          />
+        )}
+
+        {/* Grouping */}
+        {currentQ.type === 'grouping' && currentQ.categories && currentQ.items && (
+          <InteractiveGrouping 
+            categories={currentQ.categories as string[]}
+            items={currentQ.items as any[]}
+            value={answers[currentQ.id] || ''}
+            onChange={(val) => setAnswer(currentQ.id, val)}
+          />
+        )}
+
+        {/* Math short answers / standard short answers */}
+        {['pattern_completion', 'count_image', 'image_label', 'story_qa'].includes(currentQ.type) && (
+          <input
+            type={currentQ.type === 'count_image' ? "number" : "text"}
+            value={answers[currentQ.id] || ''}
+            onChange={(e) => setAnswer(currentQ.id, e.target.value)}
+            placeholder={currentQ.type === 'count_image' ? "Masukkan angka..." : "Ketik jawaban Anda..."}
             className="input-base text-base"
           />
         )}
