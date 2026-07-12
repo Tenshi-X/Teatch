@@ -54,7 +54,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
         <div className="flex items-center justify-between px-6 py-5 border-b border-[var(--sidebar-border)]">
           <Link href="/dashboard" className="flex items-center gap-3 group">
             <div className="w-10 h-10 rounded-full flex items-center justify-center shadow-lg group-hover:shadow-xl transition-shadow overflow-hidden relative">
-              <Image src="/logo_teatch.png" alt="Teatch Logo" fill className="object-cover" />
+              <Image src="/teatch_logo.png" alt="Teatch Logo" fill className="object-cover" />
             </div>
             <div>
               <h1 className="text-xl font-bold bg-gradient-to-r from-primary-600 to-secondary-500 bg-clip-text text-transparent">

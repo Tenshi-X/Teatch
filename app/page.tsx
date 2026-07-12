@@ -71,7 +71,7 @@ export default function LandingPage() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
             <div className="w-9 h-9 rounded-full flex items-center justify-center shadow-md overflow-hidden relative">
-              <Image src="/logo_teatch.png" alt="Teatch Logo" fill className="object-cover" />
+              <Image src="/teatch_logo.png" alt="Teatch Logo" fill className="object-cover" />
             </div>
             <span className="text-xl font-bold bg-gradient-to-r from-primary-600 to-secondary-500 bg-clip-text text-transparent">
               Teatch
@@ -241,7 +241,7 @@ export default function LandingPage() {
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <div className="w-7 h-7 rounded-full flex items-center justify-center overflow-hidden relative">
-              <Image src="/logo_teatch.png" alt="Teatch Logo" fill className="object-cover" />
+              <Image src="/teatch_logo.png" alt="Teatch Logo" fill className="object-cover" />
             </div>
             <span className="font-semibold text-sm">Teatch</span>
           </div>

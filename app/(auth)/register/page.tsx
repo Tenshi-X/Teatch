@@ -24,7 +24,7 @@ export default function RegisterPage() {
       {/* Logo */}
       <div className="text-center mb-8">
         <div className="inline-flex items-center justify-center w-16 h-16 rounded-full shadow-lg shadow-primary-500/25 mb-4 overflow-hidden relative">
-          <Image src="/logo_teatch.png" alt="Teatch Logo" fill className="object-cover" />
+          <Image src="/teatch_logo.png" alt="Teatch Logo" fill className="object-cover" />
         </div>
         <h1 className="text-3xl font-bold bg-gradient-to-r from-primary-600 to-secondary-500 bg-clip-text text-transparent">
           Teatch
