@@ -60,16 +60,15 @@ export default function NewWorksheetPage() {
     fetchSubjects();
   }, [activeChild]);
 
-  // Derive Segment implicitly from selected Subject
   const derivedSegmentId = useMemo(() => {
     const subjectName = subjects.find(s => s.id === selectedSubject)?.name?.toLowerCase() || '';
-    if (subjectName.includes('matematika')) return 'math';
-    if (subjectName.includes('indonesia')) return 'language';
-    if (subjectName.includes('inggris')) return 'english';
-    if (subjectName.includes('ipa') || subjectName.includes('sains')) return 'science';
-    if (subjectName.includes('ips') || subjectName.includes('sejarah')) return 'social';
-    if (subjectName.includes('logika')) return 'logic';
-    return 'general';
+    if (subjectName.includes('matematika')) return 'matematika';
+    if (subjectName.includes('indonesia')) return 'bahasa_indonesia';
+    if (subjectName.includes('inggris')) return 'bahasa_inggris';
+    if (subjectName.includes('ipa') || subjectName.includes('sains')) return 'ipa';
+    if (subjectName.includes('ips') || subjectName.includes('sejarah')) return 'ips';
+    if (subjectName.includes('logika')) return 'logika';
+    return 'umum';
   }, [selectedSubject, subjects]);
 
   const derivedSegment = useMemo(() => {
