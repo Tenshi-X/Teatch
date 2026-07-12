@@ -208,7 +208,7 @@ export default function NewWorksheetPage() {
       <div>
         <h1 className="text-2xl font-bold flex items-center gap-2">
           <Wand2 className="text-primary-500" />
-          Buat Latihan AI
+          Buat Latihan
         </h1>
         <p className="text-surface-400 text-sm mt-1">
           Generate soal otomatis untuk{' '}
@@ -220,7 +220,7 @@ export default function NewWorksheetPage() {
       <Card padding="lg">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Select
-            label="Mata Pelajaran (Database)"
+            label="Mata Pelajaran"
             options={subjectOptions}
             value={selectedSubject}
             onChange={(e) => setSelectedSubject(e.target.value)}
@@ -307,9 +307,9 @@ export default function NewWorksheetPage() {
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary-100 dark:bg-primary-900/30 mb-4">
             <Loader2 className="w-8 h-8 text-primary-600 animate-spin" />
           </div>
-          <h3 className="text-lg font-semibold mb-1">AI sedang membuat soal...</h3>
+          <h3 className="text-lg font-semibold mb-1">sedang membuat soal...</h3>
           <p className="text-sm text-surface-400">
-            Tunggu sebentar, Gemini sedang memproses permintaan Anda
+            Tunggu sebentar, Sistem sedang memproses permintaan Anda
           </p>
         </Card>
       )}
