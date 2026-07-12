@@ -103,7 +103,7 @@ export default function LandingPage() {
         <div className="max-w-4xl mx-auto text-center relative z-10">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 text-sm font-medium mb-6 animate-fade-in">
             <Sparkles size={16} />
-            Platform Belajar AI #1 untuk Anak Indonesia
+            Platform Belajar Berbasis AI #1 untuk Anak Indonesia
           </div>
 
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight mb-6 animate-fade-in-up">
@@ -246,7 +246,7 @@ export default function LandingPage() {
             <span className="font-semibold text-sm">Teatch</span>
           </div>
           <p className="text-xs text-surface-400">
-            © 2026 Teatch. Platform Belajar AI untuk Anak Indonesia.
+            © 2026 Teatch. Platform Belajar Berbasis AI untuk Anak Indonesia.
           </p>
         </div>
       </footer>

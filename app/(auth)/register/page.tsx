@@ -5,17 +5,26 @@ import { signUp, type AuthState } from '@/app/actions/auth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import Link from 'next/link';
-import { BookOpen, UserPlus } from 'lucide-react';
+import Image from 'next/image';
+import { ArrowLeft, UserPlus } from 'lucide-react';
 
 export default function RegisterPage() {
   const [state, formAction, isPending] = useActionState<AuthState, FormData>(signUp, {});
 
   return (
     <div className="animate-fade-in-up">
+      {/* Back Button */}
+      <div className="mb-6 flex justify-center">
+        <Link href="/" className="inline-flex items-center gap-2 text-sm text-surface-500 hover:text-surface-700 dark:hover:text-surface-300 transition-colors">
+          <ArrowLeft size={16} />
+          Kembali ke Beranda
+        </Link>
+      </div>
+
       {/* Logo */}
       <div className="text-center mb-8">
-        <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-primary-500 to-primary-700 shadow-lg shadow-primary-500/25 mb-4">
-          <BookOpen className="w-8 h-8 text-white" />
+        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full shadow-lg shadow-primary-500/25 mb-4 overflow-hidden relative">
+          <Image src="/logo_teatch.png" alt="Teatch Logo" fill className="object-cover" />
         </div>
         <h1 className="text-3xl font-bold bg-gradient-to-r from-primary-600 to-secondary-500 bg-clip-text text-transparent">
           Teatch

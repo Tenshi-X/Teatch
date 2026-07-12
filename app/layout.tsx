@@ -12,7 +12,7 @@ const kanit = Kanit({
 
 export const metadata: Metadata = {
   title: {
-    default: "Teatch — Platform Belajar AI untuk Anak",
+    default: "Teatch - Platform Belajar Berbasis AI untuk Anak",
     template: "%s | Teatch",
   },
   description:
