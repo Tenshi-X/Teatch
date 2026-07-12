@@ -13,20 +13,12 @@ export default function RegisterPage() {
 
   return (
     <div className="animate-fade-in-up">
-      {/* Back Button */}
-      <div className="mb-6 flex justify-center">
-        <Link href="/" className="inline-flex items-center gap-2 text-sm text-surface-500 hover:text-surface-700 dark:hover:text-surface-300 transition-colors">
-          <ArrowLeft size={16} />
-          Kembali ke Beranda
-        </Link>
-      </div>
-
       {/* Logo */}
       <div className="text-center mb-8">
         <div className="inline-flex items-center justify-center w-16 h-16 rounded-full shadow-lg shadow-primary-500/25 mb-4 overflow-hidden relative">
           <Image src="/teatch_logo.png" alt="Teatch Logo" fill className="object-cover" />
         </div>
-        <h1 className="text-3xl font-bold bg-gradient-to-r from-primary-600 to-secondary-500 bg-clip-text text-transparent">
+        <h1 className="text-3xl font-bold text-primary-600 dark:text-primary-500">
           Teatch
         </h1>
         <p className="text-surface-400 mt-1 text-sm">Daftar sebagai Orang Tua</p>

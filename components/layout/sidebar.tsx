@@ -57,7 +57,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
               <Image src="/teatch_logo.png" alt="Teatch Logo" fill className="object-cover" />
             </div>
             <div>
-              <h1 className="text-xl font-bold bg-gradient-to-r from-primary-600 to-secondary-500 bg-clip-text text-transparent">
+              <h1 className="text-xl font-bold text-primary-600 dark:text-primary-500">
                 Teatch
               </h1>
               <p className="text-[10px] text-surface-400 -mt-0.5">AI Learning Platform</p>

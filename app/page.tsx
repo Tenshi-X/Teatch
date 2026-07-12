@@ -73,7 +73,7 @@ export default function LandingPage() {
             <div className="w-9 h-9 rounded-full flex items-center justify-center shadow-md overflow-hidden relative">
               <Image src="/teatch_logo.png" alt="Teatch Logo" fill className="object-cover" />
             </div>
-            <span className="text-xl font-bold bg-gradient-to-r from-primary-600 to-secondary-500 bg-clip-text text-transparent">
+            <span className="text-xl font-bold text-primary-600 dark:text-primary-500">
               Teatch
             </span>
           </Link>
