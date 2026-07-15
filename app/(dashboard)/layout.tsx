@@ -51,6 +51,7 @@ export default async function DashboardLayout({
   return (
     <DashboardShell
       userName={profile.full_name}
+      userRole={profile.role}
       initialChildren={childrenData || []}
     >
       {children}

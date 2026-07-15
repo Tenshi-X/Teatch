@@ -14,6 +14,7 @@ import {
   BookOpen,
   X,
   FileText,
+  ShieldAlert,
 } from 'lucide-react';
 
 const navItems = [
@@ -27,9 +28,10 @@ const navItems = [
 interface SidebarProps {
   isOpen: boolean;
   onClose: () => void;
+  userRole?: string;
 }
 
-export function Sidebar({ isOpen, onClose }: SidebarProps) {
+export function Sidebar({ isOpen, onClose, userRole }: SidebarProps) {
   const pathname = usePathname();
 
   return (
@@ -100,6 +102,17 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
               </Link>
             );
           })}
+
+          {userRole === 'admin' && (
+            <Link
+              href="/admin"
+              onClick={onClose}
+              className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 text-rose-500 hover:bg-rose-500/10"
+            >
+              <ShieldAlert size={20} />
+              Admin Dashboard
+            </Link>
+          )}
         </nav>
 
         {/* Bottom section */}
