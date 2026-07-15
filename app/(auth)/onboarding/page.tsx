@@ -29,11 +29,13 @@ export default function OnboardingPage() {
         return;
       }
 
-      const { data: profile } = await supabase
+      const { data } = await supabase
         .from('profiles')
         .select('*')
         .eq('auth_user_id', user.id)
         .single();
+
+      const profile = data as any;
 
       if (profile) {
         if (profile.is_onboarded) {
