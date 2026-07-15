@@ -14,6 +14,8 @@ export type Database = {
           id: string;
           auth_user_id: string;
           full_name: string;
+          email: string | null;
+          role: 'admin' | 'user';
           avatar_url: string | null;
           phone_number: string | null;
           is_onboarded: boolean;
@@ -28,6 +30,8 @@ export type Database = {
           id?: string;
           auth_user_id: string;
           full_name: string;
+          email?: string | null;
+          role?: 'admin' | 'user';
           avatar_url?: string | null;
           phone_number?: string | null;
           is_onboarded?: boolean;
@@ -42,6 +46,8 @@ export type Database = {
           id?: string;
           auth_user_id?: string;
           full_name?: string;
+          email?: string | null;
+          role?: 'admin' | 'user';
           avatar_url?: string | null;
           phone_number?: string | null;
           is_onboarded?: boolean;
