@@ -15,6 +15,12 @@ export type Database = {
           auth_user_id: string;
           full_name: string;
           avatar_url: string | null;
+          phone_number: string | null;
+          is_onboarded: boolean;
+          subscription_tier: string;
+          subscription_status: string;
+          subscription_period_start: string | null;
+          subscription_period_end: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -23,6 +29,12 @@ export type Database = {
           auth_user_id: string;
           full_name: string;
           avatar_url?: string | null;
+          phone_number?: string | null;
+          is_onboarded?: boolean;
+          subscription_tier?: string;
+          subscription_status?: string;
+          subscription_period_start?: string | null;
+          subscription_period_end?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -31,6 +43,12 @@ export type Database = {
           auth_user_id?: string;
           full_name?: string;
           avatar_url?: string | null;
+          phone_number?: string | null;
+          is_onboarded?: boolean;
+          subscription_tier?: string;
+          subscription_status?: string;
+          subscription_period_start?: string | null;
+          subscription_period_end?: string | null;
           updated_at?: string;
         };
       };

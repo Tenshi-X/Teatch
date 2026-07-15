@@ -37,6 +37,10 @@ export default async function DashboardLayout({
   }
   const profile = profileData as any;
 
+  if (!profile.is_onboarded) {
+    redirect('/onboarding');
+  }
+
   // Fetch children
   const { data: childrenData } = await supabase
     .from('children')

@@ -85,7 +85,7 @@ export default function LandingPage() {
               Masuk
             </Link>
             <Link
-              href="/register"
+              href="/login"
               className="px-4 py-2 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-xl transition-colors shadow-md hover:shadow-lg"
             >
               Daftar Gratis
@@ -120,7 +120,7 @@ export default function LandingPage() {
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
             <Link
-              href="/register"
+              href="/login"
               className="inline-flex items-center gap-2 px-8 py-3.5 text-base font-semibold text-white bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 rounded-2xl shadow-xl shadow-primary-500/25 hover:shadow-primary-500/40 transition-all active:scale-[0.98]"
             >
               Mulai Sekarang — Gratis
@@ -227,7 +227,7 @@ export default function LandingPage() {
             Gratis untuk dicoba. Tidak perlu kartu kredit.
           </p>
           <Link
-            href="/register"
+            href="/login"
             className="inline-flex items-center gap-2 px-8 py-3.5 text-base font-semibold text-white bg-gradient-to-r from-primary-600 to-primary-700 rounded-2xl shadow-xl shadow-primary-500/25 hover:shadow-primary-500/40 transition-all active:scale-[0.98]"
           >
             Daftar Gratis Sekarang
