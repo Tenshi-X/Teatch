@@ -26,7 +26,7 @@ export async function POST(request: Request) {
     }
 
     // Fetch user profile to check quota
-    const { data: profile, error: profileError } = await supabase
+    const { data: profile, error: profileError } = await (supabase as any)
       .from('profiles')
       .select('id, worksheet_quota')
       .eq('auth_user_id', user.id)
@@ -45,7 +45,7 @@ export async function POST(request: Request) {
 
     // Decrement quota on success
     if (profile.worksheet_quota !== undefined && profile.worksheet_quota > 0) {
-      await supabase
+      await (supabase as any)
         .from('profiles')
         .update({ worksheet_quota: profile.worksheet_quota - 1 })
         .eq('id', profile.id);
