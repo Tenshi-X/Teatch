@@ -56,6 +56,6 @@ export const dict: Translations = {
 };
 
 export function t(key: keyof typeof dict, lang: 'id' | 'en'): string {
-  if (!dict[key]) return key;
+  if (!dict[key]) return String(key);
   return dict[key][lang] || dict[key]['id'];
 }
