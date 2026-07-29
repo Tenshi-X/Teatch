@@ -6,9 +6,12 @@ import { ChevronDown, Plus, Check } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { cn, calculateAge } from '@/lib/utils';
+import { useLanguageStore } from '@/lib/stores/language-store';
+import { t } from '@/lib/i18n';
 
 export function ChildSelector() {
   const { children, activeChild, setActiveChild } = useChildStore();
+  const { language } = useLanguageStore();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -29,7 +32,7 @@ export function ChildSelector() {
         className="flex items-center gap-2 px-3 py-2 rounded-xl bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 text-sm font-medium hover:bg-primary-100 dark:hover:bg-primary-900/30 transition-colors"
       >
         <Plus size={16} />
-        Tambah Anak
+        {t('childSelector.add', language)}
       </Link>
     );
   }
@@ -46,7 +49,7 @@ export function ChildSelector() {
             <div className="text-left hidden sm:block">
               <p className="text-sm font-medium leading-tight">{activeChild.name}</p>
               <p className="text-xs text-surface-400">
-                {activeChild.level} • {calculateAge(activeChild.birth_date)} tahun
+                {activeChild.level} • {calculateAge(activeChild.birth_date)} {t('childSelector.yearsOld', language)}
               </p>
             </div>
             <ChevronDown
@@ -64,7 +67,7 @@ export function ChildSelector() {
       {isOpen && (
         <div className="absolute left-1/2 -translate-x-1/2 lg:left-0 lg:translate-x-0 top-full mt-2 w-64 card p-2 shadow-xl animate-scale-in z-50">
           <p className="px-3 py-1.5 text-xs font-medium text-surface-400 uppercase tracking-wider">
-            Pilih Anak
+            {t('childSelector.select', language)}
           </p>
           {children.map((child) => (
             <button
@@ -99,7 +102,7 @@ export function ChildSelector() {
               className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors"
             >
               <Plus size={16} />
-              Tambah Anak Baru
+              {t('childSelector.addNew', language)}
             </Link>
           </div>
         </div>

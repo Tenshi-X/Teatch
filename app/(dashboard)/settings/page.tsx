@@ -27,11 +27,6 @@ export default async function SettingsPage() {
 
   return (
     <div className="max-w-3xl mx-auto space-y-6 animate-fade-in">
-      <div>
-        <h1 className="text-2xl font-bold mb-1">Pengaturan</h1>
-        <p className="text-surface-400">Kelola profil orang tua dan preferensi aplikasi Anda.</p>
-      </div>
-
       <SettingsClient 
         initialName={profile.full_name} 
         email={user.email || ''} 

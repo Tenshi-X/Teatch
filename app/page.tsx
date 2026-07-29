@@ -12,7 +12,10 @@ import {
   Puzzle,
   Image as ImageIcon,
   Laptop,
-  Target
+  Target,
+  Instagram,
+  MessageCircle,
+  Mail
 } from 'lucide-react';
 
 export default function LandingPage() {
@@ -446,16 +449,40 @@ export default function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-[var(--card-border)] py-8 px-4">
-        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-full flex items-center justify-center overflow-hidden relative">
-              <Image src="/teatch_logo.png" alt="Teatch Logo" fill className="object-cover" />
+      <footer className="border-t border-[var(--card-border)] py-12 px-4 bg-surface-50 dark:bg-surface-900/50">
+        <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12 mb-8 border-b border-[var(--card-border)] pb-8">
+          <div>
+            <div className="flex items-center gap-2 mb-4">
+              <div className="w-8 h-8 rounded-full flex items-center justify-center overflow-hidden relative shadow-sm">
+                <Image src="/teatch_logo.png" alt="Teatch Logo" fill className="object-cover" />
+              </div>
+              <span className="font-bold text-lg text-primary-600 dark:text-primary-500">Teatch</span>
             </div>
-            <span className="font-semibold text-sm">Teatch</span>
+            <p className="text-sm text-surface-400 max-w-sm mb-6">
+              Platform Belajar Berbasis AI untuk Anak Indonesia. Meringankan tugas orang tua dan guru dalam menyajikan latihan yang adaptif dan interaktif.
+            </p>
           </div>
+          <div className="flex flex-col md:items-end">
+            <h3 className="font-semibold text-lg mb-4 text-surface-700 dark:text-surface-300">Hubungi Kami</h3>
+            <div className="flex flex-col gap-3">
+              <a href="mailto:trenova151@gmail.com" className="flex items-center gap-3 text-sm text-surface-500 hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
+                <Mail size={18} />
+                trenova151@gmail.com
+              </a>
+              <a href="https://wa.me/6287795078879" target="_blank" rel="noreferrer" className="flex items-center gap-3 text-sm text-surface-500 hover:text-emerald-500 transition-colors">
+                <MessageCircle size={18} />
+                +62 877 9507 8879 (WhatsApp)
+              </a>
+              <a href="https://www.instagram.com/trenova.intelligence?igsh=dDQ5ODM5cDFsdHIw" target="_blank" rel="noreferrer" className="flex items-center gap-3 text-sm text-surface-500 hover:text-pink-500 transition-colors">
+                <Instagram size={18} />
+                @trenova.intelligence
+              </a>
+            </div>
+          </div>
+        </div>
+        <div className="max-w-6xl mx-auto text-center">
           <p className="text-xs text-surface-400">
-            © 2026 Teatch. Platform Belajar Berbasis AI untuk Anak Indonesia.
+            © {new Date().getFullYear()} Trenova Intelligence. Seluruh hak cipta dilindungi.
           </p>
         </div>
       </footer>
