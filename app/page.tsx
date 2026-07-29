@@ -217,6 +217,215 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Pricing */}
+      <section className="py-20 px-4">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl sm:text-4xl font-bold mb-4">Pilih Paket Belajar</h2>
+            <p className="text-surface-400 max-w-2xl mx-auto">
+              Tingkatkan pengalaman belajar anak dengan fitur premium. Harga terjangkau untuk masa depan cerah.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+            {/* Free Trial */}
+            <div className="card p-8 border border-[var(--card-border)] relative flex flex-col">
+              <div className="mb-4">
+                <h3 className="text-xl font-semibold mb-2">Free Trial</h3>
+                <p className="text-surface-400 text-sm">Untuk mencoba fitur dasar</p>
+              </div>
+              <div className="mb-6">
+                <span className="text-4xl font-bold">Rp 0</span>
+              </div>
+              <ul className="space-y-3 mb-8 flex-1">
+                <li className="flex items-start gap-3 text-sm">
+                  <CheckCircle className="w-5 h-5 text-primary-500 shrink-0" />
+                  <span>Maksimal 10 worksheet</span>
+                </li>
+                <li className="flex items-start gap-3 text-sm">
+                  <CheckCircle className="w-5 h-5 text-primary-500 shrink-0" />
+                  <span>1 profil anak</span>
+                </li>
+                <li className="flex items-start gap-3 text-sm">
+                  <CheckCircle className="w-5 h-5 text-primary-500 shrink-0" />
+                  <span>Semua tipe soal standar</span>
+                </li>
+              </ul>
+              <Link
+                href="/login"
+                className="w-full py-3 px-4 text-center rounded-xl font-medium border border-surface-200 dark:border-surface-700 hover:bg-surface-50 dark:hover:bg-surface-800 transition-colors"
+              >
+                Mulai Gratis
+              </Link>
+            </div>
+
+            {/* Basic */}
+            <div className="card p-8 border-2 border-primary-500 relative flex flex-col shadow-xl shadow-primary-500/10 scale-105 z-10">
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-primary-500 text-white px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
+                Terpopuler
+              </div>
+              <div className="mb-4">
+                <h3 className="text-xl font-semibold mb-2">Basic</h3>
+                <p className="text-surface-400 text-sm">Cocok untuk pendampingan harian</p>
+              </div>
+              <div className="mb-6">
+                <span className="text-4xl font-bold">Rp 150rb</span>
+                <span className="text-surface-400">/bln</span>
+              </div>
+              <ul className="space-y-3 mb-8 flex-1">
+                <li className="flex items-start gap-3 text-sm">
+                  <CheckCircle className="w-5 h-5 text-primary-500 shrink-0" />
+                  <span className="font-medium">300 worksheet</span>
+                </li>
+                <li className="flex items-start gap-3 text-sm">
+                  <CheckCircle className="w-5 h-5 text-primary-500 shrink-0" />
+                  <span>Maksimal 10 profil anak</span>
+                </li>
+                <li className="flex items-start gap-3 text-sm">
+                  <CheckCircle className="w-5 h-5 text-primary-500 shrink-0" />
+                  <span>Statistik perkembangan anak</span>
+                </li>
+                <li className="flex items-start gap-3 text-sm">
+                  <CheckCircle className="w-5 h-5 text-primary-500 shrink-0" />
+                  <span>Prioritas dukungan (Support)</span>
+                </li>
+              </ul>
+              <a
+                href="https://shopee.co.id/trenovaintelligence"
+                target="_blank"
+                rel="noreferrer"
+                className="w-full py-3 px-4 text-center rounded-xl font-medium bg-primary-600 text-white hover:bg-primary-700 transition-colors shadow-md hover:shadow-lg"
+              >
+                Berlangganan
+              </a>
+            </div>
+
+            {/* Pro */}
+            <div className="card p-8 border border-[var(--card-border)] relative flex flex-col">
+              <div className="mb-4">
+                <h3 className="text-xl font-semibold mb-2">Pro</h3>
+                <p className="text-surface-400 text-sm">Untuk keluarga besar & intensif</p>
+              </div>
+              <div className="mb-6">
+                <span className="text-4xl font-bold">Rp 250rb</span>
+                <span className="text-surface-400">/bln</span>
+              </div>
+              <ul className="space-y-3 mb-8 flex-1">
+                <li className="flex items-start gap-3 text-sm">
+                  <CheckCircle className="w-5 h-5 text-primary-500 shrink-0" />
+                  <span className="font-medium">500 worksheet</span>
+                </li>
+                <li className="flex items-start gap-3 text-sm">
+                  <CheckCircle className="w-5 h-5 text-primary-500 shrink-0" />
+                  <span>Maksimal 30 profil anak</span>
+                </li>
+                <li className="flex items-start gap-3 text-sm">
+                  <CheckCircle className="w-5 h-5 text-primary-500 shrink-0" />
+                  <span>Fitur premium lanjutan</span>
+                </li>
+                <li className="flex items-start gap-3 text-sm">
+                  <CheckCircle className="w-5 h-5 text-primary-500 shrink-0" />
+                  <span>Dukungan teknis prioritas 24/7</span>
+                </li>
+              </ul>
+              <a
+                href="https://shopee.co.id/trenovaintelligence"
+                target="_blank"
+                rel="noreferrer"
+                className="w-full py-3 px-4 text-center rounded-xl font-medium border border-surface-200 dark:border-surface-700 hover:bg-surface-50 dark:hover:bg-surface-800 transition-colors"
+              >
+                Berlangganan
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonials */}
+      <section className="py-16 px-4 bg-surface-50 dark:bg-surface-900/50">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold mb-4">Apa Kata Mereka?</h2>
+            <p className="text-surface-400">Ribuan orang tua telah merasakan manfaat Teatch.</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[
+              {
+                name: 'Bunda Rara',
+                role: 'Ibu 2 Anak',
+                text: 'Sangat terbantu! Dulu pusing cari soal latihan untuk TK dan SD. Sekarang tinggal pilih topik, AI yang buatkan soal yang sesuai dan menarik.',
+              },
+              {
+                name: 'Pak Budi',
+                role: 'Ayah 1 Anak',
+                text: 'Visualnya bagus dan soalnya interaktif. Anak saya yang tadinya malas belajar berhitung sekarang jadi semangat karena seperti main game.',
+              },
+              {
+                name: 'Bu Tika',
+                role: 'Guru Privat & Ibu',
+                text: 'Sangat merekomendasikan Teatch. Kuota worksheet sangat lega dan statistik perkembangannya akurat. Worth every penny!',
+              },
+            ].map((testi, i) => (
+              <div key={i} className="card p-6">
+                <div className="flex items-center gap-1 mb-4 text-warning-500">
+                  {Array.from({ length: 5 }).map((_, idx) => (
+                    <svg key={idx} className="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                      <path d="M12 17.27L18.18 21L16.54 13.97L22 9.24L14.81 8.63L12 2L9.19 8.63L2 9.24L7.46 13.97L5.82 21L12 17.27Z" />
+                    </svg>
+                  ))}
+                </div>
+                <p className="text-surface-600 dark:text-surface-300 text-sm mb-6 italic">
+                  "{testi.text}"
+                </p>
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-primary-100 dark:bg-primary-900/30 text-primary-600 flex items-center justify-center font-bold">
+                    {testi.name.charAt(0)}
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-sm">{testi.name}</h4>
+                    <p className="text-xs text-surface-400">{testi.role}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section className="py-20 px-4">
+        <div className="max-w-3xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold mb-4">Pertanyaan yang Sering Diajukan</h2>
+          </div>
+          <div className="space-y-4">
+            {[
+              {
+                q: 'Apakah bisa digunakan di HP/Tablet?',
+                a: 'Tentu! Teatch dirancang responsif, Anda bisa membuka dan mengerjakan soal langsung dari browser di HP, Tablet, maupun Laptop.',
+              },
+              {
+                q: 'Apa maksud dari kuota worksheet?',
+                a: 'Kuota worksheet adalah jumlah maksimal Anda bisa membuat/meng-generate set soal (worksheet) menggunakan AI setiap bulannya.',
+              },
+              {
+                q: 'Bagaimana cara berlangganan paket Premium?',
+                a: 'Anda bisa klik tombol Berlangganan pada paket di atas, yang akan mengarahkan Anda ke toko Shopee resmi kami untuk melakukan pembayaran dengan aman.',
+              },
+            ].map((faq, i) => (
+              <div key={i} className="card p-5">
+                <h3 className="font-semibold text-lg mb-2 flex items-start gap-2">
+                  <span className="text-primary-500">Q:</span> {faq.q}
+                </h3>
+                <p className="text-surface-500 text-sm flex items-start gap-2">
+                  <span className="font-bold text-surface-300 dark:text-surface-600">A:</span> {faq.a}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* CTA */}
       <section className="py-20 px-4 text-center">
         <div className="max-w-2xl mx-auto">

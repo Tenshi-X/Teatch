@@ -25,8 +25,31 @@ export async function POST(request: Request) {
       );
     }
 
+    // Fetch user profile to check quota
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('id, worksheet_quota')
+      .eq('auth_user_id', user.id)
+      .single();
+
+    if (profileError || !profile) {
+      return NextResponse.json({ error: 'Profile not found' }, { status: 404 });
+    }
+
+    if (profile.worksheet_quota !== undefined && profile.worksheet_quota <= 0) {
+      return NextResponse.json({ error: 'Kuota worksheet Anda telah habis. Silakan upgrade paket berlangganan.' }, { status: 403 });
+    }
+
     // Generate worksheet using Gemini
     const worksheet = await generateWorksheet(body);
+
+    // Decrement quota on success
+    if (profile.worksheet_quota !== undefined && profile.worksheet_quota > 0) {
+      await supabase
+        .from('profiles')
+        .update({ worksheet_quota: profile.worksheet_quota - 1 })
+        .eq('id', profile.id);
+    }
 
     return NextResponse.json(worksheet);
   } catch (error) {

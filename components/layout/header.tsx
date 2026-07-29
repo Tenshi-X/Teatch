@@ -10,9 +10,10 @@ import { Avatar } from '@/components/ui/avatar';
 interface HeaderProps {
   onMenuToggle: () => void;
   userName: string;
+  avatarUrl?: string;
 }
 
-export function Header({ onMenuToggle, userName }: HeaderProps) {
+export function Header({ onMenuToggle, userName, avatarUrl }: HeaderProps) {
   const { isDark, toggle } = useTheme();
   const [showUserMenu, setShowUserMenu] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -30,10 +31,10 @@ export function Header({ onMenuToggle, userName }: HeaderProps) {
   return (
     <header className="sticky top-0 z-30 bg-[var(--card-bg)]/80 backdrop-blur-xl border-b border-[var(--card-border)]">
       <div className="flex items-center justify-between px-4 lg:px-6 py-3">
-        {/* Left: Menu button (mobile) */}
+        {/* Left: Menu button */}
         <button
           onClick={onMenuToggle}
-          className="lg:hidden p-2 rounded-lg hover:bg-surface-100 dark:hover:bg-surface-800 transition-colors cursor-pointer"
+          className="p-2 rounded-lg hover:bg-surface-100 dark:hover:bg-surface-800 transition-colors cursor-pointer mr-2"
         >
           <Menu size={22} />
         </button>
@@ -59,7 +60,7 @@ export function Header({ onMenuToggle, userName }: HeaderProps) {
               onClick={() => setShowUserMenu(!showUserMenu)}
               className="p-1 rounded-lg hover:bg-surface-100 dark:hover:bg-surface-800 transition-colors cursor-pointer"
             >
-              <Avatar name={userName} size="sm" />
+              <Avatar name={userName} src={avatarUrl} size="sm" />
             </button>
 
             {showUserMenu && (

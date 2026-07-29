@@ -35,6 +35,7 @@ export default async function SettingsPage() {
       <SettingsClient 
         initialName={profile.full_name} 
         email={user.email || ''} 
+        avatarUrl={profile.avatar_url}
       />
     </div>
   );

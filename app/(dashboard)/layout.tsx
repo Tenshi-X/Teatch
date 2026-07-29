@@ -52,6 +52,9 @@ export default async function DashboardLayout({
     <DashboardShell
       userName={profile.full_name}
       userRole={profile.role}
+      avatarUrl={profile.avatar_url}
+      worksheetQuota={profile.worksheet_quota || 0}
+      subscriptionPeriodEnd={profile.subscription_period_end}
       initialChildren={childrenData || []}
     >
       {children}

@@ -4,6 +4,8 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
+import { format, differenceInDays } from 'date-fns';
+import { id } from 'date-fns/locale';
 import {
   LayoutDashboard,
   Users,
@@ -29,10 +31,21 @@ interface SidebarProps {
   isOpen: boolean;
   onClose: () => void;
   userRole?: string;
+  worksheetQuota?: number;
+  subscriptionPeriodEnd?: string;
 }
 
-export function Sidebar({ isOpen, onClose, userRole }: SidebarProps) {
+export function Sidebar({ isOpen, onClose, userRole, worksheetQuota = 0, subscriptionPeriodEnd }: SidebarProps) {
   const pathname = usePathname();
+
+  const getActivePeriodText = () => {
+    if (!subscriptionPeriodEnd) return 'Tidak aktif';
+    const endDate = new Date(subscriptionPeriodEnd);
+    const daysLeft = differenceInDays(endDate, new Date());
+    if (daysLeft < 0) return 'Masa aktif habis';
+    if (daysLeft === 0) return 'Habis hari ini';
+    return `${daysLeft} hari lagi`;
+  };
 
   return (
     <>
@@ -114,6 +127,38 @@ export function Sidebar({ isOpen, onClose, userRole }: SidebarProps) {
             </Link>
           )}
         </nav>
+
+        {/* Quota Widget */}
+        <div className="px-4 py-4 mb-2">
+          <div className="card p-4 border border-[var(--sidebar-border)] bg-surface-50 dark:bg-surface-900/50 shadow-sm relative overflow-hidden">
+            <div className="absolute -right-6 -top-6 w-20 h-20 bg-primary-500/10 rounded-full blur-xl" />
+            <div className="relative z-10">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-sm font-semibold">Kuota AI</span>
+                <span className={cn(
+                  "text-xs font-bold px-2 py-0.5 rounded-full",
+                  worksheetQuota > 5 ? "bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400" : "bg-warning-100 text-warning-700 dark:bg-warning-900/30 dark:text-warning-400"
+                )}>
+                  {worksheetQuota}
+                </span>
+              </div>
+              <div className="space-y-1.5">
+                <p className="text-xs text-surface-500 flex justify-between">
+                  <span>Masa aktif:</span>
+                  <span className="font-medium text-surface-700 dark:text-surface-300">{getActivePeriodText()}</span>
+                </p>
+                {subscriptionPeriodEnd && (
+                  <p className="text-[10px] text-surface-400">
+                    s.d {format(new Date(subscriptionPeriodEnd), 'dd MMM yyyy', { locale: id })}
+                  </p>
+                )}
+              </div>
+              <Link href="/" className="mt-3 block text-center text-xs font-medium text-primary-600 dark:text-primary-400 hover:underline">
+                Upgrade Paket
+              </Link>
+            </div>
+          </div>
+        </div>
 
         {/* Bottom section */}
         <div className="px-3 py-4 border-t border-[var(--sidebar-border)]">

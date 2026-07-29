@@ -4,21 +4,27 @@ import { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { User, Mail, Moon, Sun, LogOut, Save } from 'lucide-react';
+import { User, Mail, Moon, Sun, LogOut, Save, Camera, Globe } from 'lucide-react';
 import { useTheme } from '@/components/providers/theme-provider';
+import { Avatar } from '@/components/ui/avatar';
 import { updateProfile } from '@/app/actions/settings';
 import { signOut } from '@/app/actions/auth';
+import { useLanguageStore } from '@/lib/stores/language-store';
 import { toast } from 'sonner';
 
 interface SettingsClientProps {
   initialName: string;
   email: string;
+  avatarUrl?: string;
 }
 
-export function SettingsClient({ initialName, email }: SettingsClientProps) {
+export function SettingsClient({ initialName, email, avatarUrl }: SettingsClientProps) {
   const { isDark, toggle } = useTheme();
+  const { language, setLanguage } = useLanguageStore();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [name, setName] = useState(initialName);
+  const [avatar, setAvatar] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string>(avatarUrl || '');
 
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,6 +36,9 @@ export function SettingsClient({ initialName, email }: SettingsClientProps) {
     setIsSubmitting(true);
     const formData = new FormData();
     formData.append('fullName', name);
+    if (avatar) {
+      formData.append('avatar', avatar);
+    }
     
     try {
       const res = await updateProfile(formData);
@@ -50,8 +59,39 @@ export function SettingsClient({ initialName, email }: SettingsClientProps) {
           <User className="text-primary-600" />
           Profil Orang Tua
         </h2>
-        <form onSubmit={handleUpdateProfile} className="space-y-4 max-w-md">
-          <div>
+        <form onSubmit={handleUpdateProfile} className="space-y-6 max-w-md">
+          <div className="flex items-center gap-4">
+            <div className="relative group">
+              {previewUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={previewUrl} alt={name} className="w-20 h-20 rounded-full object-cover border-2 border-[var(--card-border)]" />
+              ) : (
+                <Avatar name={name} size="lg" />
+              )}
+              <label className="absolute bottom-0 right-0 p-1.5 bg-primary-600 text-white rounded-full cursor-pointer hover:bg-primary-700 transition-colors shadow-md">
+                <Camera size={14} />
+                <input 
+                  type="file" 
+                  className="hidden" 
+                  accept="image/png, image/jpeg, image/jpg, image/webp" 
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      setAvatar(file);
+                      setPreviewUrl(URL.createObjectURL(file));
+                    }
+                  }}
+                />
+              </label>
+            </div>
+            <div className="text-sm text-surface-500">
+              <p className="font-medium text-surface-700 dark:text-surface-300">Foto Profil</p>
+              <p className="text-xs">Format: JPG, PNG, WebP</p>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <div>
             <label className="block text-sm font-medium mb-1.5 text-surface-700 dark:text-surface-300">
               Nama Lengkap
             </label>
@@ -71,35 +111,70 @@ export function SettingsClient({ initialName, email }: SettingsClientProps) {
               {email}
             </div>
           </div>
+          </div>
           <Button 
             type="submit" 
-            disabled={isSubmitting || name === initialName}
-            className="w-full sm:w-auto mt-2"
+            disabled={isSubmitting || (name === initialName && !avatar)}
+            className="w-full sm:w-auto"
           >
             {isSubmitting ? 'Menyimpan...' : 'Simpan Perubahan'}
           </Button>
         </form>
       </Card>
 
-      {/* Appearance */}
+      {/* Appearance & Language */}
       <Card padding="lg">
         <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
           {isDark ? <Moon className="text-secondary-600" /> : <Sun className="text-warning-500" />}
-          Tampilan
+          Preferensi
         </h2>
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="font-medium">Mode Gelap (Dark Mode)</p>
-            <p className="text-sm text-surface-400">Ubah tampilan aplikasi menjadi gelap atau terang.</p>
+        <div className="space-y-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="font-medium">Mode Gelap (Dark Mode)</p>
+              <p className="text-sm text-surface-400">Ubah tampilan aplikasi menjadi gelap atau terang.</p>
+            </div>
+            <Button 
+              variant="outline" 
+              onClick={toggle}
+              className="gap-2"
+            >
+              {isDark ? <Sun size={18} /> : <Moon size={18} />}
+              {isDark ? 'Mode Terang' : 'Mode Gelap'}
+            </Button>
           </div>
-          <Button 
-            variant="outline" 
-            onClick={toggle}
-            className="gap-2"
-          >
-            {isDark ? <Sun size={18} /> : <Moon size={18} />}
-            {isDark ? 'Mode Terang' : 'Mode Gelap'}
-          </Button>
+          
+          <div className="flex items-center justify-between pt-4 border-t border-[var(--card-border)]">
+            <div>
+              <p className="font-medium flex items-center gap-2">
+                <Globe size={18} className="text-primary-500" />
+                Bahasa (Language)
+              </p>
+              <p className="text-sm text-surface-400">Pilih bahasa aplikasi.</p>
+            </div>
+            <div className="flex bg-surface-100 dark:bg-surface-800 rounded-lg p-1">
+              <button
+                onClick={() => setLanguage('id')}
+                className={`px-3 py-1.5 text-sm font-medium rounded-md transition-all ${
+                  language === 'id' 
+                    ? 'bg-white dark:bg-surface-600 shadow-sm text-primary-600 dark:text-primary-400' 
+                    : 'text-surface-500 hover:text-surface-700 dark:hover:text-surface-300'
+                }`}
+              >
+                Indo
+              </button>
+              <button
+                onClick={() => setLanguage('en')}
+                className={`px-3 py-1.5 text-sm font-medium rounded-md transition-all ${
+                  language === 'en' 
+                    ? 'bg-white dark:bg-surface-600 shadow-sm text-primary-600 dark:text-primary-400' 
+                    : 'text-surface-500 hover:text-surface-700 dark:hover:text-surface-300'
+                }`}
+              >
+                English
+              </button>
+            </div>
+          </div>
         </div>
       </Card>
 
