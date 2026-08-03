@@ -2,17 +2,18 @@ import { cn } from '@/lib/utils';
 
 export interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
   children: React.ReactNode;
-  variant?: 'default' | 'primary' | 'secondary' | 'danger' | 'warning' | 'outline';
+  variant?: 'default' | 'primary' | 'ai' | 'success' | 'warning' | 'danger' | 'outline';
   size?: 'sm' | 'md';
 }
 
 export function Badge({ children, variant = 'default', size = 'sm', className, ...props }: BadgeProps) {
   const variants = {
     default: 'bg-surface-100 text-surface-700 dark:bg-surface-800 dark:text-surface-300',
-    primary: 'bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-300',
-    secondary: 'bg-secondary-100 text-secondary-700 dark:bg-secondary-900/30 dark:text-secondary-300',
-    danger: 'bg-danger-100 text-danger-700 dark:bg-danger-500/20 dark:text-danger-500',
-    warning: 'bg-warning-100 text-warning-600 dark:bg-warning-500/20 dark:text-warning-500',
+    primary: 'bg-primary-50 text-primary-600 dark:bg-primary-900/30 dark:text-primary-300', // Used for Subject
+    ai: 'bg-ai-50 text-ai-600 dark:bg-ai-900/30 dark:text-ai-300', // Used for AI
+    success: 'bg-success-50 text-success-600 dark:bg-success-900/30 dark:text-success-400', // Used for Easy
+    warning: 'bg-learning-50 text-learning-600 dark:bg-learning-900/30 dark:text-learning-500', // Used for Medium
+    danger: 'bg-error-50 text-error-600 dark:bg-error-900/30 dark:text-error-500', // Used for Hard
     outline: 'border border-surface-300 text-surface-600 dark:border-surface-600 dark:text-surface-400',
   };
 

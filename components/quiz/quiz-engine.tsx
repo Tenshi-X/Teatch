@@ -189,7 +189,7 @@ export function QuizEngine({
             <ProgressRing
               value={result.score}
               size={140}
-              color={result.score >= 80 ? '#22C55E' : result.score >= 60 ? '#F59E0B' : '#EF4444'}
+              color={result.score >= 80 ? '#34D399' : result.score >= 60 ? '#FBBF24' : '#F87171'}
               label="Nilai"
             />
           </div>
@@ -276,9 +276,9 @@ export function QuizEngine({
             className={cn(
               'w-9 h-9 rounded-lg text-sm font-medium transition-all cursor-pointer',
               i === currentIndex
-                ? 'bg-primary-600 text-white shadow-md'
+                ? 'bg-primary-500 text-white shadow-md'
                 : answers[q.id]
-                ? 'bg-secondary-100 dark:bg-secondary-900/30 text-secondary-700 dark:text-secondary-300'
+                ? 'bg-success-50 dark:bg-success-900/30 text-success-600 dark:text-success-400 border border-success-200'
                 : 'bg-surface-100 dark:bg-surface-800 text-surface-500 hover:bg-surface-200 dark:hover:bg-surface-700'
             )}
           >
@@ -390,8 +390,8 @@ export function QuizEngine({
             <button
               onClick={() => setAnswer(currentQ.id, 'Benar')}
               className={cn(
-                "flex-1 p-4 rounded-xl border-2 font-bold text-lg transition-all cursor-pointer",
-                answers[currentQ.id] === 'Benar' ? "bg-primary-600 border-primary-600 text-white shadow-md" : "bg-surface-50 dark:bg-surface-800 border-surface-200 dark:border-surface-700 hover:border-primary-400"
+                "flex-1 p-4 rounded-[var(--radius-card)] border-2 font-bold text-lg transition-all cursor-pointer",
+                answers[currentQ.id] === 'Benar' ? "bg-success-500 border-success-500 text-white shadow-[0_6px_18px_rgba(52,211,153,0.18)]" : "bg-surface-50 dark:bg-surface-800 border-surface-200 dark:border-surface-700 hover:border-success-400"
               )}
             >
               ✅ Benar
@@ -399,8 +399,8 @@ export function QuizEngine({
             <button
               onClick={() => setAnswer(currentQ.id, 'Salah')}
               className={cn(
-                "flex-1 p-4 rounded-xl border-2 font-bold text-lg transition-all cursor-pointer",
-                answers[currentQ.id] === 'Salah' ? "bg-danger-600 border-danger-600 text-white shadow-md" : "bg-surface-50 dark:bg-surface-800 border-surface-200 dark:border-surface-700 hover:border-danger-400"
+                "flex-1 p-4 rounded-[var(--radius-card)] border-2 font-bold text-lg transition-all cursor-pointer",
+                answers[currentQ.id] === 'Salah' ? "bg-error-500 border-error-500 text-white shadow-[0_6px_18px_rgba(248,113,113,0.18)]" : "bg-surface-50 dark:bg-surface-800 border-surface-200 dark:border-surface-700 hover:border-error-400"
               )}
             >
               ❌ Salah
@@ -540,12 +540,12 @@ const InteractiveMatching = ({ options, value, onChange }: { options: any[], val
   };
 
   const colors = [
-    'bg-primary-100 dark:bg-primary-900/30 border-primary-500 text-primary-700 dark:text-primary-300',
-    'bg-secondary-100 dark:bg-secondary-900/30 border-secondary-500 text-secondary-700 dark:text-secondary-300',
-    'bg-warning-100 dark:bg-warning-900/30 border-warning-500 text-warning-700 dark:text-warning-300',
-    'bg-danger-100 dark:bg-danger-900/30 border-danger-500 text-danger-700 dark:text-danger-300',
-    'bg-blue-100 dark:bg-blue-900/30 border-blue-500 text-blue-700 dark:text-blue-300',
-    'bg-purple-100 dark:bg-purple-900/30 border-purple-500 text-purple-700 dark:text-purple-300',
+    'bg-primary-50 dark:bg-primary-900/30 border-primary-500 text-primary-600 dark:text-primary-300',
+    'bg-ai-50 dark:bg-ai-900/30 border-ai-500 text-ai-600 dark:text-ai-300',
+    'bg-learning-50 dark:bg-learning-900/30 border-learning-500 text-learning-600 dark:text-learning-300',
+    'bg-success-50 dark:bg-success-900/30 border-success-500 text-success-600 dark:text-success-300',
+    'bg-motivation-50 dark:bg-motivation-900/30 border-motivation-500 text-motivation-600 dark:text-motivation-300',
+    'bg-error-50 dark:bg-error-900/30 border-error-500 text-error-600 dark:text-error-300',
   ];
 
   const getColorIndex = (left: string) => {

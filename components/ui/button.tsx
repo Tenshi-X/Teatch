@@ -2,7 +2,7 @@ import { cn } from '@/lib/utils';
 import { ButtonHTMLAttributes, forwardRef } from 'react';
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger';
+  variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger' | 'ai';
   size?: 'sm' | 'md' | 'lg';
   isLoading?: boolean;
 }
@@ -10,19 +10,21 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant = 'primary', size = 'md', isLoading, children, disabled, ...props }, ref) => {
     const baseStyles =
-      'inline-flex items-center justify-center gap-2 font-medium rounded-full transition-all duration-200 ease-out focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed active:translate-y-[1px] cursor-pointer';
+      'inline-flex items-center justify-center gap-2 font-medium rounded-[var(--radius-button)] transition-all duration-150 ease-out focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed hover:scale-[1.02] active:scale-[0.98] cursor-pointer';
 
     const variants = {
       primary:
-        'bg-primary-600 text-white hover:bg-primary-700 focus:ring-primary-500 shadow-sm hover:shadow-md hover:-translate-y-px',
+        'bg-primary-500 text-white hover:bg-primary-600 focus:ring-primary-500 shadow-[0_6px_18px_rgba(59,130,246,0.18)] border border-transparent',
       secondary:
-        'bg-secondary-500 text-white hover:bg-secondary-600 focus:ring-secondary-500 shadow-sm hover:shadow-md hover:-translate-y-px',
+        'bg-white border border-surface-300 text-primary-600 hover:bg-surface-50 focus:ring-primary-500 dark:bg-surface-800 dark:border-surface-700 dark:hover:bg-surface-900',
       outline:
-        'border-[1.5px] border-surface-300 text-primary-600 hover:bg-surface-50 focus:ring-primary-500 dark:border-surface-700 dark:text-primary-400 dark:hover:bg-surface-800/50',
+        'border-[1.5px] border-surface-300 text-surface-600 hover:bg-surface-50 focus:ring-primary-500 dark:border-surface-700 dark:text-surface-300 dark:hover:bg-surface-800/50',
       ghost:
-        'text-surface-600 hover:bg-surface-100 focus:ring-surface-300 dark:text-surface-300 dark:hover:bg-surface-800',
+        'text-surface-600 hover:bg-surface-100 focus:ring-surface-300 dark:text-surface-300 dark:hover:bg-surface-800 bg-transparent border border-transparent',
       danger:
-        'bg-danger-600 text-white hover:bg-danger-700 focus:ring-danger-500 shadow-sm hover:shadow-md hover:-translate-y-px',
+        'bg-error-500 text-white hover:bg-error-600 focus:ring-error-500 shadow-[0_6px_18px_rgba(248,113,113,0.18)] border border-transparent',
+      ai:
+        'bg-ai-500 text-white hover:bg-ai-600 focus:ring-ai-500 shadow-[0_6px_18px_rgba(139,92,246,0.18)] border border-transparent',
     };
 
     const sizes = {

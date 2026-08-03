@@ -12,59 +12,90 @@
   --font-mono: 'JetBrains Mono', ui-monospace, monospace;
 
   /* Primary — Blue */
-  --color-primary-50: #E6F1F8;
-  --color-primary-100: #CCE3F1;
-  --color-primary-200: #99C7E3;
-  --color-primary-300: #66ABD5;
-  --color-primary-400: #338FC7;
-  --color-primary-500: #0671B8;
-  --color-primary-600: #055A93;
-  --color-primary-700: #04446E;
-  --color-primary-800: #022D4A;
-  --color-primary-900: #011725;
+  --color-primary-50: #EFF6FF;
+  --color-primary-100: #DBEAFE;
+  --color-primary-200: #BFDBFE;
+  --color-primary-300: #93C5FD;
+  --color-primary-400: #60A5FA;
+  --color-primary-500: #3B82F6; /* Primary Blue */
+  --color-primary-600: #2563EB; /* Primary Hover */
+  --color-primary-700: #1D4ED8; /* Primary Active */
+  --color-primary-800: #1E40AF;
+  --color-primary-900: #1E3A8A;
 
-  /* Secondary — Teal */
-  --color-secondary-50: #E6F6F6;
-  --color-secondary-100: #CCEDEE;
-  --color-secondary-200: #99DBDD;
-  --color-secondary-300: #66C8CC;
-  --color-secondary-400: #33B6BB;
-  --color-secondary-500: #00A8A7;
-  --color-secondary-600: #008686;
-  --color-secondary-700: #006564;
-  --color-secondary-800: #004343;
-  --color-secondary-900: #002221;
+  /* AI — Purple */
+  --color-ai-50: #F5F3FF; /* AI Soft */
+  --color-ai-100: #EDE9FE;
+  --color-ai-200: #DDD6FE;
+  --color-ai-300: #C4B5FD;
+  --color-ai-400: #A78BFA;
+  --color-ai-500: #8B5CF6; /* AI Purple */
+  --color-ai-600: #7C3AED; /* AI Hover */
+  --color-ai-700: #6D28D9;
+  --color-ai-800: #5B21B6;
+  --color-ai-900: #4C1D95;
 
-  /* Danger — Orange */
-  --color-danger-50: #FEF1E9;
-  --color-danger-100: #FDE3D3;
-  --color-danger-500: #F37521;
-  --color-danger-600: #C25E1A;
-  --color-danger-700: #924614;
+  /* Learning — Yellow */
+  --color-learning-50: #FEF3C7; /* Soft */
+  --color-learning-500: #FBBF24; /* Base */
+  
+  /* Success — Green */
+  --color-success-50: #ECFDF5; /* Soft */
+  --color-success-500: #34D399; /* Base */
 
-  /* Warning — Gold */
-  --color-warning-50: #FFF7E8;
-  --color-warning-100: #FEEFD1;
-  --color-warning-500: #FAB217;
-  --color-warning-600: #C88E12;
+  /* Motivation — Orange */
+  --color-motivation-50: #FFF7ED; /* Soft */
+  --color-motivation-500: #FB923C; /* Base */
 
-  /* Surface colors (light mode defaults) */
+  /* Error — Red */
+  --color-error-50: #FEF2F2; /* Soft */
+  --color-error-500: #F87171; /* Base */
+
+  /* Aliases for backwards compatibility */
+  --color-secondary-50: var(--color-success-50);
+  --color-secondary-100: #D1FAE5;
+  --color-secondary-200: #A7F3D0;
+  --color-secondary-300: #6EE7B7;
+  --color-secondary-400: #34D399;
+  --color-secondary-500: var(--color-success-500);
+  --color-secondary-600: #059669;
+  --color-secondary-700: #047857;
+
+  --color-danger-50: var(--color-error-50);
+  --color-danger-100: #FEE2E2;
+  --color-danger-500: var(--color-error-500);
+  --color-danger-600: #DC2626;
+  --color-danger-700: #B91C1C;
+
+  --color-warning-50: var(--color-learning-50);
+  --color-warning-100: #FEF3C7;
+  --color-warning-500: var(--color-learning-500);
+  --color-warning-600: #D97706;
+
+  /* Surface colors (Light mode equivalents to Slate/Gray) */
   --color-surface-0: #FFFFFF;
-  --color-surface-50: #FAFAFA;
-  --color-surface-100: #F4F4F5;
-  --color-surface-200: #E8E8EC;
-  --color-surface-300: #D4D4D8;
-  --color-surface-400: #A1A1AA;
-  --color-surface-500: #9C9C9C;
-  --color-surface-600: #6B6B6B;
-  --color-surface-700: #3F3F46;
-  --color-surface-800: #27272A;
-  --color-surface-900: #0A0A0A;
-  --color-surface-950: #000000;
+  --color-surface-50: #FAFBFC;
+  --color-surface-100: #F5F7FA;
+  --color-surface-200: #EEF2F7;
+  --color-surface-300: #D6DEE8;
+  --color-surface-400: #CBD5E1;
+  --color-surface-500: #94A3B8;
+  --color-surface-600: #64748B;
+  --color-surface-700: #475569;
+  --color-surface-800: #1E293B;
+  --color-surface-900: #0F172A;
+  --color-surface-950: #020617;
 
   /* Background & Foreground */
   --color-background: var(--bg);
   --color-foreground: var(--fg);
+  
+  /* Border Radii */
+  --radius-input: 14px;
+  --radius-button: 16px;
+  --radius-card: 24px;
+  --radius-modal: 28px;
+  --radius-avatar: 999px;
 }
 
 /* ============================================================
@@ -72,37 +103,37 @@
    ============================================================ */
 
 :root {
-  --bg: #FAFAFA;
-  --fg: #0A0A0A;
+  --bg: #FAFBFC;
+  --fg: #1E293B;
   --card-bg: #FFFFFF;
-  --card-border: #E8E8EC;
+  --card-border: #E5E7EB;
   --sidebar-bg: #FFFFFF;
-  --sidebar-border: #E8E8EC;
+  --sidebar-border: #E5E7EB;
   --input-bg: #FFFFFF;
-  --input-border: #E8E8EC;
+  --input-border: #E5E7EB;
   --glass-bg: rgba(255, 255, 255, 0.95);
   --glass-border: var(--card-border);
-  --shadow-sm: 0 1px 4px rgba(0,0,0,0.03);
-  --shadow-md: 0 2px 12px rgba(0,0,0,0.06);
-  --shadow-lg: 0 4px 20px rgba(0,0,0,0.08);
-  --shadow-xl: 0 8px 32px rgba(0,0,0,0.1);
+  --shadow-sm: 0 2px 6px rgba(15,23,42,0.04);
+  --shadow-md: 0 6px 20px rgba(15,23,42,0.06);
+  --shadow-lg: 0 12px 40px rgba(15,23,42,0.08);
+  --shadow-xl: 0 24px 60px rgba(15,23,42,0.1);
 }
 
 .dark {
-  --bg: #0A0A0A;
-  --fg: #FAFAFA;
-  --card-bg: #121212;
-  --card-border: #27272A;
-  --sidebar-bg: #121212;
-  --sidebar-border: #27272A;
-  --input-bg: #121212;
-  --input-border: #3F3F46;
-  --glass-bg: rgba(18, 18, 18, 0.95);
+  --bg: #111827;
+  --fg: #F8FAFC;
+  --card-bg: #1E293B;
+  --card-border: #334155;
+  --sidebar-bg: #172033;
+  --sidebar-border: #334155;
+  --input-bg: #1E293B;
+  --input-border: #334155;
+  --glass-bg: rgba(30, 41, 59, 0.95);
   --glass-border: var(--card-border);
-  --shadow-sm: 0 1px 4px rgba(0,0,0,0.2);
-  --shadow-md: 0 2px 12px rgba(0,0,0,0.3);
-  --shadow-lg: 0 4px 20px rgba(0,0,0,0.4);
-  --shadow-xl: 0 8px 32px rgba(0,0,0,0.5);
+  --shadow-sm: 0 2px 6px rgba(0,0,0,0.3);
+  --shadow-md: 0 6px 20px rgba(0,0,0,0.4);
+  --shadow-lg: 0 12px 40px rgba(0,0,0,0.5);
+  --shadow-xl: 0 24px 60px rgba(0,0,0,0.6);
 }
 
 /* ============================================================
@@ -133,9 +164,9 @@ body {
 .card {
   background: var(--card-bg);
   border: 1px solid var(--card-border);
-  border-radius: 12px;
+  border-radius: var(--radius-card, 24px);
   box-shadow: var(--shadow-sm);
-  transition: transform 0.2s ease-out, box-shadow 0.2s ease-out, background 0.2s ease-out;
+  transition: transform 0.15s ease-out, box-shadow 0.15s ease-out, background 0.15s ease-out;
 }
 
 .card:hover {
@@ -146,14 +177,14 @@ body {
 .card-glass {
   background: var(--glass-bg);
   border: 1px solid var(--glass-border);
-  border-radius: 12px;
+  border-radius: var(--radius-card, 24px);
 }
 
 /* Input styles */
 .input-base {
   background: var(--input-bg);
   border: 1px solid var(--input-border);
-  border-radius: 6px;
+  border-radius: var(--radius-input, 14px);
   padding: 10px 14px;
   font-size: 14px;
   color: var(--fg);

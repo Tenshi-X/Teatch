@@ -95,10 +95,10 @@ export function Sidebar({ isOpen, onClose, userRole }: SidebarProps) {
                 href={item.href}
                 onClick={handleLinkClick}
                 className={cn(
-                  'flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200',
+                  'flex items-center gap-3 px-4 py-2.5 rounded-[var(--radius-input)] text-sm font-medium transition-all duration-150 border',
                   isActive
-                    ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300'
-                    : 'text-surface-500 hover:bg-surface-50 dark:hover:bg-surface-800/50 hover:text-surface-700 dark:hover:text-surface-300'
+                    ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 border-primary-500'
+                    : 'border-transparent text-surface-600 hover:bg-surface-50 dark:hover:bg-surface-800/50 hover:text-surface-700 dark:hover:text-surface-300'
                 )}
               >
                 <item.icon
@@ -131,10 +131,10 @@ export function Sidebar({ isOpen, onClose, userRole }: SidebarProps) {
           <Link
             href="/settings"
             className={cn(
-              'flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200',
+              'flex items-center gap-3 px-4 py-2.5 rounded-[var(--radius-input)] text-sm font-medium transition-all duration-150 border',
               pathname === '/settings'
-                ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300'
-                : 'text-surface-500 hover:bg-surface-50 dark:hover:bg-surface-800/50 hover:text-surface-700 dark:hover:text-surface-300'
+                ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 border-primary-500'
+                : 'border-transparent text-surface-600 hover:bg-surface-50 dark:hover:bg-surface-800/50 hover:text-surface-700 dark:hover:text-surface-300'
             )}
           >
             <Settings size={20} />
