@@ -41,7 +41,7 @@ export function WorksheetDetail({ worksheet, questions }: WorksheetDetailProps) 
   });
 
   const difficultyColors: Record<string, string> = {
-    mudah: 'secondary',
+    mudah: 'success',
     sedang: 'warning',
     sulit: 'danger',
   };
@@ -69,7 +69,7 @@ export function WorksheetDetail({ worksheet, questions }: WorksheetDetailProps) 
                 </Badge>
               )}
               <Badge
-                variant={difficultyColors[worksheet.difficulty] as 'secondary' | 'warning' | 'danger'}
+                variant={difficultyColors[worksheet.difficulty] as 'success' | 'warning' | 'danger'}
                 size="md"
               >
                 {worksheet.difficulty.charAt(0).toUpperCase() + worksheet.difficulty.slice(1)}
