@@ -26,7 +26,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
           id={inputId}
           className={cn(
             'input-base',
-            error && 'border-danger-500 focus:border-danger-500 focus:shadow-[0_0_0_3px_rgba(243,117,33,0.12)]',
+            error && 'border-danger-500 focus:border-danger-500 focus:shadow-[0_0_0_2px_var(--bg),0_0_0_4px_var(--color-danger-500)]',
             className
           )}
           {...props}
