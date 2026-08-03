@@ -149,7 +149,7 @@ export function HistoryList({ worksheets, attempts, childrenData }: HistoryListP
                         <Link href={`/worksheets/${ws.id}`} className="flex flex-col h-full gap-3">
                           <div className="flex justify-between items-start">
                             <Badge
-                              variant={ws.difficulty === 'mudah' ? 'secondary' : ws.difficulty === 'sedang' ? 'warning' : 'danger'}
+                              variant={ws.difficulty === 'mudah' ? 'success' : ws.difficulty === 'sedang' ? 'warning' : 'danger'}
                               size="sm"
                             >
                               {ws.difficulty}
