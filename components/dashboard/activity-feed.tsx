@@ -45,7 +45,7 @@ export function ActivityFeed({ activities }: ActivityFeedProps) {
               </Badge>
               {activity.score !== undefined && (
                 <Badge
-                  variant={activity.score >= 80 ? 'secondary' : activity.score >= 60 ? 'warning' : 'danger'}
+                  variant={activity.score >= 80 ? 'success' : activity.score >= 60 ? 'warning' : 'danger'}
                   size="sm"
                 >
                   Skor: {activity.score}

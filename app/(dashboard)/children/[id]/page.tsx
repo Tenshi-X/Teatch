@@ -104,7 +104,7 @@ export default async function ChildDetailPage({
                   </span>
                   <div className="flex flex-wrap gap-1.5">
                     {child.favorite_subjects.map((subj) => (
-                      <Badge key={subj} variant="secondary" size="sm">
+                      <Badge key={subj} variant="primary" size="sm">
                         {subj}
                       </Badge>
                     ))}
