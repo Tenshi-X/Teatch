@@ -37,7 +37,7 @@ export async function getAdminDashboardData() {
   startOfMonth.setHours(0, 0, 0, 0);
 
   const { data: worksheets } = await (supabase.from('worksheets') as any)
-    .select('child_id, created_at')
+    .select('child_id, created_at, question_count')
     .gte('created_at', startOfMonth.toISOString());
 
   // We need to map child_id to parent to count usage
@@ -52,7 +52,7 @@ export async function getAdminDashboardData() {
   worksheets?.forEach((w: any) => {
     const parentId = childToParent.get(w.child_id);
     if (parentId) {
-      usageByParent.set(parentId, (usageByParent.get(parentId) || 0) + 1);
+      usageByParent.set(parentId, (usageByParent.get(parentId) || 0) + (w.question_count || 1));
     }
   });
 
@@ -70,12 +70,12 @@ export async function getAdminDashboardData() {
     }
 
     totalUsage += usage;
-    totalQuota += tier.maxWorksheetsPerMonth;
+    totalQuota += tier.maxQuestions;
 
     return {
       ...p,
       usage,
-      quota: tier.maxWorksheetsPerMonth,
+      quota: tier.maxQuestions,
     };
   });
 

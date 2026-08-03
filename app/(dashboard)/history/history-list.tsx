@@ -27,6 +27,8 @@ interface HistoryListProps {
 
 export function HistoryList({ worksheets, attempts, childrenData }: HistoryListProps) {
   const [activeChildId, setActiveChildId] = useState<string>(childrenData[0]?.id || '');
+  const [selectedSubject, setSelectedSubject] = useState<string>('Semua');
+  const [statusFilter, setStatusFilter] = useState<'Semua' | 'Selesai' | 'Belum'>('Semua');
 
   const attemptsByWorksheet = attempts.reduce(
     (acc, a) => {
@@ -38,13 +40,30 @@ export function HistoryList({ worksheets, attempts, childrenData }: HistoryListP
   );
 
   const filteredWorksheets = worksheets.filter((ws) => ws.child_id === activeChildId);
+  const uniqueSubjects = Array.from(new Set(filteredWorksheets.map(ws => ws.subjects?.name || 'Lainnya')));
 
-  const worksheetsBySubject = filteredWorksheets.reduce((acc, ws) => {
+  const displayedWorksheets = filteredWorksheets.filter(ws => {
+    // Subject filter
+    if (selectedSubject !== 'Semua' && (ws.subjects?.name || 'Lainnya') !== selectedSubject) {
+      return false;
+    }
+    
+    // Status filter
+    const wsAttempts = attemptsByWorksheet[ws.id] || [];
+    const isSelesai = wsAttempts.length > 0;
+
+    if (statusFilter === 'Selesai' && !isSelesai) return false;
+    if (statusFilter === 'Belum' && isSelesai) return false;
+
+    return true;
+  });
+
+  const worksheetsBySubject = displayedWorksheets.reduce((acc, ws) => {
     const subjectName = ws.subjects?.name || 'Lainnya';
     if (!acc[subjectName]) acc[subjectName] = [];
     acc[subjectName].push(ws);
     return acc;
-  }, {} as Record<string, typeof filteredWorksheets>);
+  }, {} as Record<string, typeof displayedWorksheets>);
 
   return (
     <div className="max-w-5xl mx-auto animate-fade-in">
@@ -68,7 +87,33 @@ export function HistoryList({ worksheets, attempts, childrenData }: HistoryListP
         </div>
       )}
 
-      {filteredWorksheets.length === 0 ? (
+      {/* Filters */}
+      {filteredWorksheets.length > 0 && (
+        <div className="flex flex-col sm:flex-row gap-3 mb-6 animate-fade-in-up">
+          <select 
+            className="w-full sm:w-auto px-4 py-2.5 rounded-xl border border-surface-200 dark:border-surface-700 bg-surface-50 dark:bg-surface-800 text-sm outline-none focus:ring-2 focus:ring-primary-500/50 cursor-pointer"
+            value={selectedSubject}
+            onChange={(e) => setSelectedSubject(e.target.value)}
+          >
+            <option value="Semua">Semua Pelajaran</option>
+            {uniqueSubjects.map(sub => (
+              <option key={sub} value={sub}>{sub}</option>
+            ))}
+          </select>
+
+          <select 
+            className="w-full sm:w-auto px-4 py-2.5 rounded-xl border border-surface-200 dark:border-surface-700 bg-surface-50 dark:bg-surface-800 text-sm outline-none focus:ring-2 focus:ring-primary-500/50 cursor-pointer"
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value as any)}
+          >
+            <option value="Semua">Semua Status (Selesai & Belum)</option>
+            <option value="Selesai">Sudah Dikerjakan</option>
+            <option value="Belum">Belum Dikerjakan</option>
+          </select>
+        </div>
+      )}
+
+      {displayedWorksheets.length === 0 ? (
         <EmptyState
           icon={<FileText size={48} />}
           title="Belum ada soal"

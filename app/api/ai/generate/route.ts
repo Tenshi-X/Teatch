@@ -36,18 +36,18 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Profile not found' }, { status: 404 });
     }
 
-    if (profile.worksheet_quota !== undefined && profile.worksheet_quota <= 0) {
-      return NextResponse.json({ error: 'Kuota worksheet Anda telah habis. Silakan upgrade paket berlangganan.' }, { status: 403 });
+    if (profile.worksheet_quota !== undefined && profile.worksheet_quota < body.questionCount) {
+      return NextResponse.json({ error: 'Sisa kuota soal Anda tidak mencukupi. Silakan upgrade paket berlangganan.' }, { status: 403 });
     }
 
     // Generate worksheet using Gemini
     const worksheet = await generateWorksheet(body);
 
     // Decrement quota on success
-    if (profile.worksheet_quota !== undefined && profile.worksheet_quota > 0) {
+    if (profile.worksheet_quota !== undefined && profile.worksheet_quota >= body.questionCount) {
       await (supabase as any)
         .from('profiles')
-        .update({ worksheet_quota: profile.worksheet_quota - 1 })
+        .update({ worksheet_quota: profile.worksheet_quota - body.questionCount })
         .eq('id', profile.id);
     }
 

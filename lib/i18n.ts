@@ -14,7 +14,7 @@ export const dict: Translations = {
   'nav.admin': { id: 'Admin Dashboard', en: 'Admin Dashboard' },
   'nav.settings': { id: 'Pengaturan', en: 'Settings' },
 
-  'header.quota': { id: 'Sisa Worksheet:', en: 'Worksheets Left:' },
+  'header.quota': { id: 'Sisa Soal:', en: 'Questions Left:' },
   'header.parentAccount': { id: 'Akun Orang Tua', en: 'Parent Account' },
   'header.logout': { id: 'Keluar', en: 'Log Out' },
 

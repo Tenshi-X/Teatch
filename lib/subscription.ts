@@ -1,26 +1,22 @@
-export type SubscriptionTier = 'free_trial' | 'basic' | 'family' | 'teacher';
+export type SubscriptionTier = 'free_trial' | 'basic' | 'pro';
 
 export interface TierLimits {
   maxChildren: number;
-  maxWorksheetsPerMonth: number;
+  maxQuestions: number;
 }
 
 export const SUBSCRIPTION_LIMITS: Record<SubscriptionTier, TierLimits> = {
   free_trial: {
     maxChildren: 1,
-    maxWorksheetsPerMonth: 10,
+    maxQuestions: 100,
   },
   basic: {
     maxChildren: 3,
-    maxWorksheetsPerMonth: 100,
+    maxQuestions: 3000,
   },
-  family: {
+  pro: {
     maxChildren: 6,
-    maxWorksheetsPerMonth: 500,
-  },
-  teacher: {
-    maxChildren: 30,
-    maxWorksheetsPerMonth: 1000,
+    maxQuestions: 5000,
   },
 };
 
