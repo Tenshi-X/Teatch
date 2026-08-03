@@ -9,7 +9,7 @@ export const dict: Translations = {
   'nav.dashboard': { id: 'Dashboard', en: 'Dashboard' },
   'nav.children': { id: 'Anak Saya', en: 'My Children' },
   'nav.create': { id: 'Buat Latihan', en: 'Create Worksheet' },
-  'nav.history': { id: 'Riwayat', en: 'History' },
+  'nav.history': { id: 'Soal Saya', en: 'My Worksheets' },
   'nav.statistics': { id: 'Statistik', en: 'Statistics' },
   'nav.admin': { id: 'Admin Dashboard', en: 'Admin Dashboard' },
   'nav.settings': { id: 'Pengaturan', en: 'Settings' },

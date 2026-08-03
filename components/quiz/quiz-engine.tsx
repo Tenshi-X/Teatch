@@ -232,11 +232,19 @@ export function QuizEngine({
 
   return (
     <div className="max-w-3xl mx-auto space-y-4 animate-fade-in">
+      {/* Back Button */}
+      <div className="-mb-2">
+        <Button variant="ghost" size="sm" onClick={() => router.back()} className="-ml-3 text-surface-500 hover:text-surface-900 dark:hover:text-surface-100 cursor-pointer">
+          <ArrowLeft size={16} className="mr-2" />
+          Kembali
+        </Button>
+      </div>
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-lg font-bold">{worksheetTitle}</h1>
-          <p className="text-sm text-surface-400">
+          <p className="text-sm text-surface-400 mt-1">
             Soal {currentIndex + 1} dari {questions.length}
           </p>
         </div>

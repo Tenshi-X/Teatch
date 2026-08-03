@@ -5,6 +5,8 @@ import { ChildSelector } from './child-selector';
 import { useTheme } from '@/components/providers/theme-provider';
 import { signOut } from '@/app/actions/auth';
 import { useState, useRef, useEffect } from 'react';
+import { format } from 'date-fns';
+import { id } from 'date-fns/locale';
 import { Avatar } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
 import { useLanguageStore } from '@/lib/stores/language-store';
@@ -15,9 +17,10 @@ interface HeaderProps {
   userName: string;
   avatarUrl?: string;
   worksheetQuota?: number;
+  subscriptionPeriodEnd?: string;
 }
 
-export function Header({ onMenuToggle, userName, avatarUrl, worksheetQuota }: HeaderProps) {
+export function Header({ onMenuToggle, userName, avatarUrl, worksheetQuota, subscriptionPeriodEnd }: HeaderProps) {
   const { isDark, toggle } = useTheme();
   const { language } = useLanguageStore();
   const [showUserMenu, setShowUserMenu] = useState(false);
@@ -51,6 +54,18 @@ export function Header({ onMenuToggle, userName, avatarUrl, worksheetQuota }: He
 
         {/* Right: Theme toggle + User menu */}
         <div className="flex items-center gap-2">
+          {/* Active Period Widget */}
+          {subscriptionPeriodEnd && (
+            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-surface-100 dark:bg-surface-800 rounded-lg mr-1 border border-surface-200 dark:border-surface-700">
+              <span className="text-sm font-medium text-surface-600 dark:text-surface-300">
+                Aktif s.d:
+              </span>
+              <span className="text-sm font-bold text-primary-600 dark:text-primary-400">
+                {format(new Date(subscriptionPeriodEnd), 'dd MMM yyyy', { locale: id })}
+              </span>
+            </div>
+          )}
+
           {/* Quota Widget */}
           {worksheetQuota !== undefined && (
             <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-surface-100 dark:bg-surface-800 rounded-lg mr-1 border border-surface-200 dark:border-surface-700">

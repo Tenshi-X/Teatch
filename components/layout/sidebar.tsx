@@ -39,9 +39,11 @@ export function Sidebar({ isOpen, onClose, userRole }: SidebarProps) {
   const pathname = usePathname();
   const { language } = useLanguageStore();
 
-
-
-  return (
+  const handleLinkClick = () => {
+    if (window.innerWidth < 1024) {
+      onClose();
+    }
+  };  return (
     <>
       {/* Mobile overlay */}
       {isOpen && (
@@ -91,7 +93,7 @@ export function Sidebar({ isOpen, onClose, userRole }: SidebarProps) {
               <Link
                 key={item.href}
                 href={item.href}
-                onClick={onClose}
+                onClick={handleLinkClick}
                 className={cn(
                   'flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200',
                   isActive
@@ -113,7 +115,7 @@ export function Sidebar({ isOpen, onClose, userRole }: SidebarProps) {
           {userRole === 'admin' && (
             <Link
               href="/admin"
-              onClick={onClose}
+              onClick={handleLinkClick}
               className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 text-rose-500 hover:bg-rose-500/10"
             >
               <ShieldAlert size={20} />

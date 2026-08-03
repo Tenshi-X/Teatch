@@ -4,7 +4,7 @@ import { HistoryList } from './history-list';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Riwayat Belajar',
+  title: 'Soal Saya',
 };
 
 export default async function HistoryPage() {
@@ -36,7 +36,7 @@ export default async function HistoryPage() {
   if (childIds.length === 0) {
     return (
       <div className="max-w-4xl mx-auto animate-fade-in">
-        <h1 className="text-2xl font-bold mb-6">Riwayat Belajar</h1>
+        <h1 className="text-2xl font-bold mb-6">Soal Saya</h1>
         <p className="text-surface-400">Tambahkan profil anak terlebih dahulu.</p>
       </div>
     );
