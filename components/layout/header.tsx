@@ -34,7 +34,7 @@ export function Header({ onMenuToggle, userName, avatarUrl, worksheetQuota }: He
   }, []);
 
   return (
-    <header className="sticky top-0 z-30 bg-[var(--card-bg)]/80 backdrop-blur-xl border-b border-[var(--card-border)]">
+    <header className="sticky top-0 z-30 bg-[var(--card-bg)] border-b border-[var(--card-border)]">
       <div className="flex items-center justify-between px-4 lg:px-6 py-3">
         {/* Left: Menu button */}
         <button
@@ -84,7 +84,7 @@ export function Header({ onMenuToggle, userName, avatarUrl, worksheetQuota }: He
             </button>
 
             {showUserMenu && (
-              <div className="absolute right-0 top-full mt-2 w-56 card p-2 shadow-xl animate-scale-in">
+              <div className="absolute right-0 top-full mt-2 w-56 card p-2 shadow-sm border border-[var(--card-border)] animate-scale-in">
                 <div className="px-3 py-2 border-b border-[var(--card-border)] mb-2">
                   <p className="text-sm font-medium">{userName}</p>
                   <p className="text-xs text-surface-400">{t('header.parentAccount', language)}</p>

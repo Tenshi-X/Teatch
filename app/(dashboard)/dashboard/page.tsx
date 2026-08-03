@@ -109,8 +109,8 @@ export default function DashboardPage() {
     return (
       <div className="max-w-2xl mx-auto mt-12">
         <Card padding="lg" className="text-center">
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br from-primary-500 to-primary-700 shadow-lg shadow-primary-500/25 mb-6">
-            <Sparkles className="w-10 h-10 text-white" />
+          <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-primary-50 border border-primary-200 dark:bg-primary-900/20 dark:border-primary-800/50 mb-6">
+            <Sparkles className="w-10 h-10 text-primary-600 dark:text-primary-400" />
           </div>
           <h2 className="text-2xl font-bold mb-2">Selamat Datang di Teatch! 🎉</h2>
           <p className="text-surface-400 mb-6 max-w-md mx-auto">
@@ -131,8 +131,7 @@ export default function DashboardPage() {
     <div className="max-w-7xl mx-auto space-y-6 animate-fade-in">
       {/* Welcome banner */}
       {activeChild && (
-        <Card variant="gradient" padding="lg" className="relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-48 h-48 bg-gradient-to-bl from-primary-500/10 to-transparent rounded-full -translate-y-12 translate-x-12" />
+        <Card padding="lg" className="relative overflow-hidden bg-primary-50/50 dark:bg-primary-900/10 border-primary-100 dark:border-primary-900/30">
           <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center gap-4">
             <Avatar
               src={activeChild.photo_url}

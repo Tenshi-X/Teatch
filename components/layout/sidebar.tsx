@@ -62,7 +62,7 @@ export function Sidebar({ isOpen, onClose, userRole }: SidebarProps) {
         {/* Logo */}
         <div className="flex items-center justify-between px-6 py-5 border-b border-[var(--sidebar-border)]">
           <Link href="/dashboard" className="flex items-center gap-3 group">
-            <div className="w-10 h-10 rounded-full flex items-center justify-center shadow-lg group-hover:shadow-xl transition-shadow overflow-hidden relative">
+            <div className="w-10 h-10 rounded-full flex items-center justify-center border border-[var(--card-border)] bg-white shadow-sm transition-shadow overflow-hidden relative">
               <Image src="/teatch_logo.png" alt="Teatch Logo" fill className="object-cover" />
             </div>
             <div>
@@ -95,7 +95,7 @@ export function Sidebar({ isOpen, onClose, userRole }: SidebarProps) {
                 className={cn(
                   'flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200',
                   isActive
-                    ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 shadow-sm'
+                    ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300'
                     : 'text-surface-500 hover:bg-surface-50 dark:hover:bg-surface-800/50 hover:text-surface-700 dark:hover:text-surface-300'
                 )}
               >

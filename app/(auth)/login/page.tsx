@@ -35,7 +35,7 @@ export default function LoginPage() {
     <div className="animate-fade-in-up">
       {/* Logo */}
       <div className="text-center mb-8">
-        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full shadow-lg shadow-primary-500/25 mb-4 overflow-hidden relative">
+        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full border border-[var(--card-border)] bg-white shadow-sm mb-4 overflow-hidden relative">
           <Image src="/teatch_logo.png" alt="Teatch Logo" fill className="object-cover" />
         </div>
         <h1 className="text-3xl font-bold text-primary-600 dark:text-primary-500">
@@ -54,7 +54,7 @@ export default function LoginPage() {
 
         <Button 
           onClick={handleGoogleLogin} 
-          className="w-full bg-white text-surface-900 border border-surface-200 hover:bg-surface-50 dark:bg-surface-800 dark:text-white dark:border-surface-700 dark:hover:bg-surface-700 shadow-sm" 
+          className="w-full bg-white text-surface-900 border-[1.5px] border-surface-200 hover:bg-surface-50 dark:bg-[#121212] dark:text-white dark:border-surface-700 dark:hover:bg-surface-800 shadow-sm" 
           variant="outline" 
           size="lg" 
           isLoading={isPending}
