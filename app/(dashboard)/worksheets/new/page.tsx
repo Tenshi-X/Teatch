@@ -141,6 +141,7 @@ export default function NewWorksheetPage() {
       const data = (await res.json()) as AIGeneratedWorksheet;
       setResult(data);
       toast.success(`${data.questions.length} soal berhasil digenerate! 🎉`);
+      router.refresh(); // Fetch updated quota immediately
     } catch (error) {
       toast.error(
         error instanceof Error ? error.message : 'Gagal menggenerate soal'
