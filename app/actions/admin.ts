@@ -110,8 +110,14 @@ export async function updateAdminUser(userId: string, data: {
     throw new Error('Unauthorized');
   }
 
+  const tierLimits = SUBSCRIPTION_LIMITS[data.subscription_tier as keyof typeof SUBSCRIPTION_LIMITS] || SUBSCRIPTION_LIMITS.free_trial;
+  const updateData = {
+    ...data,
+    worksheet_quota: tierLimits.maxQuestions,
+  };
+
   const { error } = await (supabase.from('profiles') as any)
-    .update(data)
+    .update(updateData)
     .eq('id', userId);
 
   if (error) {

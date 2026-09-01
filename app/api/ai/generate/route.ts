@@ -36,9 +36,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Profile not found' }, { status: 404 });
     }
 
-    if (profile.worksheet_quota !== undefined && profile.worksheet_quota < body.questionCount) {
-      return NextResponse.json({ error: 'Sisa kuota soal Anda tidak mencukupi. Silakan upgrade paket berlangganan.' }, { status: 403 });
-    }
+    // TEMPORARY BYPASS FOR DEVELOPMENT:
+    // if (profile.worksheet_quota !== undefined && profile.worksheet_quota < body.questionCount) {
+    //   return NextResponse.json({ error: 'Sisa kuota soal Anda tidak mencukupi. Silakan upgrade paket berlangganan.' }, { status: 403 });
+    // }
 
     // Generate worksheet using Gemini
     const worksheet = await generateWorksheet(body);

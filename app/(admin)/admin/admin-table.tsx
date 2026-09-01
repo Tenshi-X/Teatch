@@ -93,8 +93,8 @@ export function AdminTable({ profiles }: AdminTableProps) {
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex flex-col">
-                      <span className="font-medium text-slate-200">{profile.usage} req</span>
-                      <span className="text-xs text-slate-500">{profile.quota} dari batas</span>
+                      <span className="font-medium text-slate-200">{profile.worksheet_quota ?? 0} req</span>
+                      <span className="text-xs text-slate-500">sisa dari {profile.quota} batas</span>
                     </div>
                   </td>
                   <td className="px-6 py-4">
