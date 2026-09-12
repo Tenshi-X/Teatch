@@ -37,7 +37,12 @@ export async function updateSession(request: NextRequest) {
   // Protected routes - redirect to login if not authenticated
   const isAuthPage = request.nextUrl.pathname.startsWith('/login');
   const isCallbackPage = request.nextUrl.pathname.startsWith('/callback');
-  const isPublicPage = request.nextUrl.pathname === '/';
+  const isPublicPage =
+    request.nextUrl.pathname === '/' ||
+    request.nextUrl.pathname.startsWith('/privacy') ||
+    request.nextUrl.pathname.startsWith('/terms') ||
+    request.nextUrl.pathname.startsWith('/robots.txt') ||
+    request.nextUrl.pathname.startsWith('/sitemap.xml');
 
   if (!user && !isAuthPage && !isCallbackPage && !isPublicPage) {
     const url = request.nextUrl.clone();

@@ -10,6 +10,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://www.teatch.my.id'),
   title: {
     default: "Teatch - Platform Belajar Berbasis AI untuk Anak",
     template: "%s | Teatch",
@@ -24,6 +25,34 @@ export const metadata: Metadata = {
     "pendidikan",
     "homeschooling",
   ],
+  openGraph: {
+    type: "website",
+    locale: "id_ID",
+    url: "https://www.teatch.my.id",
+    siteName: "Teatch",
+    title: "Teatch - Platform Belajar Berbasis AI untuk Anak",
+    description:
+      "Generate soal latihan otomatis sesuai usia dan kurikulum. Pantau perkembangan belajar anak dengan alat yang mudah, cepat, dan interaktif. Gratis untuk dicoba.",
+    images: [
+      {
+        url: "/teatch_logo.png",
+        width: 2816,
+        height: 1536,
+        alt: "Teatch - Platform Belajar Berbasis AI untuk Anak",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Teatch - Platform Belajar Berbasis AI untuk Anak",
+    description:
+      "Generate soal latihan otomatis sesuai usia dan kurikulum. Pantau perkembangan belajar anak dengan alat yang mudah, cepat, dan interaktif.",
+    images: ["/teatch_logo.png"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 export default function RootLayout({
