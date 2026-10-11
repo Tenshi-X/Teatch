@@ -5,7 +5,7 @@ import { Card } from '@/components/ui/card';
 import { Avatar } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { calculateAge, formatDate, getLevelColor } from '@/lib/utils';
+import { calculateAge, formatDate } from '@/lib/utils';
 import { Edit, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import type { Metadata } from 'next';
@@ -39,7 +39,6 @@ export default async function ChildDetailPage({
     : undefined;
 
   const age = calculateAge(child.birth_date);
-  const levelColor = getLevelColor(child.level);
 
   return (
     <div className="max-w-2xl mx-auto animate-fade-in">
@@ -60,13 +59,7 @@ export default async function ChildDetailPage({
               <div>
                 <h1 className="text-2xl font-bold mb-2">{child.name}</h1>
                 <div className="flex flex-wrap gap-2 mb-4">
-                  <Badge
-                    size="md"
-                    className="text-white"
-                    style={
-                      { backgroundColor: levelColor } as React.CSSProperties
-                    }
-                  >
+                  <Badge size="md" variant="primary">
                     {child.level}
                   </Badge>
                   {child.grade && (

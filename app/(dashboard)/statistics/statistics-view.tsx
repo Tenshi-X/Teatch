@@ -50,8 +50,8 @@ export function StatisticsView({ attempts }: Props) {
                 <Tooltip formatter={(value) => [`${value}%`, 'Nilai']} />
                 <Area
                   dataKey="score"
-                  stroke="#4F46E5"
-                  fill="#4F46E5"
+                  stroke="var(--color-primary-500)"
+                  fill="var(--color-primary-500)"
                   fillOpacity={0.15}
                 />
               </AreaChart>

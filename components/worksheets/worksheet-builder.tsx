@@ -14,6 +14,7 @@ import {
   type GenerationInput,
 } from '@/lib/learning/contracts';
 import { TYPE_LABELS } from './question-content';
+import type { GenerationAvailability } from '@/lib/learning/generation-availability';
 import { Users } from 'lucide-react';
 import { toast } from 'sonner';
 import Link from 'next/link';
@@ -38,10 +39,12 @@ export function WorksheetBuilder({
   initialTopic = '',
   initialSubject = '',
   enabledTypes,
+  availability,
 }: {
   initialTopic?: string;
   initialSubject?: string;
   enabledTypes: GenerationInput['questionType'][];
+  availability: GenerationAvailability;
 }) {
   const { activeChild } = useChildStore();
   const router = useRouter();
@@ -55,20 +58,22 @@ export function WorksheetBuilder({
   const [topic, setTopic] = useState(initialTopic);
   const [objectiveId, setObjectiveId] = useState('');
   const [busy, setBusy] = useState(false);
+  const [generationError, setGenerationError] = useState<string | null>(null);
   const pendingKey = `teatch:generation:${activeChild?.id || 'none'}`;
   const rawPending = useSyncExternalStore(
     subscribePending,
     () => readPending(pendingKey),
     () => ''
   );
-  let pending: GenerationInput | undefined;
+  let storedPending: GenerationInput | undefined;
   try {
     const parsed = generationInputSchema.safeParse(JSON.parse(rawPending));
     if (parsed.success && parsed.data.childId === activeChild?.id)
-      pending = parsed.data;
+      storedPending = parsed.data;
   } catch {
     /* No pending generation. */
   }
+  const pending = availability.enabled ? storedPending : undefined;
   const requestKey = pending?.requestKey;
   const savePending = (input: GenerationInput | null) => {
     try {
@@ -140,7 +145,12 @@ export function WorksheetBuilder({
         : 20;
   const actualCount = pending?.questionCount || Math.min(count, maxCount);
   const generate = async () => {
+    if (!availability.enabled) {
+      setGenerationError(availability.message);
+      return;
+    }
     if (!subject) return;
+    setGenerationError(null);
     setBusy(true);
     const input: GenerationInput = pending || {
       childId: activeChild.id,
@@ -177,117 +187,169 @@ export function WorksheetBuilder({
       router.push(`/worksheets/${data.worksheetId}`);
       router.refresh();
     } catch (error) {
-      toast.error(
+      const message =
         error instanceof Error
           ? error.message
-          : 'Sambungan terputus. Kirim ulang untuk mengambil draf yang sama.'
-      );
+          : 'Sambungan terputus. Kirim ulang untuk mengambil draf yang sama.';
+      setGenerationError(message);
+      toast.error(message);
     } finally {
       setBusy(false);
     }
   };
   return (
     <div className="max-w-4xl mx-auto space-y-5">
-      <h1 className="text-2xl font-bold">
-        Buat latihan untuk {activeChild.name}
-      </h1>
-      <Card padding="lg">
-        <div className="grid sm:grid-cols-2 gap-4">
-          <Select
-            label="Mata pelajaran"
-            value={subject?.id || ''}
-            options={subjects.map((s) => ({ value: s.id, label: s.name }))}
-            placeholder="Pilih pelajaran"
-            disabled={busy || !!requestKey}
-            onChange={(e) => {
-              setSubjectId(e.target.value);
-              setObjectiveId('');
-            }}
-          />
-          <Select
-            label="Tujuan belajar"
-            value={validObjective}
-            options={objectives.map((o) => ({ value: o.id, label: o.label }))}
-            placeholder="Pilih tujuan atau isi topik"
-            disabled={busy || !!requestKey || !subject}
-            onChange={(e) => setObjectiveId(e.target.value)}
-          />
-          <Select
-            label="Tipe soal"
-            value={selectedType}
-            options={types.map((t) => ({ value: t, label: TYPE_LABELS[t] }))}
-            disabled={busy || !!requestKey || !subject}
-            onChange={(e) =>
-              setType(e.target.value as GenerationInput['questionType'])
-            }
-          />
-          <Select
-            label="Kesulitan"
-            value={pending?.difficulty || difficulty}
-            options={['mudah', 'sedang', 'sulit'].map((d) => ({
-              value: d,
-              label: d,
-            }))}
-            disabled={busy || !!requestKey}
-            onChange={(e) =>
-              setDifficulty(e.target.value as GenerationInput['difficulty'])
-            }
-          />
-          <label className="text-sm">
-            Jumlah soal: <b>{actualCount}</b>
-            <input
-              aria-label="Jumlah soal"
-              className="block w-full my-3"
-              type="range"
-              min={1}
-              max={maxCount}
-              value={actualCount}
-              disabled={busy || !!requestKey}
-              onChange={(e) => setCount(Number(e.target.value))}
-            />
-          </label>
-          <Input
-            label="Topik spesifik (opsional)"
-            value={pending?.topic ?? topic}
-            maxLength={200}
-            disabled={busy || !!requestKey}
-            placeholder="Contoh: penjumlahan sampai 20"
-            onChange={(e) => setTopic(e.target.value)}
-          />
-        </div>
-        <p className="text-xs text-surface-500 my-4">
-          {validObjective &&
-          objectives.find((o) => o.id === validObjective)?.curriculumVerified
-            ? 'Tujuan ini dipetakan ke lingkup capaian pembelajaran resmi; draf tetap perlu diperiksa.'
-            : 'Panduan topik lokal; pemetaan kurikulum untuk materi ini belum diverifikasi.'}{' '}
-          Draf berhasil dibuat memakai {actualCount} kuota soal; koreksi manual
-          dan latihan ulang gratis.
+      <header className="border-b border-[var(--card-border)] pb-5">
+        <p className="learning-eyebrow">Siapkan materi belajar</p>
+        <h1 className="mt-2 text-3xl font-semibold">
+          Buat latihan untuk {activeChild.name}
+        </h1>
+        <p className="mt-2 text-[var(--text-muted)]">
+          Tentukan materi dan bentuk soal. Draf bisa diperiksa sebelum anak
+          mulai.
         </p>
-        <div className="flex gap-3">
-          <Button
-            onClick={generate}
-            disabled={!subject || !types.length}
-            isLoading={busy}
+      </header>
+      <Card padding="lg">
+        {!availability.enabled && (
+          <p
+            role="status"
+            className="mb-4 rounded-lg border border-primary-300 p-4 text-sm"
           >
-            {requestKey ? 'Ambil hasil / kirim ulang' : 'Buat draf latihan'}
-          </Button>
-          {requestKey && !busy && (
-            <Button variant="outline" onClick={() => savePending(null)}>
-              Mulai permintaan baru
+            {availability.message}
+          </p>
+        )}
+        <fieldset className="min-w-0">
+          <legend className="mb-4 text-lg font-semibold">
+            1. Materi belajar
+          </legend>
+          <div className="grid sm:grid-cols-2 gap-5">
+            <Select
+              label="Mata pelajaran"
+              value={subject?.id || ''}
+              options={subjects.map((s) => ({ value: s.id, label: s.name }))}
+              placeholder="Pilih pelajaran"
+              disabled={busy || !!requestKey}
+              onChange={(e) => {
+                setSubjectId(e.target.value);
+                setObjectiveId('');
+              }}
+            />
+            <Select
+              label="Tujuan belajar"
+              value={validObjective}
+              options={objectives.map((o) => ({ value: o.id, label: o.label }))}
+              placeholder="Pilih tujuan atau isi topik"
+              disabled={busy || !!requestKey || !subject}
+              onChange={(e) => setObjectiveId(e.target.value)}
+            />
+            <Input
+              label="Topik spesifik (opsional)"
+              value={pending?.topic ?? topic}
+              maxLength={200}
+              disabled={busy || !!requestKey}
+              placeholder="Contoh: penjumlahan sampai 20"
+              onChange={(e) => setTopic(e.target.value)}
+            />
+          </div>
+        </fieldset>
+        <fieldset className="mt-7 min-w-0 border-t border-[var(--card-border)] pt-6">
+          <legend className="float-left mb-4 w-full text-lg font-semibold">
+            2. Bentuk latihan
+          </legend>
+          <div className="clear-both grid sm:grid-cols-2 gap-5">
+            <Select
+              label="Tipe soal"
+              value={selectedType}
+              options={types.map((t) => ({ value: t, label: TYPE_LABELS[t] }))}
+              disabled={busy || !!requestKey || !subject}
+              onChange={(e) =>
+                setType(e.target.value as GenerationInput['questionType'])
+              }
+            />
+            <Select
+              label="Kesulitan"
+              value={pending?.difficulty || difficulty}
+              options={['mudah', 'sedang', 'sulit'].map((d) => ({
+                value: d,
+                label: d,
+              }))}
+              disabled={busy || !!requestKey}
+              onChange={(e) =>
+                setDifficulty(e.target.value as GenerationInput['difficulty'])
+              }
+            />
+            <label className="text-sm">
+              Jumlah soal: <b>{actualCount}</b>
+              <input
+                aria-label="Jumlah soal"
+                className="block w-full my-3"
+                type="range"
+                min={1}
+                max={maxCount}
+                value={actualCount}
+                disabled={busy || !!requestKey}
+                onChange={(e) => setCount(Number(e.target.value))}
+              />
+            </label>
+          </div>
+        </fieldset>
+        <div className="mt-7 border-t border-[var(--card-border)] pt-5">
+          <h2 className="font-semibold">3. Periksa sebelum membuat draf</h2>
+          <p className="mt-2 text-sm">
+            {subject?.name || 'Pilih pelajaran'} · {TYPE_LABELS[selectedType]} ·{' '}
+            {actualCount} soal · {pending?.difficulty || difficulty}
+          </p>
+          <p className="text-sm text-[var(--text-muted)] my-4">
+            {validObjective &&
+            objectives.find((o) => o.id === validObjective)?.curriculumVerified
+              ? 'Tujuan ini dipetakan ke lingkup capaian pembelajaran resmi; draf tetap perlu diperiksa.'
+              : 'Panduan topik lokal; pemetaan kurikulum untuk materi ini belum diverifikasi.'}{' '}
+            Jika draf berhasil dibuat, {actualCount} kuota soal akan digunakan;
+            koreksi manual dan latihan ulang gratis.
+          </p>
+          <div className="flex flex-wrap gap-3">
+            <Button
+              onClick={generate}
+              disabled={!availability.enabled || !subject || !types.length}
+              isLoading={busy}
+            >
+              {!availability.enabled
+                ? 'Pembuatan AI belum tersedia'
+                : requestKey
+                  ? 'Ambil hasil / kirim ulang'
+                  : 'Buat draf latihan'}
             </Button>
+            {requestKey && !busy && (
+              <Button variant="outline" onClick={() => savePending(null)}>
+                Mulai permintaan baru
+              </Button>
+            )}
+            {!availability.enabled && storedPending && !busy && (
+              <Button variant="outline" onClick={() => savePending(null)}>
+                Hapus permintaan tersimpan
+              </Button>
+            )}
+          </div>
+          {generationError && (
+            <p
+              role="alert"
+              className="mt-4 rounded-lg border border-error-500 p-3 text-sm"
+            >
+              {generationError}
+            </p>
+          )}
+          {requestKey && !busy && (
+            <p className="text-sm mt-3">
+              Ada permintaan yang belum dikonfirmasi. Kirim ulang memakai kunci
+              yang sama. Pembuatan baru menggunakan kuota baru.
+            </p>
+          )}
+          {busy && (
+            <p className="text-sm mt-4" role="status">
+              Sedang menyusun dan memeriksa soal. Draf akan disimpan otomatis.
+            </p>
           )}
         </div>
-        {requestKey && !busy && (
-          <p className="text-sm mt-3">
-            Ada permintaan yang belum dikonfirmasi. Kirim ulang memakai kunci
-            yang sama. Pembuatan baru menggunakan kuota baru.
-          </p>
-        )}
-        {busy && (
-          <p className="text-sm mt-4" role="status">
-            Sedang menyusun dan memeriksa soal. Draf akan disimpan otomatis.
-          </p>
-        )}
       </Card>
     </div>
   );

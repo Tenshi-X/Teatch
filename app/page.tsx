@@ -4,7 +4,6 @@ import { TYPE_LABELS } from '@/components/worksheets/question-content';
 import Link from 'next/link';
 import Image from 'next/image';
 import {
-  Sparkles,
   Brain,
   Puzzle,
   Image as ImageIcon,
@@ -70,7 +69,7 @@ const features = [
     description:
       'Simpan riwayat belajar dan evaluasi kemampuan anak melalui laporan statistik terpadu.',
     color:
-      'bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400',
+      'bg-primary-50 text-primary-600 dark:bg-primary-900/20 dark:text-primary-300',
   },
 ];
 
@@ -203,7 +202,7 @@ export default function LandingPage() {
             </Link>
             <Link
               href="/login"
-              className="px-5 py-2.5 text-sm font-semibold text-white bg-primary-600 hover:bg-primary-700 rounded-full transition-all shadow-sm hover:shadow-md hover:-translate-y-px active:translate-y-[1px]"
+              className="px-5 py-2.5 text-sm font-semibold text-surface-900 bg-motivation-500 hover:bg-motivation-600 rounded-[var(--radius-button)] transition-colors"
             >
               Daftar Gratis
             </Link>
@@ -215,21 +214,21 @@ export default function LandingPage() {
         <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
           <div className="relative z-10 animate-fade-in-up">
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-surface-100 dark:bg-surface-800 border border-[var(--card-border)] text-surface-600 dark:text-surface-300 text-xs font-semibold uppercase tracking-wider mb-8">
-              <Sparkles size={14} className="text-primary-500" />
-              Platform Belajar AI Anak
+              <BookOpen size={14} className="text-primary-600" />
+              Belajar bersama keluarga
             </div>
 
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-[1.1] tracking-tight text-surface-900 dark:text-white mb-6">
-              Bantu Anak Belajar dengan{' '}
+              Temani Anak Belajar,{' '}
               <span className="text-primary-600 dark:text-primary-500">
-                Kecerdasan Buatan.
+                Selangkah demi Selangkah.
               </span>
             </h1>
 
-            <p className="text-lg text-surface-500 dark:text-surface-400 mb-6 max-w-lg leading-relaxed">
-              Generate soal latihan otomatis sesuai usia dan kurikulum. Pantau
-              perkembangan belajar anak dengan alat yang mudah, cepat, dan
-              interaktif.
+            <p className="text-lg text-[var(--text-muted)] mb-6 max-w-lg leading-relaxed">
+              Siapkan latihan sesuai kelas dan topik, dampingi anak
+              mengerjakannya, lalu lihat materi yang sudah dipahami dan yang
+              perlu dilatih lagi.
             </p>
 
             <p className="flex items-center gap-2 text-sm font-medium text-surface-600 dark:text-surface-300 mb-8">
@@ -243,14 +242,14 @@ export default function LandingPage() {
             <div className="flex flex-col sm:flex-row items-center gap-4">
               <Link
                 href="/login"
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 text-base font-semibold text-white bg-primary-600 hover:bg-primary-700 rounded-full shadow-sm hover:shadow-md hover:-translate-y-px transition-all active:translate-y-[1px]"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 text-base font-semibold text-surface-900 bg-motivation-500 hover:bg-motivation-600 rounded-[var(--radius-button)] transition-colors"
               >
                 Mulai Sekarang
                 <ArrowRight size={18} />
               </Link>
               <Link
                 href="#fitur"
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 text-base font-semibold text-surface-700 dark:text-surface-200 border-[1.5px] border-surface-200 dark:border-surface-700 hover:bg-surface-50 dark:hover:bg-surface-800 rounded-full transition-all active:translate-y-[1px]"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 text-base font-semibold text-surface-700 dark:text-surface-200 border-[1.5px] border-surface-200 dark:border-surface-700 hover:bg-surface-50 dark:hover:bg-surface-800 rounded-[var(--radius-button)] transition-colors"
               >
                 Jelajahi Fitur
               </Link>
@@ -274,7 +273,7 @@ export default function LandingPage() {
             className="relative w-full max-w-lg mx-auto lg:max-w-none animate-fade-in-up lg:mt-0 mt-8"
             style={{ animationDelay: '0.15s' }}
           >
-            <div className="relative bg-white dark:bg-surface-900 rounded-3xl border border-[var(--card-border)] shadow-lg p-6 sm:p-7">
+            <div className="relative bg-white dark:bg-surface-900 rounded-[var(--radius-card)] border border-[var(--card-border)] p-6 sm:p-7">
               {/* Card header */}
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
@@ -288,21 +287,21 @@ export default function LandingPage() {
                     <p className="text-sm font-bold text-surface-900 dark:text-white leading-tight">
                       Latihan Pagi
                     </p>
-                    <p className="text-xs text-surface-500 dark:text-surface-400">
+                    <p className="text-xs text-[var(--text-muted)]">
                       Matematika · Kelas 2 SD
                     </p>
                   </div>
                 </div>
                 <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-ai-50 dark:bg-ai-900/30 border border-ai-100 dark:border-ai-800/40 text-[11px] font-semibold text-ai-600 dark:text-ai-400">
-                  <Sparkles size={12} />
-                  AI
+                  <BookOpen size={12} />
+                  Draf
                 </span>
               </div>
 
               {/* Progress */}
               <div className="mb-6">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs font-medium text-surface-500 dark:text-surface-400">
+                  <span className="text-xs font-medium text-[var(--text-muted)]">
                     Soal 3 dari 10
                   </span>
                   <span className="text-xs font-bold text-primary-600 dark:text-primary-400">
@@ -310,12 +309,12 @@ export default function LandingPage() {
                   </span>
                 </div>
                 <div className="h-2 rounded-full bg-surface-100 dark:bg-surface-800 overflow-hidden">
-                  <div className="h-full w-[30%] rounded-full bg-gradient-to-r from-primary-500 to-primary-600" />
+                  <div className="h-full w-[30%] rounded-full bg-primary-500" />
                 </div>
               </div>
 
               {/* Question */}
-              <div className="rounded-2xl border border-[var(--card-border)] bg-surface-50 dark:bg-surface-950/60 p-4 sm:p-5 mb-5">
+              <div className="rounded-[var(--radius-card)] border border-[var(--card-border)] bg-surface-50 dark:bg-surface-950/60 p-4 sm:p-5 mb-5">
                 <p className="text-sm font-medium text-surface-800 dark:text-surface-200 leading-relaxed">
                   Ibu membeli{' '}
                   <span className="font-bold text-primary-600 dark:text-primary-400">
@@ -365,7 +364,7 @@ export default function LandingPage() {
                 <span className="text-xs font-medium text-surface-400">
                   Kunci jawaban &amp; penjelasan tersedia
                 </span>
-                <span className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-primary-600 text-white text-xs font-semibold">
+                <span className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-motivation-500 text-surface-900 text-xs font-semibold">
                   Lanjut Soal
                   <ArrowRight size={13} />
                 </span>
@@ -374,7 +373,7 @@ export default function LandingPage() {
 
             {/* Floating card — score stats */}
             <div
-              className="absolute -left-4 sm:-left-8 -bottom-8 bg-white dark:bg-surface-900 rounded-2xl border border-[var(--card-border)] shadow-lg px-5 py-4 hidden sm:block animate-fade-in-up"
+              className="absolute -left-4 sm:-left-8 -bottom-8 bg-white dark:bg-surface-900 rounded-[var(--radius-card)] border border-[var(--card-border)] px-5 py-4 hidden sm:block animate-fade-in-up"
               style={{ animationDelay: '0.35s' }}
             >
               <div className="flex items-center gap-3 mb-2">
@@ -385,7 +384,7 @@ export default function LandingPage() {
                   />
                 </div>
                 <div>
-                  <p className="text-[11px] text-surface-500 dark:text-surface-400 font-medium leading-none mb-1">
+                  <p className="text-[11px] text-[var(--text-muted)] font-medium leading-none mb-1">
                     Rata-rata skor
                   </p>
                   <p className="text-lg font-bold text-surface-900 dark:text-white leading-none">
@@ -404,7 +403,7 @@ export default function LandingPage() {
 
             {/* Floating card — points earned */}
             <div
-              className="absolute -right-3 sm:-right-6 -top-7 bg-white dark:bg-surface-900 rounded-2xl border border-[var(--card-border)] shadow-lg px-4 py-3 flex items-center gap-3 animate-fade-in-up"
+              className="absolute -right-3 sm:-right-6 -top-7 bg-white dark:bg-surface-900 rounded-[var(--radius-card)] border border-[var(--card-border)] px-4 py-3 flex items-center gap-3 animate-fade-in-up"
               style={{ animationDelay: '0.5s' }}
             >
               <div className="w-9 h-9 rounded-full bg-warning-50 dark:bg-warning-900/30 flex items-center justify-center">
@@ -417,7 +416,7 @@ export default function LandingPage() {
                 <p className="text-sm font-bold text-surface-900 dark:text-white leading-none mb-0.5">
                   +50 poin
                 </p>
-                <p className="text-[11px] text-surface-500 dark:text-surface-400 font-medium">
+                <p className="text-[11px] text-[var(--text-muted)] font-medium">
                   Jawaban benar!
                 </p>
               </div>
@@ -444,7 +443,10 @@ export default function LandingPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {features.map((feature) => (
-              <div key={feature.title} className="card p-7 rounded-2xl group">
+              <div
+                key={feature.title}
+                className="card p-7 rounded-[var(--radius-card)] group"
+              >
                 <div
                   className={`w-12 h-12 rounded-xl flex items-center justify-center border border-surface-200/60 dark:border-surface-700/60 mb-5 ${feature.color}`}
                 >
@@ -453,7 +455,7 @@ export default function LandingPage() {
                 <h3 className="text-lg font-bold tracking-tight mb-2 text-surface-900 dark:text-white">
                   {feature.title}
                 </h3>
-                <p className="text-sm text-surface-500 dark:text-surface-400 leading-relaxed">
+                <p className="text-sm text-[var(--text-muted)] leading-relaxed">
                   {feature.description}
                 </p>
               </div>
@@ -462,7 +464,7 @@ export default function LandingPage() {
 
           {/* Question type chips */}
           <div className="mt-14 text-center">
-            <p className="text-sm font-semibold text-surface-500 dark:text-surface-400 mb-5">
+            <p className="text-sm font-semibold text-[var(--text-muted)] mb-5">
               {enabledQuestionTypes().length} tipe soal pada tahap uji coba —
               termasuk:
             </p>
@@ -502,25 +504,25 @@ export default function LandingPage() {
             {steps.map((step, idx) => (
               <div
                 key={step.title}
-                className="relative card p-8 rounded-2xl text-center"
+                className="relative card p-8 rounded-[var(--radius-card)] text-center"
               >
                 <div className="absolute top-6 left-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-primary-600 text-white text-sm font-bold flex items-center justify-center shadow-sm">
                   {idx + 1}
                 </div>
-                <div className="w-14 h-14 mx-auto mt-8 rounded-2xl bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 flex items-center justify-center border border-primary-100 dark:border-primary-800/40 mb-5">
+                <div className="w-14 h-14 mx-auto mt-8 rounded-[var(--radius-card)] bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 flex items-center justify-center border border-primary-100 dark:border-primary-800/40 mb-5">
                   <step.icon className="w-7 h-7" />
                 </div>
                 <h3 className="text-lg font-bold tracking-tight mb-2 text-surface-900 dark:text-white">
                   {step.title}
                 </h3>
-                <p className="text-sm text-surface-500 dark:text-surface-400 leading-relaxed">
+                <p className="text-sm text-[var(--text-muted)] leading-relaxed">
                   {step.description}
                 </p>
               </div>
             ))}
           </div>
 
-          <p className="text-center text-sm text-surface-500 dark:text-surface-400 mt-10">
+          <p className="text-center text-sm text-[var(--text-muted)] mt-10">
             Setelah selesai, semua hasil belajar otomatis tersimpan di{' '}
             <span className="font-semibold text-surface-700 dark:text-surface-200">
               Statistik
@@ -547,7 +549,7 @@ export default function LandingPage() {
             {audiences.map((audience) => (
               <div
                 key={audience.title}
-                className="rounded-2xl border border-[var(--card-border)] bg-surface-50 dark:bg-surface-900 p-8"
+                className="rounded-[var(--radius-card)] border border-[var(--card-border)] bg-surface-50 dark:bg-surface-900 p-8"
               >
                 <div className="w-12 h-12 rounded-xl bg-white dark:bg-surface-800 border border-[var(--card-border)] flex items-center justify-center text-primary-600 dark:text-primary-400 mb-5 shadow-sm">
                   <audience.icon className="w-6 h-6" />
@@ -555,7 +557,7 @@ export default function LandingPage() {
                 <h3 className="text-lg font-bold tracking-tight mb-2 text-surface-900 dark:text-white">
                   {audience.title}
                 </h3>
-                <p className="text-sm text-surface-500 dark:text-surface-400 leading-relaxed">
+                <p className="text-sm text-[var(--text-muted)] leading-relaxed">
                   {audience.description}
                 </p>
               </div>
@@ -584,7 +586,7 @@ export default function LandingPage() {
             {faqs.map((faq) => (
               <details
                 key={faq.question}
-                className="group card rounded-2xl px-6 py-5 open:shadow-md"
+                className="group card rounded-[var(--radius-card)] px-6 py-5 "
               >
                 <summary className="flex items-center justify-between gap-4 cursor-pointer list-none [&::-webkit-details-marker]:hidden">
                   <span className="text-base font-semibold text-surface-900 dark:text-white">
@@ -594,14 +596,14 @@ export default function LandingPage() {
                     <ChevronDown size={16} />
                   </span>
                 </summary>
-                <p className="mt-4 text-sm text-surface-500 dark:text-surface-400 leading-relaxed">
+                <p className="mt-4 text-sm text-[var(--text-muted)] leading-relaxed">
                   {faq.answer}
                 </p>
               </details>
             ))}
           </div>
 
-          <p className="text-center text-sm text-surface-500 dark:text-surface-400 mt-10">
+          <p className="text-center text-sm text-[var(--text-muted)] mt-10">
             Tidak menemukan jawaban Anda?{' '}
             <a
               href="https://wa.me/6287795078879"
@@ -633,7 +635,7 @@ export default function LandingPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
             {/* Free Trial */}
-            <div className="card p-8 border border-[var(--card-border)] bg-white dark:bg-[#121212] flex flex-col rounded-2xl shadow-sm">
+            <div className="card p-8 border border-[var(--card-border)] bg-white dark:bg-[var(--card-bg)] flex flex-col rounded-[var(--radius-card)] shadow-sm">
               <div className="mb-6">
                 <h3 className="text-xl font-bold mb-2">Free Trial</h3>
                 <p className="text-surface-500 text-sm">
@@ -666,8 +668,8 @@ export default function LandingPage() {
             </div>
 
             {/* Basic */}
-            <div className="card p-8 border-2 border-primary-500 bg-white dark:bg-[#121212] flex flex-col rounded-2xl shadow-sm relative">
-              <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary-500 text-white px-4 py-1 rounded-full text-xs font-bold uppercase tracking-widest">
+            <div className="card p-8 border-2 border-primary-500 bg-white dark:bg-[var(--card-bg)] flex flex-col rounded-[var(--radius-card)] shadow-sm relative">
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary-300 text-surface-900 px-4 py-1 rounded-full text-xs font-bold uppercase tracking-widest">
                 Terpopuler
               </div>
               <div className="mb-6 mt-2">
@@ -706,14 +708,14 @@ export default function LandingPage() {
                 href="https://shopee.co.id/trenovaintelligence"
                 target="_blank"
                 rel="noreferrer"
-                className="w-full py-3 px-4 text-center rounded-full font-semibold bg-primary-600 text-white hover:bg-primary-700 transition-all hover:-translate-y-px active:translate-y-[1px] shadow-sm"
+                className="w-full py-3 px-4 text-center rounded-full font-semibold bg-motivation-500 text-surface-900 hover:bg-motivation-600 transition-colors"
               >
                 Berlangganan
               </a>
             </div>
 
             {/* Pro */}
-            <div className="card p-8 border border-[var(--card-border)] bg-white dark:bg-[#121212] flex flex-col rounded-2xl shadow-sm">
+            <div className="card p-8 border border-[var(--card-border)] bg-white dark:bg-[var(--card-bg)] flex flex-col rounded-[var(--radius-card)] shadow-sm">
               <div className="mb-6">
                 <h3 className="text-xl font-bold mb-2">Pro</h3>
                 <p className="text-surface-500 text-sm">
@@ -757,7 +759,7 @@ export default function LandingPage() {
             </div>
           </div>
 
-          <div className="max-w-2xl mx-auto mt-12 flex flex-col sm:flex-row items-center justify-center gap-3 text-sm text-surface-500 dark:text-surface-400">
+          <div className="max-w-2xl mx-auto mt-12 flex flex-col sm:flex-row items-center justify-center gap-3 text-sm text-[var(--text-muted)]">
             <span className="inline-flex items-center gap-2">
               <ShieldCheck
                 size={16}
@@ -787,7 +789,7 @@ export default function LandingPage() {
       <section className="py-32 px-6 text-center bg-white dark:bg-[#0A0A0A]">
         <div className="max-w-2xl mx-auto">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary-50 dark:bg-primary-900/20 border border-primary-100 dark:border-primary-800/40 text-primary-700 dark:text-primary-300 text-xs font-semibold uppercase tracking-wider mb-8">
-            <Sparkles size={14} className="text-primary-500" />
+            <BookOpen size={14} className="text-primary-600" />
             Mulai dalam hitungan menit
           </div>
           <h2 className="text-4xl font-bold tracking-tight mb-6">
@@ -798,7 +800,7 @@ export default function LandingPage() {
           </p>
           <Link
             href="/login"
-            className="inline-flex items-center justify-center gap-2 px-10 py-4 text-base font-semibold text-white bg-primary-600 hover:bg-primary-700 rounded-full shadow-sm hover:shadow-md hover:-translate-y-px transition-all active:translate-y-[1px]"
+            className="inline-flex items-center justify-center gap-2 px-10 py-4 text-base font-semibold text-surface-900 bg-motivation-500 hover:bg-motivation-600 rounded-[var(--radius-button)] transition-colors"
           >
             Daftar Gratis Sekarang
             <ArrowRight size={18} />

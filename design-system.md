@@ -1,133 +1,55 @@
----
-version: "alpha"
-name: "Soft UI Evolution"
-description: "Design evolved neumorphism with improved contrast (WCAG AA+), modern aesthetics, subtle depth, accessibility focus. Ideal for landing pages, saas. AI-ready template."
-colors:
-  primary: "#87CEEB"
-  secondary: "#FFB6C1"
-  tertiary: "#90EE90"
-typography:
-  h1:
-    fontFamily: System UI stack
-    fontSize: 2.25rem
-    fontWeight: 700
-  body-md:
-    fontFamily: System UI stack
-    fontSize: 1rem
-    fontWeight: 400
-  label-caps:
-    fontFamily: System UI stack
-    fontSize: 0.75rem
-    fontWeight: 500
-rounded:
-  sm: 10px
-  md: 20px
-  lg: 30px
-components:
-  button-primary:
-    backgroundColor: "{colors.primary}"
-    rounded: "{rounded.sm}"
-    padding: 12px
----
+# Teatch — panduan design system
 
-## Overview
+Teatch membantu orang tua menyiapkan latihan, mendampingi anak, meninjau jawaban, dan memahami perkembangan belajar. Identitasnya mengambil karakter buku belajar modern: jelas, ramah, dan terstruktur. Prinsip interaksi mengacu pada Adobe Spectrum; komponen menggunakan implementasi lokal Teatch.
 
-Design evolved neumorphism with improved contrast (WCAG AA+), modern aesthetics, subtle depth, accessibility focus. Ideal for landing pages, saas. AI-ready template. Remember 2020 neumorphism? That beautiful disaster. Designers lost their minds over those puffy, extruded buttons — and then watched usability testers fail to distinguish active states from disabled ones. The contrast ratios were abysmal. WCAG compliance? Nonexistent. The style died fast, but the desire for tactile, physical-feeling interfaces never went away.
+## Tipografi
 
-Samsung's One UI quietly showed the path forward. Soft shadows, generous padding, rounded containers — but with actual color differentiation and readable text. They proved you could have depth without sacrificing legibility. Apple's visionOS spatial design language pushed it further: layered surfaces with clear hierarchy, not just embossed sameness.
+- Source Sans 3, dimuat melalui `next/font`, menjadi font utama aplikasi.
+- Teks isi 16px dengan tinggi baris 1.6; keterangan 14px, label kecil 12px hanya jika masih terbaca.
+- Judul halaman 30–36px, judul bagian 20–24px, bobot 600.
+- Halaman latihan memakai teks isi 18px; PAUD, TK, dan SD kelas 1–2 memakai 20px. Soal utama 20–24px.
+- Angka statistik menggunakan tabular figures. Rumus tetap memakai KaTeX.
 
-By 2026, Soft UI Evolution is what neumorphism should have been from the start. Real contrast ratios meeting AA standards. Shadows that communicate elevation, not decoration. Color palettes that use soft tones without washing out interactive elements. The tactile metaphor survived — it just grew up.
+## Warna
 
-- Density: 5/10 — Balanced
-- Variance: 4/10 — Moderate
-- Motion: 4/10 — Subtle
+Palet pilihan pengguna dan fungsi setiap warna ada di `color-pallete.md`. Gunakan token di `app/globals.css`; hindari warna literal pada komponen baru. Turunan lebih gelap dipakai untuk teks, tautan, dan fokus yang membutuhkan kontras. Status selalu disertai teks atau tanda; warna tidak menjadi satu-satunya pembeda.
 
-- **Style:** Soft, Subtle, Pastel, Refined
-- **Keywords:** Evolved soft UI, better contrast, modern aesthetics, subtle depth, accessibility-focused, improved shadows, hybrid
-- **Era:** 2020s Modern
-- **Light/Dark:** ✓ Full / ✓ Full
+## Bentuk dan ruang
 
-## Colors
+- Jarak mengikuti kelipatan 4px; jarak umum 8, 12, 16, 20, 24, 32, dan 40px.
+- Radius input dan tombol 8px; lembar soal, kartu, dan dialog 12px.
+- Bentuk pil hanya untuk label pendek, progres, dan avatar.
+- Kartu statis memakai bidang rata dengan garis tipis. Kartu tidak terangkat ketika disentuh atau di-hover.
+- Bayangan dipakai untuk menu dan dialog yang mengambang. Hindari glow dan gradien dekoratif.
+- Susunan mengikuti isi: baris untuk riwayat dan topik, kelompok angka untuk ringkasan, kartu untuk tindakan berikutnya dan lembar soal.
 
-- **Soft Blue** (#87CEEB) — Accent highlight, links and focus states
-- **Soft Pink** (#FFB6C1) — Primary text color
-- **Soft Green** (#90EE90) — Supporting palette color
+## Dashboard orang tua
 
+Urutan informasi: identitas anak, latihan terbaru dan tinjauan yang tertunda, ringkasan angka, materi untuk dilatih lagi, aktivitas terakhir. Rata-rata nilai ditampilkan satu kali dan tidak dilabeli sebagai persentase penguasaan seluruh materi.
 
-## Typography
+Topik menggunakan `buildInsights` dan sumber bukti yang sama dengan laporan: jawaban yang sudah dinilai, scoring version 2, dalam 90 hari terakhir. Topik dengan data belum cukup tidak dipresentasikan sebagai kelemahan anak. Semua data dipisahkan per anak dan kesulitan.
 
-- **Display / Hero:** System UI stack (-apple-system, sans-serif) — Weight 700, tight tracking, used for headline impact
-- **Body:** System UI stack (-apple-system, sans-serif) — Weight 400, 16px/1.6 line-height, max 72ch per line
-- **UI Labels / Captions:** System UI stack (-apple-system, sans-serif) — 0.875rem, weight 500, slight letter-spacing
-- **Monospace:** JetBrains Mono — Used for code, metadata, and technical values
+## Latihan anak
 
-Scale:
-- Hero: clamp(2.5rem, 5vw, 4rem)
-- H1: 2.25rem
-- H2: 1.5rem
-- Body: 1rem / 1.6
-- Small: 0.875rem
+- Satu soal menjadi pusat perhatian. Navigasi orang tua dan informasi kuota disembunyikan selama pengerjaan.
+- Pilihan jawaban dan potongan mempunyai area tekan minimal 48px, fokus keyboard terlihat, dan status pilihan disertai tanda.
+- Tombol sebelumnya dan selanjutnya selalu jelas. Seluruh nomor soal dapat dibuka melalui bagian yang dapat diperluas.
+- Jawaban tetap tersimpan di perangkat selama latihan. Tampilan hasil membedakan nilai final dari jawaban yang masih menunggu tinjauan.
+- Ilustrasi menjelaskan soal atau materi. Hindari karakter dan dekorasi yang tidak berhubungan dengan aktivitas.
 
+## Formulir, laporan, dan cetak
 
-## Layout
+Form pembuatan terbagi menjadi materi belajar, bentuk latihan, dan ringkasan sebelum membuat draf. Label berada di atas input. Informasi kuota serta status draf tetap terlihat.
 
-- **Grid:** CSS Grid primary. Max-width containment: 1280px centered with 1.5rem side padding.
-- **Spacing rhythm:** Balanced. Base unit: 0.5rem (8px).
-- **Section vertical gaps:** clamp(4rem, 8vw, 8rem).
-- **Hero layout:** Split-screen (text left, visual right).
-- **Feature sections:** Zig-zag alternating text+image rows. No 3-equal-columns.
-- **Mobile collapse:** All multi-column layouts collapse below 768px. No horizontal overflow.
-- **z-index contract:** base (0) / sticky-nav (100) / overlay (200) / modal (300) / toast (500).
+Laporan menampilkan topik, jumlah jawaban yang menjadi bukti, kesulitan, dan tindakan berikutnya. Grafik memakai token warna identitas. Worksheet cetak memakai tinta gelap di atas kertas putih, penomoran jelas, dan ruang untuk jawaban.
 
+## Bahasa dan gerak
 
-## Elevation & Depth
+Gunakan bahasa Indonesia konkret: Buat latihan, Buka latihan, Tinjau jawaban, Latih topik ini. Kehangatan muncul dari bantuan dan umpan balik yang jelas. AI dijelaskan ketika relevan dengan pembuatan atau pemeriksaan draf.
 
-Improved shadows (softer than flat, clearer than neumorphism), modern (200-300ms), focus visible, WCAG AA/AAA
+Transisi singkat 150–200ms untuk perubahan keadaan; jangan menambahkan gerak pada seluruh kartu. Hormati `prefers-reduced-motion`. Semua tindakan dapat diakses melalui keyboard; teks dan tata letak harus terbaca di mode terang, gelap, dan layar kecil.
 
-- **Physics:** Ease-out curves, 200-300ms duration. Smooth and predictable.
-- **Entry animations:** Fade + translate-Y (16px → 0) over 420ms ease-out. Staggered cascades for lists: 80ms between items.
-- **Hover states:** Subtle color shift + shadow adjustment over 200ms.
-- **Page transitions:** Fade only (200ms).
-- **Performance:** Only transform and opacity animated. No layout-triggering properties.
+## Referensi
 
-
-## Shapes
-
-Base corner radius: 10px. See rounded tokens in front matter for the full scale.
-
-
-## Components
-
-- **Primary Button:** Rounded (10px) shape. Accent color fill. Hover: 8% darken + subtle lift shadow. Active: -1px translate tactile press. Font weight 600. No outer glows.
-- **Secondary / Ghost Button:** Outline variant. 1.5px border in muted color. Text in primary color. Hover: subtle background fill.
-- **Cards:** Rounded (10px) corners. Surface background. Subtle shadow (0 2px 12px rgba(0,0,0,0.06)). 1px border stroke.
-- **Inputs:** Label above input. 1px border stroke. Focus ring: 2px accent color offset 2px. Error text below in semantic red. No floating labels.
-- **Navigation:** Primary surface background. Active item: accent color indicator. Font weight 500 when active.
-- **Skeletons:** Shimmer animation matching component dimensions. No circular spinners.
-- **Empty States:** Icon-based composition with descriptive text and action button.
-
-
-## Do's and Don'ts
-
-- No emojis in UI — use icon system only (Lucide, Heroicons)
-- No pure black (#000000) — use off-black or charcoal variants
-- No oversaturated accent colors (saturation cap: 80%)
-- No 3-column equal-width feature layouts — use zig-zag or asymmetric grid
-- No `h-screen` — use `min-h-[100dvh]`
-- No AI copywriting clichés: "Elevate", "Seamless", "Unleash", "Next-Gen"
-- No broken external image links — use picsum.photos or inline SVG
-- No generic lorem ipsum in demos
-
-- Do Improved contrast AA/AAA
-- Do Soft shadows modern
-- Do Border-radius 8-12px
-- Do Animations 200-300ms
-- Do Focus states visible
-- Do Color hierarchy clear
-
-
-## Use Case
-
-Landing pages, SaaS
-
-<!-- Source: https://designmd.app/library/soft-ui-evolution · designmd.app -->
+- https://spectrum.adobe.com/getting-started/principles
+- https://github.com/adobe-fonts/source-sans

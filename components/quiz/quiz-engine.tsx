@@ -1,5 +1,12 @@
 'use client';
-import { useEffect, useState, useSyncExternalStore, useCallback } from 'react';
+import {
+  useEffect,
+  useState,
+  useSyncExternalStore,
+  useCallback,
+  useRef,
+} from 'react';
+import { ArrowLeft, ArrowRight, CheckCircle, Check } from 'lucide-react';
 import { submitAttempt } from '@/app/actions/attempts';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -11,6 +18,7 @@ import { z } from 'zod';
 import { formatDuration } from '@/lib/utils';
 import Link from 'next/link';
 import { toast } from 'sonner';
+import { useChildStore } from '@/lib/stores/child-store';
 type Progress = {
   answers: Record<string, string>;
   index: number;
@@ -50,6 +58,15 @@ export function QuizEngine({
   worksheetTitle: string;
 }) {
   const key = `teatch:quiz:${childId}:${worksheetId}`;
+  const child = useChildStore((state) =>
+    state.children.find((item) => item.id === childId)
+  );
+  const earlyLearner =
+    !!child &&
+    (['PAUD', 'TK A', 'TK B'].includes(child.level) ||
+      (child.level === 'SD' &&
+        ['Kelas 1', 'Kelas 2'].includes(child.grade || '')));
+  const questionHeading = useRef<HTMLHeadingElement>(null);
   const subscribe = useCallback((notify: () => void) => {
     window.addEventListener('storage', notify);
     window.addEventListener('teatch-progress', notify);
@@ -70,6 +87,9 @@ export function QuizEngine({
     Math.max(0, progress?.index || 0)
   );
   const elapsed = progress?.duration || 0;
+  useEffect(() => {
+    questionHeading.current?.focus({ preventScroll: true });
+  }, [index]);
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<Awaited<
     ReturnType<typeof submitAttempt>
@@ -139,22 +159,35 @@ export function QuizEngine({
   };
   if (result)
     return (
-      <Card padding="lg" className="max-w-xl mx-auto text-center space-y-5">
-        <h1 className="text-2xl font-bold">Latihan selesai</h1>
-        <p>{worksheetTitle}</p>
+      <Card padding="lg" className="max-w-xl mx-auto space-y-5">
+        <CheckCircle
+          size={32}
+          className="text-primary-600 dark:text-primary-300"
+          aria-hidden="true"
+        />
+        <p className="learning-eyebrow">Catatan latihan</p>
+        <h1 className="text-3xl font-semibold">
+          Latihan selesai. Terima kasih sudah mencoba!
+        </h1>
+        <p className="text-[var(--text-muted)]">{worksheetTitle}</p>
         {result.score === null ? (
           <p>
             Jawaban tersimpan dan menunggu tinjauan orang tua. Nilai akhir
             muncul setelah semua jawaban dinilai.
           </p>
         ) : (
-          <p className="text-4xl font-bold">{result.score}%</p>
+          <p className="text-4xl font-semibold">
+            {result.score}%
+            <span className="ml-3 text-base font-normal text-[var(--text-muted)]">
+              nilai latihan
+            </span>
+          </p>
         )}
         <p>
-          {result.correct_answers} benar dari {result.total_questions} soal •{' '}
-          {formatDuration(result.duration || 0)}
+          {result.correct_answers} jawaban sudah dinilai benar dari{' '}
+          {result.total_questions} soal · {formatDuration(result.duration || 0)}
         </p>
-        <div className="flex flex-wrap gap-3 justify-center">
+        <div className="flex flex-wrap gap-3 border-t border-[var(--card-border)] pt-5">
           {result.status === 'pending_review' && (
             <Link href="/review">
               <Button>Tinjau jawaban</Button>
@@ -163,8 +196,8 @@ export function QuizEngine({
           <Link href={`/worksheets/${worksheetId}`}>
             <Button variant="outline">Lihat pembahasan</Button>
           </Link>
-          <Link href="/statistics">
-            <Button variant="outline">Perkembangan</Button>
+          <Link href="/dashboard">
+            <Button variant="outline">Kembali ke ruang belajar</Button>
           </Link>
         </div>
       </Card>
@@ -172,53 +205,87 @@ export function QuizEngine({
   const q = questions[index];
   if (!q) return <p>Soal tidak tersedia.</p>;
   return (
-    <div className="max-w-3xl mx-auto space-y-5">
-      <h1 className="text-xl font-bold">{worksheetTitle}</h1>
-      <p className="text-sm">
-        {answered}/{questions.length} soal dijawab • {formatDuration(elapsed)}.
-        Progres disimpan di perangkat ini.
-      </p>
-      <div className="flex flex-wrap gap-2">
-        {questions.map((q, i) => (
-          <button
-            key={q.id}
-            className={`border rounded-lg p-3 ${index === i ? 'bg-primary-500 text-white' : ''}`}
-            aria-label={`Buka soal ${i + 1}`}
-            onClick={() => update({ index: i })}
+    <div className="max-w-3xl mx-auto space-y-6">
+      <header>
+        <Link
+          href={`/worksheets/${worksheetId}`}
+          className="inline-flex min-h-11 items-center gap-2 text-sm text-[var(--text-muted)] hover:underline"
+        >
+          <ArrowLeft size={16} aria-hidden="true" />
+          Kembali ke latihan
+        </Link>
+        <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
+          <p className="learning-eyebrow">
+            Waktu belajar{child ? ` · ${child.name}` : ''}
+          </p>
+          <p className="text-sm text-[var(--text-muted)]">
+            {answered} dari {questions.length} soal dijawab
+          </p>
+        </div>
+        <h1 className="mt-2 text-xl sm:text-2xl font-semibold">
+          {worksheetTitle}
+        </h1>
+        <div
+          className="mt-4 h-1.5 overflow-hidden rounded-full bg-[var(--card-border)]"
+          role="progressbar"
+          aria-label="Soal yang sudah dijawab"
+          aria-valuemin={0}
+          aria-valuemax={questions.length}
+          aria-valuenow={answered}
+        >
+          <div
+            className="h-full bg-primary-500 transition-[width] duration-200"
+            style={{ width: `${(answered / questions.length) * 100}%` }}
+          />
+        </div>
+      </header>
+      <section
+        className="practice-sheet"
+        data-early-learner={earlyLearner}
+        aria-labelledby="question-heading"
+      >
+        <div className="space-y-6">
+          <h2
+            id="question-heading"
+            ref={questionHeading}
+            tabIndex={-1}
+            className="learning-eyebrow outline-none"
           >
-            {i + 1}
-            {isAnswerComplete(q, answers[q.id] || '') ? ' ✓' : ''}
-          </button>
-        ))}
-      </div>
-      <Card padding="lg">
-        <div className="space-y-4">
-          <b>Soal {index + 1}</b>
+            Soal {index + 1} dari {questions.length}
+          </h2>
           {'story' in q && (
-            <p className="border p-4 rounded-lg whitespace-pre-wrap">
+            <p className="border-l-2 border-primary-300 pl-4 whitespace-pre-wrap leading-relaxed">
               {q.story}
             </p>
           )}
-          <MathText content={q.question} />
-          <QuestionInput
-            key={q.id}
-            question={q}
-            value={answers[q.id] || ''}
-            onChange={(v) => update({ answers: { ...answers, [q.id]: v } })}
+          <MathText
+            content={q.question}
+            className="text-xl sm:text-2xl font-medium leading-relaxed"
           />
+          <fieldset disabled={busy} className="min-w-0">
+            <legend className="sr-only">Jawaban soal {index + 1}</legend>
+            <QuestionInput
+              key={q.id}
+              question={q}
+              value={answers[q.id] || ''}
+              onChange={(v) => update({ answers: { ...answers, [q.id]: v } })}
+            />
+          </fieldset>
         </div>
-      </Card>
-      <div className="flex justify-between">
+      </section>
+      <div className="flex flex-wrap justify-between gap-3">
         <Button
           variant="outline"
           disabled={index === 0 || busy}
           onClick={() => update({ index: index - 1 })}
         >
+          <ArrowLeft size={18} aria-hidden="true" />
           Sebelumnya
         </Button>
         {index < questions.length - 1 ? (
           <Button disabled={busy} onClick={() => update({ index: index + 1 })}>
             Selanjutnya
+            <ArrowRight size={18} aria-hidden="true" />
           </Button>
         ) : (
           <Button isLoading={busy} onClick={submit}>
@@ -226,6 +293,37 @@ export function QuizEngine({
           </Button>
         )}
       </div>
+      <details className="border-t border-[var(--card-border)] pt-4">
+        <summary className="cursor-pointer py-2 text-sm font-medium">
+          Lihat semua nomor soal
+        </summary>
+        <nav aria-label="Nomor soal" className="mt-3 flex flex-wrap gap-2">
+          {questions.map((question, i) => {
+            const complete = isAnswerComplete(
+              question,
+              answers[question.id] || ''
+            );
+            return (
+              <button
+                key={question.id}
+                type="button"
+                disabled={busy}
+                aria-current={index === i ? 'step' : undefined}
+                aria-label={`Soal ${i + 1}${complete ? ', sudah dijawab' : ', belum dijawab'}`}
+                className={`inline-flex min-h-11 min-w-11 items-center justify-center gap-1 rounded-lg border px-3 ${index === i ? 'border-primary-600 bg-primary-600 text-white' : 'border-[var(--card-border)]'}`}
+                onClick={() => update({ index: i })}
+              >
+                {i + 1}
+                {complete && <Check size={14} aria-hidden="true" />}
+              </button>
+            );
+          })}
+        </nav>
+      </details>
+      <p className="text-sm text-[var(--text-muted)]">
+        Jawaban disimpan di perangkat ini selama latihan. Waktu belajar:{' '}
+        {formatDuration(elapsed)}.
+      </p>
     </div>
   );
 }

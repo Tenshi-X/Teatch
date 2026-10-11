@@ -122,6 +122,7 @@ export interface RecentActivity {
   title: string;
   subject: string;
   score?: number;
+  href?: string;
   createdAt: string;
 }
 

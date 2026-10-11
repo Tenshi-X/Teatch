@@ -1,13 +1,16 @@
 import { getParent } from '@/lib/server/ownership';
-import { DashboardView } from './dashboard-view';
+import { DashboardView, type DashboardChildData } from './dashboard-view';
+import { getLearningEvidence } from '@/lib/server/learning-evidence';
+import { buildInsights } from '@/lib/learning/insights';
 import type { RecentActivity, DashboardStats } from '@/types';
 export default async function DashboardPage() {
   const { supabase, profile } = await getParent();
   const { data: children, error } = await supabase
     .from('children')
-    .select('id')
+    .select('id,level,grade')
     .eq('parent_id', profile.id);
   if (error) throw new Error('Profil anak belum dapat dimuat.');
+  const evidence = await getLearningEvidence(supabase, children || []);
   const results = await Promise.all(
     (children || []).map(async (child) => {
       const { count, error: countError } = await supabase
@@ -43,6 +46,21 @@ export default async function DashboardPage() {
         ? Math.round(scores / stats.totalAttempts)
         : 0;
       const activities: RecentActivity[] = [];
+      const { count: pendingReviews, error: reviewError } = await supabase
+        .from('attempts')
+        .select('id', { count: 'exact', head: true })
+        .eq('child_id', child.id)
+        .eq('status', 'pending_review');
+      const { data: latestWorksheet, error: latestError } = await supabase
+        .from('worksheets')
+        .select('id,title')
+        .eq('child_id', child.id)
+        .eq('status', 'generated')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (reviewError || latestError)
+        throw new Error('Latihan belum dapat dimuat.');
       const { data: ws, error: wsError } = await supabase
         .from('worksheets')
         .select('id,title,created_at,subjects(name)')
@@ -64,6 +82,7 @@ export default async function DashboardPage() {
           type: 'worksheet_created',
           title: w.title,
           subject: w.subjects?.name || 'Latihan',
+          href: `/worksheets/${w.id}`,
           createdAt: w.created_at,
         });
       for (const a of attempts || [])
@@ -76,7 +95,21 @@ export default async function DashboardPage() {
           createdAt: a.created_at,
         });
       activities.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
-      return [child.id, { stats, activities: activities.slice(0, 5) }] as const;
+      const childData: DashboardChildData = {
+        stats,
+        activities: activities.slice(0, 5),
+        pendingReviews: pendingReviews || 0,
+        latestWorksheet,
+        topics: buildInsights(
+          evidence.filter((row) => row.childId === child.id)
+        )
+          .filter(
+            (topic) =>
+              topic.status === 'practice' || topic.status === 'developing'
+          )
+          .slice(0, 3),
+      };
+      return [child.id, childData] as const;
     })
   );
   return <DashboardView byChild={Object.fromEntries(results)} />;

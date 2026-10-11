@@ -1,5 +1,6 @@
 'use client';
 import { useState } from 'react';
+import { Check } from 'lucide-react';
 import type { GeneratedQuestion } from '@/lib/learning/contracts';
 import { AssetVisual, PlantVisual } from '@/components/worksheets/asset-visual';
 import { MathText } from '@/components/ui/math-text';
@@ -15,8 +16,7 @@ const mapValue = (v: unknown): Record<string, string> =>
   v && typeof v === 'object' && !Array.isArray(v)
     ? (v as Record<string, string>)
     : {};
-const choiceClass = (selected: boolean) =>
-  `border-2 rounded-lg p-3 text-left ${selected ? 'border-primary-500 bg-primary-50 text-surface-900' : 'border-surface-200'}`;
+const choiceClass = () => 'answer-choice';
 
 export function QuestionInput({
   question: q,
@@ -36,11 +36,22 @@ export function QuestionInput({
         {options.map((o, i) => (
           <button
             key={i}
-            className={choiceClass(value === o)}
+            className={`${choiceClass()} flex items-center gap-3`}
             aria-pressed={value === o}
             onClick={() => onChange(o)}
           >
-            <MathText content={o} />
+            <span
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-[var(--surface-subtle)] text-sm font-semibold"
+              aria-hidden="true"
+            >
+              {q.type === 'multiple_choice'
+                ? String.fromCharCode(65 + i)
+                : i + 1}
+            </span>
+            <MathText content={o} className="min-w-0 flex-1" />
+            {value === o && (
+              <Check size={20} className="shrink-0" aria-hidden="true" />
+            )}
           </button>
         ))}
       </div>
@@ -69,7 +80,8 @@ export function QuestionInput({
           {selected.map((s, i) => (
             <button
               key={i}
-              className="border rounded p-2"
+              className="answer-piece"
+              aria-label={`Hapus ${s} dari urutan`}
               onClick={() =>
                 onChange(JSON.stringify(selected.filter((_, j) => i !== j)))
               }
@@ -85,7 +97,7 @@ export function QuestionInput({
               !used.has(i) && (
                 <button
                   key={i}
-                  className="border rounded p-3"
+                  className="answer-piece"
                   onClick={() => onChange(JSON.stringify([...selected, s]))}
                 >
                   <MathText content={s} />
@@ -109,7 +121,7 @@ export function QuestionInput({
             {q.pairs.map((p) => (
               <button
                 key={p.left}
-                className={choiceClass(selectedLeft === p.left)}
+                className={choiceClass()}
                 onClick={() => setSelectedLeft(p.left)}
                 aria-pressed={selectedLeft === p.left}
               >
@@ -118,7 +130,7 @@ export function QuestionInput({
                 ) : (
                   <MathText content={p.left} />
                 )}
-                <span className="text-xs">
+                <span className="block mt-2 text-sm text-[var(--text-muted)]">
                   {selected[p.left] || 'Belum dipasangkan'}
                 </span>
               </button>
@@ -128,7 +140,7 @@ export function QuestionInput({
             {right.map((r) => (
               <button
                 key={r}
-                className="border rounded p-3"
+                className="answer-piece"
                 disabled={!selectedLeft}
                 onClick={() => {
                   if (selectedLeft) {
@@ -156,12 +168,12 @@ export function QuestionInput({
       <div className="space-y-3">
         {q.items.map((item) => (
           <label
-            className="flex items-center justify-between gap-3"
+            className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
             key={item.name}
           >
             <MathText content={item.name} />
             <select
-              className="input-base max-w-64"
+              className="input-base sm:max-w-64"
               value={selected[item.name] || ''}
               onChange={(e) => {
                 const next = { ...selected };
@@ -188,7 +200,7 @@ export function QuestionInput({
             key={id}
             aria-label={`Pilih gambar ${ASSETS[id].label}`}
             aria-pressed={value === id}
-            className={choiceClass(value === id)}
+            className={choiceClass()}
             onClick={() => onChange(id)}
           >
             <AssetVisual id={id} />
@@ -206,7 +218,7 @@ export function QuestionInput({
       )}{' '}
       {q.type === 'image_label' && <PlantVisual target={q.label_target} />}
       <label className="block">
-        <span className="text-sm">Jawaban</span>
+        <span className="mb-2 block font-medium">Jawabanmu</span>
         {q.type === 'essay' ? (
           <textarea
             className="input-base w-full"

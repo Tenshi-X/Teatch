@@ -8,23 +8,33 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant = 'primary', size = 'md', isLoading, children, disabled, ...props }, ref) => {
+  (
+    {
+      className,
+      variant = 'primary',
+      size = 'md',
+      isLoading,
+      children,
+      disabled,
+      ...props
+    },
+    ref
+  ) => {
     const baseStyles =
-      'inline-flex items-center justify-center gap-2 font-medium rounded-[var(--radius-button)] transition-all duration-150 ease-out focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed hover:scale-[1.02] active:scale-[0.98] cursor-pointer';
+      'inline-flex items-center justify-center gap-2 font-medium rounded-[var(--radius-button)] transition-colors duration-150 ease-out focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg)] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer';
 
     const variants = {
       primary:
-        'bg-primary-500 text-white hover:bg-primary-600 focus:ring-primary-500 shadow-[0_6px_18px_rgba(59,130,246,0.18)] border border-transparent',
+        'bg-motivation-500 text-surface-900 hover:bg-motivation-600 border border-transparent',
       secondary:
-        'bg-white border border-surface-300 text-primary-600 hover:bg-surface-50 focus:ring-primary-500 dark:bg-surface-800 dark:border-surface-700 dark:hover:bg-surface-900',
+        'bg-[var(--card-bg)] border border-[var(--input-border)] text-[var(--fg)] hover:bg-[var(--surface-subtle)]',
       outline:
-        'border-[1.5px] border-surface-300 text-surface-600 hover:bg-surface-50 focus:ring-primary-500 dark:border-surface-700 dark:text-surface-300 dark:hover:bg-surface-800/50',
+        'border border-[var(--input-border)] text-[var(--fg)] hover:bg-[var(--surface-subtle)]',
       ghost:
-        'text-surface-600 hover:bg-surface-100 focus:ring-surface-300 dark:text-surface-300 dark:hover:bg-surface-800 bg-transparent border border-transparent',
+        'text-[var(--text-soft)] hover:bg-[var(--surface-subtle)] bg-transparent border border-transparent',
       danger:
-        'bg-error-500 text-white hover:bg-error-600 focus:ring-error-500 shadow-[0_6px_18px_rgba(248,113,113,0.18)] border border-transparent',
-      ai:
-        'bg-ai-500 text-white hover:bg-ai-600 focus:ring-ai-500 shadow-[0_6px_18px_rgba(139,92,246,0.18)] border border-transparent',
+        'bg-danger-600 text-white hover:bg-danger-700 border border-transparent',
+      ai: 'bg-motivation-500 text-surface-900 hover:bg-motivation-600 border border-transparent',
     };
 
     const sizes = {
@@ -38,6 +48,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         ref={ref}
         className={cn(baseStyles, variants[variant], sizes[size], className)}
         disabled={disabled || isLoading}
+        aria-busy={isLoading || undefined}
         {...props}
       >
         {isLoading && (
@@ -47,7 +58,14 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
             fill="none"
             viewBox="0 0 24 24"
           >
-            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+            <circle
+              className="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              strokeWidth="4"
+            />
             <path
               className="opacity-75"
               fill="currentColor"

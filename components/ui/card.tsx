@@ -8,11 +8,21 @@ export interface CardProps extends HTMLAttributes<HTMLDivElement> {
 }
 
 const Card = forwardRef<HTMLDivElement, CardProps>(
-  ({ className, variant = 'default', padding = 'md', hover = false, children, ...props }, ref) => {
+  (
+    {
+      className,
+      variant = 'default',
+      padding = 'md',
+      hover = false,
+      children,
+      ...props
+    },
+    ref
+  ) => {
     const variants = {
       default: 'card',
-      glass: 'card-glass',
-      gradient: 'card bg-gradient-to-br from-primary-500/5 to-secondary-500/5',
+      glass: 'card',
+      gradient: 'card',
     };
 
     const paddings = {
@@ -28,8 +38,8 @@ const Card = forwardRef<HTMLDivElement, CardProps>(
         className={cn(
           variants[variant],
           paddings[padding],
-          hover && 'hover:-translate-y-[2px] hover:shadow-md cursor-pointer',
-          'transition-all duration-300 ease-out',
+          hover && 'hover:border-primary-500 cursor-pointer',
+          'transition-colors duration-150 ease-out',
           className
         )}
         {...props}

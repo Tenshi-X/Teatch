@@ -1,10 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
-import { Inter } from 'next/font/google';
 import Link from 'next/link';
 import { ShieldAlert, ArrowLeft } from 'lucide-react';
-
-const inter = Inter({ subsets: ['latin'] });
 
 export default async function AdminLayout({
   children,
@@ -31,9 +28,7 @@ export default async function AdminLayout({
   }
 
   return (
-    <div
-      className={`min-h-screen bg-[#0F172A] text-slate-200 ${inter.className}`}
-    >
+    <div className="min-h-screen bg-[#0F172A] text-slate-200 font-sans">
       <nav className="border-b border-slate-800 bg-[#1E293B]/50 backdrop-blur-md sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">

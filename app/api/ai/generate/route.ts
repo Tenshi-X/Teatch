@@ -6,7 +6,10 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { generationInputSchema } from '@/lib/learning/contracts';
 import { getObjectives, subjectSegment } from '@/lib/learning/objectives';
 import { calculateAge } from '@/lib/utils';
-import { enabledQuestionTypes } from '@/lib/server/features';
+import {
+  enabledQuestionTypes,
+  generationAvailability,
+} from '@/lib/server/features';
 import { fulfillGeneration, PipelineError } from '@/services/ai/pipeline';
 import { generateWorksheet, GenerationError } from '@/services/ai/gemini';
 import type { Json } from '@/types/database';
@@ -30,18 +33,12 @@ export async function POST(request: Request) {
     );
   try {
     const { supabase, profile } = await getParent();
-    if (process.env.TEATCH_AI_ENABLED !== 'true')
+    const availability = generationAvailability(profile.id);
+    if (!availability.enabled)
       return fail(
-        'Pembuatan soal sedang disiapkan. Latihan tersimpan tetap bisa digunakan.',
-        503,
-        true
+        availability.message || 'Pembuatan soal AI belum diaktifkan.',
+        503
       );
-    const pilot = (process.env.TEATCH_AI_PILOT_PARENT_IDS || '')
-      .split(',')
-      .map((s) => s.trim())
-      .filter(Boolean);
-    if (pilot.length && !pilot.includes(profile.id))
-      return fail('Pembuatan soal sedang diuji pada akun terbatas.', 503);
     const text = await request.text();
     if (text.length > 4000) return fail('Permintaan terlalu panjang.', 400);
     const parsed = generationInputSchema.safeParse(JSON.parse(text));

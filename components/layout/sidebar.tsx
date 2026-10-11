@@ -75,13 +75,14 @@ export function Sidebar({ isOpen, onClose, userRole }: SidebarProps) {
               <h1 className="text-xl font-bold text-primary-600 dark:text-primary-500">
                 Teatch
               </h1>
-              <p className="text-[10px] text-surface-400 -mt-0.5">
-                AI Learning Platform
+              <p className="text-xs text-[var(--text-muted)] -mt-0.5">
+                Belajar bersama keluarga
               </p>
             </div>
           </Link>
           <button
             onClick={onClose}
+            aria-label="Tutup navigasi"
             className="lg:hidden p-2 rounded-lg hover:bg-surface-100 dark:hover:bg-surface-800 transition-colors cursor-pointer"
           >
             <X size={20} />
@@ -99,6 +100,7 @@ export function Sidebar({ isOpen, onClose, userRole }: SidebarProps) {
               <Link
                 key={item.href}
                 href={item.href}
+                aria-current={isActive ? 'page' : undefined}
                 onClick={handleLinkClick}
                 className={cn(
                   'flex items-center gap-3 px-4 py-2.5 rounded-[var(--radius-input)] text-sm font-medium transition-all duration-150 border',
