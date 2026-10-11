@@ -38,7 +38,7 @@ export default async function HistoryPage() {
     return (
       <div className="max-w-4xl mx-auto animate-fade-in">
         <h1 className="text-2xl font-bold mb-6">Soal Saya</h1>
-        <p className="text-surface-400">
+        <p className="text-[var(--text-muted)]">
           Tambahkan profil anak terlebih dahulu.
         </p>
       </div>

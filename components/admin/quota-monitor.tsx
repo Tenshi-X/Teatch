@@ -16,7 +16,7 @@ export function QuotaMonitor({
   const [busy, setBusy] = useState(false);
   const router = useRouter();
   return (
-    <section className="border border-slate-700 rounded-xl p-5 space-y-3">
+    <section className="border border-[var(--card-border)] rounded-xl p-5 space-y-3">
       <h2 className="font-bold">Audit kuota</h2>
       <p>
         {audit.discrepancies} akun berbeda dari catatan perubahan •{' '}

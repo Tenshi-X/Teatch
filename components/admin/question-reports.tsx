@@ -17,19 +17,22 @@ export function QuestionReports({
   const router = useRouter();
   const [busy, setBusy] = useState<string | null>(null);
   return (
-    <section className="rounded-xl border border-slate-700 p-6 space-y-3">
+    <section className="rounded-xl border border-[var(--card-border)] p-6 space-y-3">
       <h2 className="font-bold text-lg">100 laporan soal terbuka terbaru</h2>
       {!reports.length && <p>Tidak ada laporan terbuka.</p>}
       {reports.map((r) => {
         const q = r.questions ? hydrateQuestion(r.questions) : null;
         return (
-          <div key={r.id} className="border-b border-slate-700 pb-3 space-y-3">
+          <div
+            key={r.id}
+            className="border-b border-[var(--card-border)] pb-3 space-y-3"
+          >
             <p className="whitespace-pre-wrap">{r.reason}</p>
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-[var(--text-muted)]">
               Soal: {r.question_id} •{' '}
               {new Date(r.created_at).toLocaleDateString('id-ID')}
             </p>
-            <details className="rounded-lg border border-slate-600 p-3">
+            <details className="rounded-lg border border-[var(--card-border)] p-3">
               <summary className="cursor-pointer">
                 Lihat soal dan kunci yang dilaporkan
               </summary>

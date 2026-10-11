@@ -45,9 +45,26 @@ export function StatisticsView({ attempts }: Props) {
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={chart}>
-                <XAxis dataKey="name" />
-                <YAxis domain={[0, 100]} />
-                <Tooltip formatter={(value) => [`${value}%`, 'Nilai']} />
+                <XAxis
+                  dataKey="name"
+                  tick={{ fill: 'var(--text-muted)' }}
+                  stroke="var(--input-border)"
+                />
+                <YAxis
+                  domain={[0, 100]}
+                  tick={{ fill: 'var(--text-muted)' }}
+                  stroke="var(--input-border)"
+                />
+                <Tooltip
+                  formatter={(value) => [`${value}%`, 'Nilai']}
+                  contentStyle={{
+                    background: 'var(--card-bg)',
+                    borderColor: 'var(--input-border)',
+                    color: 'var(--fg)',
+                  }}
+                  itemStyle={{ color: 'var(--fg)' }}
+                  labelStyle={{ color: 'var(--text-muted)' }}
+                />
                 <Area
                   dataKey="score"
                   stroke="var(--color-primary-500)"
@@ -91,7 +108,7 @@ export function StatisticsView({ attempts }: Props) {
                   </span>
                 )}
                 {a.scoring_version === 1 && (
-                  <p className="text-xs text-amber-600">
+                  <p className="text-xs text-learning-600 dark:text-learning-500">
                     Hasil sistem lama — tidak masuk ringkasan belajar
                   </p>
                 )}

@@ -10,7 +10,7 @@ export function ProgressRing({
   value,
   size = 120,
   strokeWidth = 10,
-  color = '#4F46E5',
+  color = 'var(--accent-color)',
   label,
 }: ProgressRingProps) {
   const radius = (size - strokeWidth) / 2;
@@ -50,7 +50,7 @@ export function ProgressRing({
           <span className="text-2xl font-bold">{Math.round(value)}</span>
         </div>
       </div>
-      {label && <p className="text-sm text-surface-400">{label}</p>}
+      {label && <p className="text-sm text-[var(--text-muted)]">{label}</p>}
     </div>
   );
 }

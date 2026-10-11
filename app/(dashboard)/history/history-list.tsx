@@ -84,7 +84,7 @@ export function HistoryList({
   return (
     <div className="max-w-5xl mx-auto animate-fade-in">
       <h1 className="text-2xl font-bold mb-6">Soal Saya</h1>
-      <p className="text-sm text-surface-500 mb-4">
+      <p className="text-sm text-[var(--text-muted)] mb-4">
         100 latihan dan 100 hasil pengerjaan terbaru dari akun ini.
       </p>
 
@@ -227,7 +227,7 @@ export function HistoryList({
                           {wsAttempts.some(
                             (a) => a.status === 'pending_review'
                           ) && (
-                            <p className="text-sm text-amber-600">
+                            <p className="text-sm text-learning-600 dark:text-learning-500">
                               Menunggu tinjauan jawaban
                             </p>
                           )}
@@ -238,7 +238,7 @@ export function HistoryList({
                             {ws.title}
                           </h3>
 
-                          <div className="flex items-center justify-between text-xs text-surface-400 mt-2 pt-3 border-t border-[var(--card-border)]">
+                          <div className="flex items-center justify-between text-xs text-[var(--text-muted)] mt-2 pt-3 border-t border-[var(--card-border)]">
                             <span className="flex items-center gap-1">
                               <FileText size={12} /> {ws.question_count} soal
                             </span>

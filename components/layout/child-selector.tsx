@@ -17,7 +17,10 @@ export function ChildSelector() {
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(e.target as Node)
+      ) {
         setIsOpen(false);
       }
     };
@@ -45,17 +48,24 @@ export function ChildSelector() {
       >
         {activeChild && (
           <>
-            <Avatar src={activeChild.photo_url} name={activeChild.name} size="sm" />
+            <Avatar
+              src={activeChild.photo_url}
+              name={activeChild.name}
+              size="sm"
+            />
             <div className="text-left hidden sm:block">
-              <p className="text-sm font-medium leading-tight">{activeChild.name}</p>
-              <p className="text-xs text-surface-400">
-                {activeChild.level} • {calculateAge(activeChild.birth_date)} {t('childSelector.yearsOld', language)}
+              <p className="text-sm font-medium leading-tight">
+                {activeChild.name}
+              </p>
+              <p className="text-xs text-[var(--text-muted)]">
+                {activeChild.level} • {calculateAge(activeChild.birth_date)}{' '}
+                {t('childSelector.yearsOld', language)}
               </p>
             </div>
             <ChevronDown
               size={16}
               className={cn(
-                'text-surface-400 transition-transform',
+                'text-[var(--text-muted)] transition-transform',
                 isOpen && 'rotate-180'
               )}
             />
@@ -66,7 +76,7 @@ export function ChildSelector() {
       {/* Dropdown */}
       {isOpen && (
         <div className="absolute left-1/2 -translate-x-1/2 lg:left-0 lg:translate-x-0 top-full mt-2 w-64 card p-2 shadow-xl animate-scale-in z-50">
-          <p className="px-3 py-1.5 text-xs font-medium text-surface-400 uppercase tracking-wider">
+          <p className="px-3 py-1.5 text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider">
             {t('childSelector.select', language)}
           </p>
           {children.map((child) => (
@@ -86,12 +96,15 @@ export function ChildSelector() {
               <Avatar src={child.photo_url} name={child.name} size="sm" />
               <div className="text-left flex-1 min-w-0">
                 <p className="text-sm font-medium truncate">{child.name}</p>
-                <p className="text-xs text-surface-400">
+                <p className="text-xs text-[var(--text-muted)]">
                   {child.level} {child.grade && `• ${child.grade}`}
                 </p>
               </div>
               {child.id === activeChild?.id && (
-                <Check size={16} className="text-primary-600 dark:text-primary-400 shrink-0" />
+                <Check
+                  size={16}
+                  className="text-primary-600 dark:text-primary-400 shrink-0"
+                />
               )}
             </button>
           ))}

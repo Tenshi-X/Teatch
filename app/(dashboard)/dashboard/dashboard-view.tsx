@@ -39,7 +39,7 @@ export function DashboardView({
         </p>
         <Link
           href="/children/new"
-          className="mt-7 inline-flex min-h-12 items-center gap-2 rounded-[var(--radius-button)] bg-motivation-500 px-5 py-3 font-semibold text-surface-900 hover:bg-motivation-600"
+          className="mt-7 inline-flex min-h-12 items-center gap-2 rounded-[var(--radius-button)] action-primary px-5 py-3 font-semibold"
         >
           <Users size={18} aria-hidden="true" /> Tambah profil anak
         </Link>
@@ -135,7 +135,7 @@ export function DashboardView({
                   ? `/worksheets/${latestWorksheet.id}`
                   : '/worksheets/new'
               }
-              className="inline-flex min-h-12 items-center gap-2 rounded-[var(--radius-button)] bg-motivation-500 px-5 py-3 font-semibold text-surface-900 hover:bg-motivation-600"
+              className="inline-flex min-h-12 items-center gap-2 rounded-[var(--radius-button)] action-primary px-5 py-3 font-semibold"
             >
               <BookOpen size={18} aria-hidden="true" />
               {latestWorksheet ? 'Buka latihan' : 'Buat latihan'}
@@ -151,15 +151,17 @@ export function DashboardView({
             )}
           </div>
         </div>
-        <div className="flex flex-col justify-between rounded-[var(--radius-card)] bg-learning-50 p-5 sm:p-7 text-surface-900 dark:bg-surface-800 dark:text-surface-50">
+        <div className="card flex flex-col justify-between p-5 sm:p-7">
           <div>
-            <ClipboardCheck size={24} aria-hidden="true" />
+            <span className="inline-flex rounded-lg bg-[var(--note-bg)] p-2 text-[var(--note-text)]">
+              <ClipboardCheck size={24} aria-hidden="true" />
+            </span>
             <h2 className="mt-3 text-xl font-semibold">
               {pendingReviews
                 ? `${pendingReviews} latihan menunggu tinjauan`
                 : 'Temani setiap langkah belajar'}
             </h2>
-            <p className="mt-2 text-sm">
+            <p className="mt-2 text-sm text-[var(--text-muted)]">
               {pendingReviews
                 ? 'Periksa jawaban yang perlu dinilai agar laporan perkembangan dapat diperbarui.'
                 : 'Periksa draf sebelum digunakan. Jawaban uraian membutuhkan tinjauan orang tua.'}
@@ -167,7 +169,7 @@ export function DashboardView({
           </div>
           <Link
             href="/review"
-            className="mt-5 inline-flex min-h-11 items-center gap-2 font-semibold underline underline-offset-4"
+            className="mt-5 inline-flex min-h-11 items-center gap-2 font-semibold text-[var(--accent-color)] underline underline-offset-4"
           >
             Tinjau jawaban
             <ArrowRight size={16} aria-hidden="true" />

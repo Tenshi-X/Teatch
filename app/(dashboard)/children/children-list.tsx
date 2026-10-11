@@ -39,7 +39,7 @@ export function ChildrenList({ childProfiles: children }: ChildrenListProps) {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold">Anak Saya</h1>
-          <p className="text-surface-400 text-sm mt-1">
+          <p className="text-[var(--text-muted)] text-sm mt-1">
             Kelola profil anak Anda
           </p>
         </div>
@@ -85,7 +85,7 @@ export function ChildrenList({ childProfiles: children }: ChildrenListProps) {
         title="Hapus Profil Anak"
         size="sm"
       >
-        <p className="text-sm text-surface-500 mb-6">
+        <p className="text-sm text-[var(--text-muted)] mb-6">
           Apakah Anda yakin ingin menghapus profil{' '}
           <strong className="text-[var(--fg)]">{deleteTarget?.name}</strong>?
           Semua data latihan dan riwayat akan ikut terhapus.

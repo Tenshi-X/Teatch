@@ -175,7 +175,7 @@ export default function LandingPage() {
                 src="/teatch_logo.png"
                 alt="Teatch Logo"
                 fill
-                className="object-cover"
+                className="brand-logo object-cover"
               />
             </div>
             <span className="text-xl font-bold tracking-tight text-surface-900 dark:text-white">
@@ -202,7 +202,7 @@ export default function LandingPage() {
             </Link>
             <Link
               href="/login"
-              className="px-5 py-2.5 text-sm font-semibold text-surface-900 bg-motivation-500 hover:bg-motivation-600 rounded-[var(--radius-button)] transition-colors"
+              className="px-5 py-2.5 text-sm font-semibold action-primary rounded-[var(--radius-button)] transition-colors"
             >
               Daftar Gratis
             </Link>
@@ -220,7 +220,7 @@ export default function LandingPage() {
 
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-[1.1] tracking-tight text-surface-900 dark:text-white mb-6">
               Temani Anak Belajar,{' '}
-              <span className="text-primary-600 dark:text-primary-500">
+              <span className="text-primary-600 dark:text-primary-300">
                 Selangkah demi Selangkah.
               </span>
             </h1>
@@ -242,7 +242,7 @@ export default function LandingPage() {
             <div className="flex flex-col sm:flex-row items-center gap-4">
               <Link
                 href="/login"
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 text-base font-semibold text-surface-900 bg-motivation-500 hover:bg-motivation-600 rounded-[var(--radius-button)] transition-colors"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 text-base font-semibold action-primary rounded-[var(--radius-button)] transition-colors"
               >
                 Mulai Sekarang
                 <ArrowRight size={18} />
@@ -260,7 +260,7 @@ export default function LandingPage() {
               {levels.map((level) => (
                 <span
                   key={level}
-                  className="px-4 py-1.5 rounded-full text-xs font-medium border border-[var(--card-border)] text-surface-500 bg-surface-50 dark:bg-surface-900"
+                  className="px-4 py-1.5 rounded-full text-xs font-medium border border-[var(--card-border)] text-[var(--text-muted)] bg-surface-50 dark:bg-surface-900"
                 >
                   {level}
                 </span>
@@ -361,7 +361,7 @@ export default function LandingPage() {
 
               {/* Card footer */}
               <div className="flex items-center justify-between">
-                <span className="text-xs font-medium text-surface-400">
+                <span className="text-xs font-medium text-[var(--text-muted)]">
                   Kunci jawaban &amp; penjelasan tersedia
                 </span>
                 <span className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-motivation-500 text-surface-900 text-xs font-semibold">
@@ -428,14 +428,14 @@ export default function LandingPage() {
       {/* Features */}
       <section
         id="fitur"
-        className="scroll-mt-24 py-24 px-6 bg-white dark:bg-[#0A0A0A]"
+        className="scroll-mt-24 py-24 px-6 bg-white dark:bg-[var(--bg)]"
       >
         <div className="max-w-6xl mx-auto">
           <div className="text-center max-w-2xl mx-auto mb-16">
             <h2 className="text-3xl font-bold tracking-tight mb-4">
               Dirancang untuk Hasil yang Nyata
             </h2>
-            <p className="text-surface-500 text-lg">
+            <p className="text-[var(--text-muted)] text-lg">
               Setiap fitur dibuat untuk memberikan pengalaman belajar terbaik
               bagi anak Anda, tanpa membuat orang tua pusing.
             </p>
@@ -494,7 +494,7 @@ export default function LandingPage() {
             <h2 className="text-3xl font-bold tracking-tight mb-4">
               Hanya 3 Langkah, Langsung Siap Dipakai
             </h2>
-            <p className="text-surface-500 text-lg">
+            <p className="text-[var(--text-muted)] text-lg">
               Tidak perlu keahlian khusus. Selesaikan tiga langkah ini dan anak
               Anda sudah bisa mulai berlatih.
             </p>
@@ -533,13 +533,13 @@ export default function LandingPage() {
       </section>
 
       {/* Audiences */}
-      <section className="py-24 px-6 bg-white dark:bg-[#0A0A0A]">
+      <section className="py-24 px-6 bg-white dark:bg-[var(--bg)]">
         <div className="max-w-6xl mx-auto">
           <div className="text-center max-w-2xl mx-auto mb-16">
             <h2 className="text-3xl font-bold tracking-tight mb-4">
               Dibuat untuk Siapa Saja yang Mendampingi Anak
             </h2>
-            <p className="text-surface-500 text-lg">
+            <p className="text-[var(--text-muted)] text-lg">
               Satu platform, banyak peran — semua dengan tujuan yang sama:
               belajar yang menyenangkan dan efektif.
             </p>
@@ -576,7 +576,7 @@ export default function LandingPage() {
             <h2 className="text-3xl font-bold tracking-tight mb-4">
               Pertanyaan yang Sering Diajukan
             </h2>
-            <p className="text-surface-500 text-lg">
+            <p className="text-[var(--text-muted)] text-lg">
               Masih penasaran? Temukan jawabannya di sini, atau hubungi kami
               langsung.
             </p>
@@ -586,13 +586,13 @@ export default function LandingPage() {
             {faqs.map((faq) => (
               <details
                 key={faq.question}
-                className="group card rounded-[var(--radius-card)] px-6 py-5 "
+                className="group card rounded-[var(--radius-card)] px-6 py-5"
               >
                 <summary className="flex items-center justify-between gap-4 cursor-pointer list-none [&::-webkit-details-marker]:hidden">
                   <span className="text-base font-semibold text-surface-900 dark:text-white">
                     {faq.question}
                   </span>
-                  <span className="w-7 h-7 shrink-0 rounded-full border border-[var(--card-border)] bg-surface-50 dark:bg-surface-800 flex items-center justify-center text-surface-500 dark:text-surface-300 transition-transform duration-200 group-open:rotate-180">
+                  <span className="w-7 h-7 shrink-0 rounded-full border border-[var(--card-border)] bg-surface-50 dark:bg-surface-800 flex items-center justify-center text-[var(--text-muted)] dark:text-surface-300 transition-transform duration-200 group-open:rotate-180">
                     <ChevronDown size={16} />
                   </span>
                 </summary>
@@ -620,14 +620,14 @@ export default function LandingPage() {
       {/* Pricing (Flat & Soft) */}
       <section
         id="harga"
-        className="scroll-mt-24 py-24 px-6 bg-white dark:bg-[#0A0A0A]"
+        className="scroll-mt-24 py-24 px-6 bg-white dark:bg-[var(--bg)]"
       >
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-3xl font-bold tracking-tight mb-4">
               Pilih Paket Belajar
             </h2>
-            <p className="text-surface-500 max-w-2xl mx-auto text-lg">
+            <p className="text-[var(--text-muted)] max-w-2xl mx-auto text-lg">
               Harga transparan. Pilih rencana yang sesuai dengan kebutuhan
               keluarga Anda.
             </p>
@@ -638,7 +638,7 @@ export default function LandingPage() {
             <div className="card p-8 border border-[var(--card-border)] bg-white dark:bg-[var(--card-bg)] flex flex-col rounded-[var(--radius-card)] shadow-sm">
               <div className="mb-6">
                 <h3 className="text-xl font-bold mb-2">Free Trial</h3>
-                <p className="text-surface-500 text-sm">
+                <p className="text-[var(--text-muted)] text-sm">
                   Untuk mencoba fitur dasar
                 </p>
               </div>
@@ -674,7 +674,7 @@ export default function LandingPage() {
               </div>
               <div className="mb-6 mt-2">
                 <h3 className="text-xl font-bold mb-2">Basic</h3>
-                <p className="text-surface-500 text-sm">
+                <p className="text-[var(--text-muted)] text-sm">
                   Cocok untuk pendampingan harian
                 </p>
               </div>
@@ -682,7 +682,7 @@ export default function LandingPage() {
                 <span className="text-4xl font-bold tracking-tight">
                   Rp 150rb
                 </span>
-                <span className="text-surface-400">/bln</span>
+                <span className="text-[var(--text-muted)]">/bln</span>
               </div>
               <ul className="space-y-4 mb-10 flex-1">
                 <li className="flex items-start gap-3 text-sm text-surface-600 dark:text-surface-300">
@@ -708,7 +708,7 @@ export default function LandingPage() {
                 href="https://shopee.co.id/trenovaintelligence"
                 target="_blank"
                 rel="noreferrer"
-                className="w-full py-3 px-4 text-center rounded-full font-semibold bg-motivation-500 text-surface-900 hover:bg-motivation-600 transition-colors"
+                className="w-full py-3 px-4 text-center rounded-full font-semibold action-primary transition-colors"
               >
                 Berlangganan
               </a>
@@ -718,7 +718,7 @@ export default function LandingPage() {
             <div className="card p-8 border border-[var(--card-border)] bg-white dark:bg-[var(--card-bg)] flex flex-col rounded-[var(--radius-card)] shadow-sm">
               <div className="mb-6">
                 <h3 className="text-xl font-bold mb-2">Pro</h3>
-                <p className="text-surface-500 text-sm">
+                <p className="text-[var(--text-muted)] text-sm">
                   Untuk keluarga besar &amp; intensif
                 </p>
               </div>
@@ -726,7 +726,7 @@ export default function LandingPage() {
                 <span className="text-4xl font-bold tracking-tight">
                   Rp 250rb
                 </span>
-                <span className="text-surface-400">/bln</span>
+                <span className="text-[var(--text-muted)]">/bln</span>
               </div>
               <ul className="space-y-4 mb-10 flex-1">
                 <li className="flex items-start gap-3 text-sm text-surface-600 dark:text-surface-300">
@@ -786,7 +786,7 @@ export default function LandingPage() {
       </section>
 
       {/* CTA */}
-      <section className="py-32 px-6 text-center bg-white dark:bg-[#0A0A0A]">
+      <section className="py-32 px-6 text-center bg-white dark:bg-[var(--bg)]">
         <div className="max-w-2xl mx-auto">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary-50 dark:bg-primary-900/20 border border-primary-100 dark:border-primary-800/40 text-primary-700 dark:text-primary-300 text-xs font-semibold uppercase tracking-wider mb-8">
             <BookOpen size={14} className="text-primary-600" />
@@ -795,12 +795,12 @@ export default function LandingPage() {
           <h2 className="text-4xl font-bold tracking-tight mb-6">
             Siap Membantu Anak Belajar?
           </h2>
-          <p className="text-surface-500 text-lg mb-10">
+          <p className="text-[var(--text-muted)] text-lg mb-10">
             Platform Teatch gratis untuk dicoba. Tidak perlu kartu kredit.
           </p>
           <Link
             href="/login"
-            className="inline-flex items-center justify-center gap-2 px-10 py-4 text-base font-semibold text-surface-900 bg-motivation-500 hover:bg-motivation-600 rounded-[var(--radius-button)] transition-colors"
+            className="inline-flex items-center justify-center gap-2 px-10 py-4 text-base font-semibold action-primary rounded-[var(--radius-button)] transition-colors"
           >
             Daftar Gratis Sekarang
             <ArrowRight size={18} />
@@ -818,14 +818,14 @@ export default function LandingPage() {
                   src="/teatch_logo.png"
                   alt="Teatch Logo"
                   fill
-                  className="object-cover"
+                  className="brand-logo object-cover"
                 />
               </div>
               <span className="font-bold tracking-tight text-lg text-surface-900 dark:text-white">
                 Teatch
               </span>
             </div>
-            <p className="text-sm text-surface-500 max-w-sm leading-relaxed">
+            <p className="text-sm text-[var(--text-muted)] max-w-sm leading-relaxed">
               Platform Belajar Berbasis AI untuk Anak Indonesia. Meringankan
               tugas orang tua dan guru dalam menyajikan latihan yang adaptif dan
               interaktif.
@@ -838,7 +838,7 @@ export default function LandingPage() {
             <div className="flex flex-col gap-4">
               <a
                 href="mailto:trenova151@gmail.com"
-                className="flex items-center gap-3 text-sm text-surface-500 hover:text-primary-600 transition-colors"
+                className="flex items-center gap-3 text-sm text-[var(--text-muted)] hover:text-primary-600 transition-colors"
               >
                 <Mail size={18} />
                 trenova151@gmail.com
@@ -847,7 +847,7 @@ export default function LandingPage() {
                 href="https://wa.me/6287795078879"
                 target="_blank"
                 rel="noreferrer"
-                className="flex items-center gap-3 text-sm text-surface-500 hover:text-emerald-600 transition-colors"
+                className="flex items-center gap-3 text-sm text-[var(--text-muted)] hover:text-primary-600 dark:hover:text-primary-300 transition-colors"
               >
                 <MessageCircle size={18} />
                 +62 877 9507 8879 (WhatsApp)
@@ -856,20 +856,20 @@ export default function LandingPage() {
           </div>
         </div>
         <div className="max-w-6xl mx-auto border-t border-[var(--card-border)] pt-8 text-center md:text-left flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-xs text-surface-400">
+          <p className="text-xs text-[var(--text-muted)]">
             © {new Date().getFullYear()} Trenova Intelligence. Seluruh hak cipta
             dilindungi.
           </p>
           <div className="flex gap-4">
             <Link
               href="/privacy"
-              className="text-xs text-surface-400 hover:text-surface-600 dark:hover:text-surface-300 transition-colors"
+              className="text-xs text-[var(--text-muted)] hover:text-surface-600 dark:hover:text-surface-300 transition-colors"
             >
               Privasi
             </Link>
             <Link
               href="/terms"
-              className="text-xs text-surface-400 hover:text-surface-600 dark:hover:text-surface-300 transition-colors"
+              className="text-xs text-[var(--text-muted)] hover:text-surface-600 dark:hover:text-surface-300 transition-colors"
             >
               Syarat &amp; Ketentuan
             </Link>

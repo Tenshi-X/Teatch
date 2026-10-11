@@ -67,13 +67,15 @@ export function SettingsClient({
         <h1 className="text-2xl font-bold mb-1">
           {t('settings.title', language)}
         </h1>
-        <p className="text-surface-400">{t('settings.desc', language)}</p>
+        <p className="text-[var(--text-muted)]">
+          {t('settings.desc', language)}
+        </p>
       </div>
 
       {/* Profile Settings */}
       <Card padding="lg">
         <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-          <User className="text-primary-600" />
+          <User className="text-primary-600 dark:text-primary-300" />
           {t('settings.profile', language)}
         </h2>
         <form onSubmit={handleUpdateProfile} className="space-y-6 max-w-md">
@@ -113,7 +115,7 @@ export function SettingsClient({
                 />
               </label>
             </div>
-            <div className="text-sm text-surface-500">
+            <div className="text-sm text-[var(--text-muted)]">
               <p className="font-medium text-surface-700 dark:text-surface-300">
                 {t('settings.photo', language)}
               </p>
@@ -137,7 +139,7 @@ export function SettingsClient({
               <label className="block text-sm font-medium mb-1.5 text-surface-700 dark:text-surface-300">
                 {t('settings.email', language)}
               </label>
-              <div className="flex items-center gap-2 px-3 py-2 bg-surface-50 dark:bg-surface-800/50 rounded-lg border border-surface-200 dark:border-surface-700 text-surface-500 text-sm">
+              <div className="flex items-center gap-2 px-3 py-2 bg-surface-50 dark:bg-surface-800/50 rounded-lg border border-surface-200 dark:border-surface-700 text-[var(--text-muted)] text-sm">
                 <Mail size={16} />
                 {email}
               </div>
@@ -169,7 +171,7 @@ export function SettingsClient({
           <div className="flex items-center justify-between">
             <div>
               <p className="font-medium">{t('settings.darkMode', language)}</p>
-              <p className="text-sm text-surface-400">
+              <p className="text-sm text-[var(--text-muted)]">
                 {t('settings.darkModeDesc', language)}
               </p>
             </div>
@@ -187,7 +189,7 @@ export function SettingsClient({
                 <Globe size={18} className="text-primary-500" />
                 {t('settings.language', language)}
               </p>
-              <p className="text-sm text-surface-400">
+              <p className="text-sm text-[var(--text-muted)]">
                 {t('settings.languageDesc', language)}
               </p>
             </div>
@@ -196,8 +198,8 @@ export function SettingsClient({
                 onClick={() => setLanguage('id')}
                 className={`px-3 py-1.5 text-sm font-medium rounded-md transition-all ${
                   language === 'id'
-                    ? 'bg-white dark:bg-surface-600 shadow-sm text-primary-600 dark:text-primary-400'
-                    : 'text-surface-500 hover:text-surface-700 dark:hover:text-surface-300'
+                    ? 'bg-white dark:bg-[var(--card-bg)] shadow-sm text-primary-600 dark:text-primary-300'
+                    : 'text-[var(--text-muted)] hover:text-surface-700 dark:hover:text-surface-300'
                 }`}
               >
                 Indo
@@ -206,8 +208,8 @@ export function SettingsClient({
                 onClick={() => setLanguage('en')}
                 className={`px-3 py-1.5 text-sm font-medium rounded-md transition-all ${
                   language === 'en'
-                    ? 'bg-white dark:bg-surface-600 shadow-sm text-primary-600 dark:text-primary-400'
-                    : 'text-surface-500 hover:text-surface-700 dark:hover:text-surface-300'
+                    ? 'bg-white dark:bg-[var(--card-bg)] shadow-sm text-primary-600 dark:text-primary-300'
+                    : 'text-[var(--text-muted)] hover:text-surface-700 dark:hover:text-surface-300'
                 }`}
               >
                 English
@@ -226,13 +228,13 @@ export function SettingsClient({
           <LogOut />
           {t('settings.session', language)}
         </h2>
-        <p className="text-sm text-surface-500 mb-4">
+        <p className="text-sm text-[var(--text-muted)] mb-4">
           {t('settings.sessionDesc', language)}
         </p>
         <Button
           variant="outline"
           onClick={() => signOut()}
-          className="text-danger-600 hover:text-danger-700 hover:bg-danger-50 border-danger-200 dark:border-danger-900 dark:hover:bg-danger-500/10"
+          className="text-danger-600 dark:text-danger-500 hover:text-danger-700 dark:hover:text-danger-500 hover:bg-danger-50 border-danger-200 dark:border-danger-500/60 dark:hover:bg-danger-500/10"
         >
           {t('settings.logoutBtn', language)}
         </Button>

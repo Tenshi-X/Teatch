@@ -114,7 +114,7 @@ export function Header({
               <div className="absolute right-0 top-full mt-2 w-56 card p-2 shadow-sm border border-[var(--card-border)] animate-scale-in">
                 <div className="px-3 py-2 border-b border-[var(--card-border)] mb-2">
                   <p className="text-sm font-medium">{userName}</p>
-                  <p className="text-xs text-surface-400">
+                  <p className="text-xs text-[var(--text-muted)]">
                     {t('header.parentAccount', language)}
                   </p>
                 </div>
@@ -123,7 +123,7 @@ export function Header({
                     setShowUserMenu(false);
                     signOut();
                   }}
-                  className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-danger-600 hover:bg-danger-50 dark:hover:bg-danger-500/10 transition-colors cursor-pointer"
+                  className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-danger-600 dark:text-danger-500 hover:bg-danger-50 dark:hover:bg-danger-500/10 transition-colors cursor-pointer"
                 >
                   <LogOut size={16} />
                   {t('header.logout', language)}

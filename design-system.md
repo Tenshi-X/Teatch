@@ -14,6 +14,8 @@ Teatch membantu orang tua menyiapkan latihan, mendampingi anak, meninjau jawaban
 
 Palet pilihan pengguna dan fungsi setiap warna ada di `color-pallete.md`. Gunakan token di `app/globals.css`; hindari warna literal pada komponen baru. Turunan lebih gelap dipakai untuk teks, tautan, dan fokus yang membutuhkan kontras. Status selalu disertai teks atau tanda; warna tidak menjadi satu-satunya pembeda.
 
+Bidang besar selalu netral. Mode gelap memakai charcoal, bukan latar hijau. Teal dan mint menandai tindakan atau pilihan; cream dan orange hanya aksen kecil. Panel tinjauan tetap mengikuti permukaan kartu, dengan ikon cream sebagai penanda. Teks keterangan memakai `--text-muted` agar tetap terbaca pada kedua tema. Batas kontrol lebih kuat daripada garis dekoratif kartu.
+
 ## Bentuk dan ruang
 
 - Jarak mengikuti kelipatan 4px; jarak umum 8, 12, 16, 20, 24, 32, dan 40px.

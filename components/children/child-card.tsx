@@ -23,7 +23,7 @@ export function ChildCard({ child, onDelete }: ChildCardProps) {
           aria-label={`Edit profil ${child.name}`}
           className="p-2 rounded-lg hover:bg-surface-100 dark:hover:bg-surface-800 transition-colors"
         >
-          <Edit size={16} className="text-surface-500" />
+          <Edit size={16} className="text-[var(--text-muted)]" />
         </Link>
         {onDelete && (
           <button
@@ -66,7 +66,7 @@ export function ChildCard({ child, onDelete }: ChildCardProps) {
                   </span>
                 ))}
                 {child.interests.length > 3 && (
-                  <span className="text-xs text-surface-400">
+                  <span className="text-xs text-[var(--text-muted)]">
                     +{child.interests.length - 3} lainnya
                   </span>
                 )}

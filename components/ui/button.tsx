@@ -21,11 +21,10 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     ref
   ) => {
     const baseStyles =
-      'inline-flex items-center justify-center gap-2 font-medium rounded-[var(--radius-button)] transition-colors duration-150 ease-out focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg)] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer';
+      'inline-flex items-center justify-center gap-2 font-medium rounded-[var(--radius-button)] transition-colors duration-150 ease-out focus-visible:ring-2 focus-visible:ring-[var(--accent-color)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg)] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer';
 
     const variants = {
-      primary:
-        'bg-motivation-500 text-surface-900 hover:bg-motivation-600 border border-transparent',
+      primary: 'action-primary border border-transparent',
       secondary:
         'bg-[var(--card-bg)] border border-[var(--input-border)] text-[var(--fg)] hover:bg-[var(--surface-subtle)]',
       outline:
@@ -34,7 +33,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         'text-[var(--text-soft)] hover:bg-[var(--surface-subtle)] bg-transparent border border-transparent',
       danger:
         'bg-danger-600 text-white hover:bg-danger-700 border border-transparent',
-      ai: 'bg-motivation-500 text-surface-900 hover:bg-motivation-600 border border-transparent',
+      ai: 'action-primary border border-transparent',
     };
 
     const sizes = {

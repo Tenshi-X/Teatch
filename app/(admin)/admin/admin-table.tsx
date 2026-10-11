@@ -23,11 +23,11 @@ export function AdminTable({ profiles }: AdminTableProps) {
   });
 
   const getStatusColor = (status: string, endDate: string | null) => {
-    if (status !== 'active') return 'text-red-500';
-    if (!endDate) return 'text-emerald-400';
+    if (status !== 'active') return 'text-error-600 dark:text-error-500';
+    if (!endDate) return 'text-primary-600 dark:text-primary-300';
     const end = new Date(endDate);
-    if (end < new Date()) return 'text-red-500';
-    return 'text-emerald-400';
+    if (end < new Date()) return 'text-error-600 dark:text-error-500';
+    return 'text-primary-600 dark:text-primary-300';
   };
 
   const getStatusText = (status: string, endDate: string | null) => {
@@ -43,7 +43,7 @@ export function AdminTable({ profiles }: AdminTableProps) {
   return (
     <>
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-bold text-white flex items-center gap-2">
+        <h2 className="text-xl font-bold text-[var(--fg)] flex items-center gap-2">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="20"
@@ -54,7 +54,7 @@ export function AdminTable({ profiles }: AdminTableProps) {
             strokeWidth="2"
             strokeLinecap="round"
             strokeLinejoin="round"
-            className="text-slate-400"
+            className="text-[var(--text-muted)]"
           >
             <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
           </svg>
@@ -66,16 +66,16 @@ export function AdminTable({ profiles }: AdminTableProps) {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Cari berdasarkan email..."
-            className="bg-[#1E293B] border border-slate-700 text-sm text-white rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 placeholder:text-slate-500 w-64"
+            className="bg-[var(--card-bg)] border border-[var(--card-border)] text-sm text-[var(--fg)] rounded-lg px-4 py-2 focus:outline-none focus:border-[var(--accent-color)] focus:ring-1 focus:ring-[var(--accent-color)] placeholder:text-[var(--text-muted)] w-64"
           />
         </div>
       </div>
 
-      <div className="bg-[#1E293B] border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
+      <div className="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-2xl overflow-hidden shadow-xl">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-slate-800/50 text-xs font-semibold text-slate-400 uppercase tracking-wider">
+              <tr className="bg-[var(--surface-subtle)]/50 text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">
                 <th className="px-6 py-4">Profil Pengguna</th>
                 <th className="px-6 py-4">Peran</th>
                 <th className="px-6 py-4">Sisa</th>
@@ -83,20 +83,20 @@ export function AdminTable({ profiles }: AdminTableProps) {
                 <th className="px-6 py-4 text-right">Aksi</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/60 text-sm">
+            <tbody className="divide-y divide-[var(--card-border)]/60 text-sm">
               {filteredProfiles.map((profile) => (
                 <tr
                   key={profile.id}
-                  className="hover:bg-slate-800/30 transition-colors"
+                  className="hover:bg-[var(--surface-subtle)]/30 transition-colors"
                 >
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-slate-300 font-medium">
+                      <div className="w-8 h-8 rounded-full bg-[var(--surface-subtle)] flex items-center justify-center text-[var(--text-soft)] font-medium">
                         {(profile.email || profile.full_name || 'U')
                           .charAt(0)
                           .toUpperCase()}
                       </div>
-                      <span className="font-medium text-slate-200">
+                      <span className="font-medium text-[var(--text-soft)]">
                         {profile.email || profile.full_name || 'Tanpa Nama'}
                       </span>
                     </div>
@@ -105,8 +105,8 @@ export function AdminTable({ profiles }: AdminTableProps) {
                     <span
                       className={`inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium border ${
                         profile.role === 'admin'
-                          ? 'bg-purple-500/10 text-purple-400 border-purple-500/20'
-                          : 'bg-blue-500/10 text-blue-400 border-blue-500/20'
+                          ? 'bg-[var(--surface-subtle)] text-primary-600 dark:text-primary-300 border-[var(--card-border)]'
+                          : 'bg-[var(--surface-subtle)] text-primary-600 dark:text-primary-300 border-[var(--card-border)]'
                       }`}
                     >
                       {profile.role?.toUpperCase() || 'USER'}
@@ -114,10 +114,10 @@ export function AdminTable({ profiles }: AdminTableProps) {
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex flex-col">
-                      <span className="font-medium text-slate-200">
+                      <span className="font-medium text-[var(--text-soft)]">
                         {profile.worksheet_quota ?? 0} soal
                       </span>
-                      <span className="text-xs text-slate-500">
+                      <span className="text-xs text-[var(--text-muted)]">
                         sisa dari {profile.quota} batas
                       </span>
                     </div>
@@ -132,7 +132,7 @@ export function AdminTable({ profiles }: AdminTableProps) {
                           profile.subscription_period_end
                         )}
                       </span>
-                      <span className="text-xs text-slate-500 mt-0.5">
+                      <span className="text-xs text-[var(--text-muted)] mt-0.5">
                         {profile.subscription_period_end
                           ? `Berakhir: ${format(new Date(profile.subscription_period_end), 'd MMM yyyy, HH:mm', { locale: id })} WIB`
                           : 'Tidak ada batas waktu'}
@@ -143,7 +143,7 @@ export function AdminTable({ profiles }: AdminTableProps) {
                     <div className="flex items-center justify-end gap-2">
                       <button
                         onClick={() => setSelectedUser(profile)}
-                        className="p-2 text-slate-400 hover:text-white hover:bg-slate-700 rounded-lg transition-all"
+                        className="p-2 text-[var(--text-muted)] hover:text-[var(--fg)] hover:bg-[var(--surface-subtle)] rounded-lg transition-all"
                       >
                         <Pencil size={16} />
                       </button>

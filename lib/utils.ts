@@ -55,13 +55,7 @@ export function getInitials(name: string): string {
 }
 
 export function getLevelColor(level: string): string {
-  const colors: Record<string, string> = {
-    PAUD: '#FF6B6B',
-    'TK A': '#FF8E53',
-    'TK B': '#FFA726',
-    SD: '#4F46E5',
-    SMP: '#7C3AED',
-    SMA: '#2563EB',
-  };
-  return colors[level] || '#6B7280';
+  return ['PAUD', 'TK A', 'TK B', 'SD', 'SMP', 'SMA'].includes(level)
+    ? 'var(--accent-color)'
+    : 'var(--text-muted)';
 }

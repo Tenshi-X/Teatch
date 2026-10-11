@@ -8,4 +8,4 @@ Gunakan `design-system.md` sebagai sumber aturan komponen, tipografi, ruang, dan
 
 Dashboard menonjolkan langkah berikutnya, tinjauan yang tertunda, dan materi yang perlu dilatih. Halaman latihan memberi ruang pada satu soal, pilihan jawaban yang mudah ditekan, dan navigasi sederhana. Worksheet cetak mengikuti struktur lembar kerja guru.
 
-Halaman pengenalan menjelaskan manfaat bagi orang tua melalui contoh latihan yang konkret. Gunakan tata letak yang sesuai isi, tombol utama oranye, identitas teal, serta mint dan krem sebagai bidang pendamping.
+Halaman pengenalan menjelaskan manfaat bagi orang tua melalui contoh latihan yang konkret. Tombol utama memakai teal gelap pada mode terang dan mint pada mode gelap. Bidang besar netral; cream dan orange hanya menjadi aksen kecil. Mode gelap memakai charcoal dengan teks serta batas kontrol yang jelas.

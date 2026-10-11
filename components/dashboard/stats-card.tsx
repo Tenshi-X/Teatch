@@ -9,7 +9,14 @@ interface StatsCardProps {
   color: string;
 }
 
-export function StatsCard({ title, value, subtitle, icon, trend, color }: StatsCardProps) {
+export function StatsCard({
+  title,
+  value,
+  subtitle,
+  icon,
+  trend,
+  color,
+}: StatsCardProps) {
   return (
     <div className="card p-5 relative overflow-hidden group">
       {/* Background gradient accent */}
@@ -20,10 +27,10 @@ export function StatsCard({ title, value, subtitle, icon, trend, color }: StatsC
 
       <div className="flex items-start justify-between relative z-10">
         <div className="flex-1">
-          <p className="text-sm text-surface-400 mb-1">{title}</p>
+          <p className="text-sm text-[var(--text-muted)] mb-1">{title}</p>
           <p className="text-2xl font-bold">{value}</p>
           {subtitle && (
-            <p className="text-xs text-surface-400 mt-1">{subtitle}</p>
+            <p className="text-xs text-[var(--text-muted)] mt-1">{subtitle}</p>
           )}
           {trend && (
             <div className="flex items-center gap-1 mt-2">
@@ -35,7 +42,9 @@ export function StatsCard({ title, value, subtitle, icon, trend, color }: StatsC
               >
                 {trend.value >= 0 ? '↑' : '↓'} {Math.abs(trend.value)}%
               </span>
-              <span className="text-xs text-surface-400">{trend.label}</span>
+              <span className="text-xs text-[var(--text-muted)]">
+                {trend.label}
+              </span>
             </div>
           )}
         </div>

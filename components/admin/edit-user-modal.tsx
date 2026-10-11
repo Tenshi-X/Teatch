@@ -54,12 +54,14 @@ export function EditUserModal({ user, onClose }: EditUserModalProps) {
 
   return (
     <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="bg-[#1E293B] rounded-2xl w-full max-w-md border border-slate-700 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
-        <div className="flex items-center justify-between p-6 border-b border-slate-800">
-          <h2 className="text-xl font-semibold text-white">Edit Pengguna</h2>
+      <div className="bg-[var(--card-bg)] rounded-2xl w-full max-w-md border border-[var(--card-border)] animate-in fade-in zoom-in-95 duration-200">
+        <div className="flex items-center justify-between p-6 border-b border-[var(--card-border)]">
+          <h2 className="text-xl font-semibold text-[var(--fg)]">
+            Edit Pengguna
+          </h2>
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-white transition-colors"
+            className="text-[var(--text-muted)] hover:text-[var(--fg)] transition-colors"
           >
             <X size={20} />
           </button>
@@ -67,22 +69,22 @@ export function EditUserModal({ user, onClose }: EditUserModalProps) {
 
         <form onSubmit={handleSubmit} className="p-6 space-y-5">
           <div>
-            <label className="block text-sm font-medium text-slate-300 mb-1.5">
+            <label className="block text-sm font-medium text-[var(--text-soft)] mb-1.5">
               Email / Akun
             </label>
-            <div className="px-3 py-2 bg-slate-800/50 rounded-lg text-slate-400 text-sm border border-slate-700">
+            <div className="px-3 py-2 bg-[var(--surface-subtle)]/50 rounded-lg text-[var(--text-muted)] text-sm border border-[var(--card-border)]">
               {user.email || user.full_name || 'Tanpa Nama'}
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-300 mb-1.5">
+            <label className="block text-sm font-medium text-[var(--text-soft)] mb-1.5">
               Peran (Role)
             </label>
             <select
               value={role}
               onChange={(e) => setRole(e.target.value as 'admin' | 'user')}
-              className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="input-base text-sm"
             >
               <option value="user">User Biasa</option>
               <option value="admin">Administrator</option>
@@ -90,13 +92,13 @@ export function EditUserModal({ user, onClose }: EditUserModalProps) {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-300 mb-1.5">
+            <label className="block text-sm font-medium text-[var(--text-soft)] mb-1.5">
               Paket Berlangganan
             </label>
             <select
               value={tier}
               onChange={(e) => setTier(e.target.value)}
-              className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="input-base text-sm"
             >
               {Object.entries(SUBSCRIPTION_LIMITS).map(([value, plan]) => (
                 <option key={value} value={value}>
@@ -107,13 +109,13 @@ export function EditUserModal({ user, onClose }: EditUserModalProps) {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-300 mb-1.5">
+            <label className="block text-sm font-medium text-[var(--text-soft)] mb-1.5">
               Status Berlangganan
             </label>
             <select
               value={status}
               onChange={(e) => setStatus(e.target.value)}
-              className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="input-base text-sm"
             >
               <option value="active">Aktif</option>
               <option value="canceled">Dibatalkan (Canceled)</option>
@@ -122,18 +124,18 @@ export function EditUserModal({ user, onClose }: EditUserModalProps) {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-300 mb-1.5">
+            <label className="block text-sm font-medium text-[var(--text-soft)] mb-1.5">
               Tanggal Berakhir (Masa Aktif)
             </label>
             <input
               type="date"
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
-              className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 [color-scheme:dark]"
+              className="input-base text-sm"
             />
           </div>
 
-          <label className="flex items-center gap-2 text-sm text-slate-300">
+          <label className="flex items-center gap-2 text-sm text-[var(--text-soft)]">
             <input
               type="checkbox"
               checked={resetQuota}
@@ -145,14 +147,14 @@ export function EditUserModal({ user, onClose }: EditUserModalProps) {
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-sm font-medium text-slate-300 hover:text-white bg-transparent transition-colors"
+              className="px-4 py-2 text-sm font-medium text-[var(--text-soft)] hover:text-[var(--fg)] bg-transparent transition-colors"
             >
               Batal
             </button>
             <button
               type="submit"
               disabled={isLoading}
-              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-lg shadow-blue-500/20 transition-all flex items-center gap-2"
+              className="px-4 py-2 text-sm font-medium action-primary rounded-lg transition-all flex items-center gap-2"
             >
               {isLoading && <Loader2 size={16} className="animate-spin" />}
               Simpan Perubahan

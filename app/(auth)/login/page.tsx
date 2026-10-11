@@ -40,13 +40,13 @@ export default function LoginPage() {
             src="/teatch_logo.png"
             alt="Teatch Logo"
             fill
-            className="object-cover"
+            className="brand-logo object-cover"
           />
         </div>
-        <h1 className="text-3xl font-bold text-primary-600 dark:text-primary-500">
+        <h1 className="text-3xl font-bold text-primary-600 dark:text-primary-300">
           Teatch
         </h1>
-        <p className="text-surface-400 mt-1 text-sm">
+        <p className="text-[var(--text-muted)] mt-1 text-sm">
           Platform Belajar Berbasis AI untuk Anak
         </p>
       </div>
@@ -56,14 +56,14 @@ export default function LoginPage() {
         <div className="flex flex-col items-center justify-center gap-2 mb-8">
           <Sparkles className="w-8 h-8 text-primary-500 mb-2" />
           <h2 className="text-2xl font-semibold">Selamat Datang</h2>
-          <p className="text-surface-500 text-sm">
+          <p className="text-[var(--text-muted)] text-sm">
             Masuk untuk melanjutkan perjalanan belajar Anda.
           </p>
         </div>
 
         <Button
           onClick={handleGoogleLogin}
-          className="w-full bg-white text-surface-900 border-[1.5px] border-surface-200 hover:bg-surface-50 dark:bg-[#121212] dark:text-white dark:border-surface-700 dark:hover:bg-surface-800 shadow-sm"
+          className="w-full bg-white text-surface-900 border-[1.5px] border-surface-200 hover:bg-surface-50 dark:bg-[var(--input-bg)] dark:text-white dark:border-surface-700 dark:hover:bg-surface-800 shadow-sm"
           variant="outline"
           size="lg"
           isLoading={isPending}
@@ -89,7 +89,7 @@ export default function LoginPage() {
           Lanjutkan dengan Google
         </Button>
 
-        <p className="text-xs text-surface-400 mt-6 max-w-xs mx-auto">
+        <p className="text-xs text-[var(--text-muted)] mt-6 max-w-xs mx-auto">
           Dengan masuk, Anda menyetujui Ketentuan Layanan dan Kebijakan Privasi
           kami.
         </p>

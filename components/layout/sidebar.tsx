@@ -68,11 +68,11 @@ export function Sidebar({ isOpen, onClose, userRole }: SidebarProps) {
                 src="/teatch_logo.png"
                 alt="Teatch Logo"
                 fill
-                className="object-cover"
+                className="brand-logo object-cover"
               />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-primary-600 dark:text-primary-500">
+              <h1 className="text-xl font-bold text-primary-600 dark:text-primary-300">
                 Teatch
               </h1>
               <p className="text-xs text-[var(--text-muted)] -mt-0.5">
@@ -105,8 +105,8 @@ export function Sidebar({ isOpen, onClose, userRole }: SidebarProps) {
                 className={cn(
                   'flex items-center gap-3 px-4 py-2.5 rounded-[var(--radius-input)] text-sm font-medium transition-all duration-150 border',
                   isActive
-                    ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 border-primary-500'
-                    : 'border-transparent text-surface-600 hover:bg-surface-50 dark:hover:bg-surface-800/50 hover:text-surface-700 dark:hover:text-surface-300'
+                    ? 'nav-active'
+                    : 'border-transparent text-[var(--text-muted)] hover:bg-surface-50 dark:hover:bg-surface-800/50 hover:text-surface-700 dark:hover:text-surface-300'
                 )}
               >
                 <item.icon
@@ -124,7 +124,7 @@ export function Sidebar({ isOpen, onClose, userRole }: SidebarProps) {
             <Link
               href="/admin"
               onClick={handleLinkClick}
-              className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 text-rose-500 hover:bg-rose-500/10"
+              className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 text-[var(--text-muted)] hover:bg-[var(--surface-subtle)]"
             >
               <ShieldAlert size={20} />
               {t('nav.admin', language)}
@@ -139,8 +139,8 @@ export function Sidebar({ isOpen, onClose, userRole }: SidebarProps) {
             className={cn(
               'flex items-center gap-3 px-4 py-2.5 rounded-[var(--radius-input)] text-sm font-medium transition-all duration-150 border',
               pathname === '/settings'
-                ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 border-primary-500'
-                : 'border-transparent text-surface-600 hover:bg-surface-50 dark:hover:bg-surface-800/50 hover:text-surface-700 dark:hover:text-surface-300'
+                ? 'nav-active'
+                : 'border-transparent text-[var(--text-muted)] hover:bg-surface-50 dark:hover:bg-surface-800/50 hover:text-surface-700 dark:hover:text-surface-300'
             )}
           >
             <Settings size={20} />

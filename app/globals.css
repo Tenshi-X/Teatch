@@ -68,27 +68,31 @@
 
   --color-danger-50: var(--color-error-50);
   --color-danger-100: #fee2e2;
+  --color-danger-200: #fecaca;
   --color-danger-500: var(--color-error-500);
   --color-danger-600: var(--color-error-600);
   --color-danger-700: #912018;
+  --color-danger-900: var(--color-error-900);
   --color-warning-50: var(--color-learning-50);
   --color-warning-100: var(--color-learning-50);
+  --color-warning-400: #fff0c5;
   --color-warning-500: var(--color-learning-500);
   --color-warning-600: var(--color-learning-600);
+  --color-warning-900: var(--color-learning-900);
 
-  /* Surface colors (Light mode equivalents to Slate/Gray) */
+  /* Neutral surfaces avoid a blue or green cast. */
   --color-surface-0: #ffffff;
-  --color-surface-50: #fafbfc;
-  --color-surface-100: #f5f7fa;
-  --color-surface-200: #eef2f7;
-  --color-surface-300: #d6dee8;
-  --color-surface-400: #cbd5e1;
-  --color-surface-500: #94a3b8;
-  --color-surface-600: #64748b;
-  --color-surface-700: #475569;
-  --color-surface-800: #1e293b;
-  --color-surface-900: #0f172a;
-  --color-surface-950: #020617;
+  --color-surface-50: #faf9f6;
+  --color-surface-100: #f2f1ed;
+  --color-surface-200: #e6e4de;
+  --color-surface-300: #d2cfc7;
+  --color-surface-400: #aaa79f;
+  --color-surface-500: #77746d;
+  --color-surface-600: #625f59;
+  --color-surface-700: #484641;
+  --color-surface-800: #303030;
+  --color-surface-900: #222222;
+  --color-surface-950: #181818;
 
   /* Background & Foreground */
   --color-background: var(--bg);
@@ -107,38 +111,60 @@
    ============================================================ */
 
 :root {
-  --bg: #fffdf7;
-  --fg: #1e293b;
+  color-scheme: light;
+  --bg: #f7f6f2;
+  --fg: #292824;
   --card-bg: #ffffff;
-  --card-border: #e5e7eb;
+  --card-border: #dedbd4;
   --sidebar-bg: #ffffff;
-  --sidebar-border: #e5e7eb;
+  --sidebar-border: #dedbd4;
   --input-bg: #ffffff;
-  --input-border: #e5e7eb;
+  --input-border: #918e87;
   --text-muted: var(--color-surface-600);
   --text-soft: var(--color-surface-700);
   --surface-subtle: var(--color-surface-100);
+  --action-bg: var(--color-primary-600);
+  --action-hover: var(--color-primary-700);
+  --action-text: #ffffff;
+  --selection-bg: var(--color-primary-50);
+  --selection-border: var(--color-primary-600);
+  --selection-text: var(--color-primary-700);
+  --accent-color: var(--color-primary-600);
+  --note-bg: #fff7df;
+  --note-text: #78591c;
+  --error-text: var(--color-error-600);
   --glass-bg: rgba(255, 255, 255, 0.95);
   --glass-border: var(--card-border);
-  --shadow-sm: 0 2px 6px rgba(15, 23, 42, 0.04);
-  --shadow-md: 0 6px 20px rgba(15, 23, 42, 0.06);
-  --shadow-lg: 0 12px 40px rgba(15, 23, 42, 0.08);
-  --shadow-xl: 0 24px 60px rgba(15, 23, 42, 0.1);
+  --shadow-sm: 0 2px 6px rgba(24, 24, 24, 0.04);
+  --shadow-md: 0 6px 20px rgba(24, 24, 24, 0.06);
+  --shadow-lg: 0 12px 40px rgba(24, 24, 24, 0.08);
+  --shadow-xl: 0 24px 60px rgba(24, 24, 24, 0.1);
 }
 
 .dark {
-  --bg: #122527;
-  --fg: #f8fafc;
-  --card-bg: #1c3335;
-  --card-border: #334155;
-  --sidebar-bg: #172e30;
-  --sidebar-border: #334155;
-  --input-bg: #1c3335;
-  --input-border: #334155;
-  --text-muted: var(--color-surface-300);
-  --text-soft: var(--color-surface-200);
-  --surface-subtle: var(--color-surface-900);
-  --glass-bg: rgba(30, 41, 59, 0.95);
+  color-scheme: dark;
+  --bg: #181818;
+  --fg: #f2f1ed;
+  --card-bg: #222222;
+  --card-border: #454545;
+  --sidebar-bg: #1e1e1e;
+  --sidebar-border: #454545;
+  --input-bg: #1b1b1b;
+  --input-border: #77746d;
+  --text-muted: #b8b5ae;
+  --text-soft: #d2cfc7;
+  --surface-subtle: #2c2c2c;
+  --action-bg: var(--color-primary-300);
+  --action-hover: var(--color-primary-200);
+  --action-text: #1c4042;
+  --selection-bg: #303030;
+  --selection-border: var(--color-primary-300);
+  --selection-text: var(--color-primary-300);
+  --accent-color: var(--color-primary-300);
+  --note-bg: #332e24;
+  --note-text: var(--color-learning-50);
+  --error-text: var(--color-error-500);
+  --glass-bg: rgba(34, 34, 34, 0.95);
   --glass-border: var(--card-border);
   --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.3);
   --shadow-md: 0 6px 20px rgba(0, 0, 0, 0.4);
@@ -198,19 +224,29 @@ body {
 }
 
 .input-base::placeholder {
-  color: var(--color-surface-500);
+  color: var(--text-muted);
 }
 
 .input-base:focus {
-  border-color: var(--color-primary-500);
+  border-color: var(--accent-color);
   box-shadow:
     0 0 0 2px var(--bg),
-    0 0 0 4px var(--color-primary-500);
+    0 0 0 4px var(--accent-color);
 }
 
 .input-base:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+.input-base[aria-invalid='true'] {
+  border-color: var(--error-text);
+}
+
+.input-base[aria-invalid='true']:focus {
+  box-shadow:
+    0 0 0 2px var(--bg),
+    0 0 0 4px var(--error-text);
 }
 
 /* Sidebar */
@@ -220,8 +256,35 @@ body {
 }
 
 :where(a, button, input, select, textarea):focus-visible {
-  outline: 2px solid var(--color-primary-600);
+  outline: 2px solid var(--accent-color);
   outline-offset: 4px;
+}
+
+input[type='range'],
+input[type='checkbox'],
+input[type='radio'] {
+  accent-color: var(--accent-color);
+}
+
+.action-primary {
+  background: var(--action-bg);
+  color: var(--action-text);
+}
+
+.action-primary:hover:not(:disabled) {
+  background: var(--action-hover);
+}
+
+.nav-active {
+  background: var(--selection-bg);
+  border-color: transparent;
+  color: var(--selection-text);
+  box-shadow: inset 3px 0 0 var(--selection-border);
+}
+
+/* Preserve the existing logo shape with a neutral treatment. */
+.brand-logo {
+  filter: grayscale(1);
 }
 
 .learning-eyebrow {
@@ -263,13 +326,13 @@ body {
 
 .answer-choice:hover:not(:disabled),
 .answer-piece:hover:not(:disabled) {
-  border-color: var(--color-primary-500);
+  border-color: var(--selection-border);
 }
 
 .answer-choice[aria-pressed='true'] {
-  border-color: var(--color-primary-500);
-  box-shadow: inset 3px 0 0 var(--color-primary-500);
-  background: var(--surface-subtle);
+  border-color: var(--selection-border);
+  box-shadow: inset 3px 0 0 var(--selection-border);
+  background: var(--selection-bg);
 }
 
 .answer-choice:disabled,

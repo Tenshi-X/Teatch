@@ -24,16 +24,22 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
         <input
           ref={ref}
           id={inputId}
+          aria-invalid={error ? true : undefined}
           className={cn(
             'input-base',
-            error && 'border-danger-500 focus:border-danger-500 focus:shadow-[0_0_0_2px_var(--bg),0_0_0_4px_var(--color-danger-500)]',
+            error &&
+              'border-danger-500 focus:border-danger-500 focus:shadow-[0_0_0_2px_var(--bg),0_0_0_4px_var(--color-danger-500)]',
             className
           )}
           {...props}
         />
-        {error && <p className="mt-1.5 text-sm text-danger-500">{error}</p>}
+        {error && (
+          <p className="mt-1.5 text-sm text-[var(--error-text)]">{error}</p>
+        )}
         {helperText && !error && (
-          <p className="mt-1.5 text-sm text-surface-400">{helperText}</p>
+          <p className="mt-1.5 text-sm text-[var(--text-muted)]">
+            {helperText}
+          </p>
         )}
       </div>
     );

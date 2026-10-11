@@ -62,7 +62,7 @@ export default function OnboardingPage() {
       <div className="w-full max-w-md bg-white dark:bg-surface-900 rounded-3xl shadow-xl p-8 border border-surface-200 dark:border-surface-800">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold mb-2">Selamat Datang! 🎉</h1>
-          <p className="text-surface-500">
+          <p className="text-[var(--text-muted)]">
             Mari lengkapi profil Anda sebelum mulai menggunakan Teatch.
           </p>
         </div>
@@ -101,7 +101,7 @@ export default function OnboardingPage() {
               required
               className="w-full"
             />
-            <p className="text-xs text-surface-400 mt-1">
+            <p className="text-xs text-[var(--text-muted)] mt-1">
               Nomor ini akan digunakan untuk informasi terkait akun.
             </p>
           </div>

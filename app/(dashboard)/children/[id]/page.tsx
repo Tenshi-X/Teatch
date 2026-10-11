@@ -44,7 +44,7 @@ export default async function ChildDetailPage({
     <div className="max-w-2xl mx-auto animate-fade-in">
       <Link
         href="/children"
-        className="inline-flex items-center gap-1 text-sm text-surface-400 hover:text-surface-600 dark:hover:text-surface-300 mb-4 transition-colors"
+        className="inline-flex items-center gap-1 text-sm text-[var(--text-muted)] hover:text-surface-600 dark:hover:text-surface-300 mb-4 transition-colors"
       >
         <ArrowLeft size={16} />
         Kembali
@@ -82,7 +82,7 @@ export default async function ChildDetailPage({
 
             <div className="space-y-3 text-sm">
               <div>
-                <span className="text-surface-400">Tanggal Lahir:</span>{' '}
+                <span className="text-[var(--text-muted)]">Tanggal Lahir:</span>{' '}
                 <span className="font-medium">
                   {formatDate(child.birth_date)}
                 </span>
@@ -90,7 +90,9 @@ export default async function ChildDetailPage({
 
               {child.interests && child.interests.length > 0 && (
                 <div>
-                  <span className="text-surface-400 block mb-1">Minat:</span>
+                  <span className="text-[var(--text-muted)] block mb-1">
+                    Minat:
+                  </span>
                   <div className="flex flex-wrap gap-1.5">
                     {child.interests.map((interest) => (
                       <Badge key={interest} variant="primary" size="sm">
@@ -104,7 +106,7 @@ export default async function ChildDetailPage({
               {child.favorite_subjects &&
                 child.favorite_subjects.length > 0 && (
                   <div>
-                    <span className="text-surface-400 block mb-1">
+                    <span className="text-[var(--text-muted)] block mb-1">
                       Mata Pelajaran Favorit:
                     </span>
                     <div className="flex flex-wrap gap-1.5">

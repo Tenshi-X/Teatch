@@ -17,70 +17,88 @@ export default async function AdminPage() {
       {/* Metrics Row */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Total Users */}
-        <div className="bg-[#1E293B] rounded-2xl p-6 border border-slate-800 shadow-lg relative overflow-hidden group">
+        <div className="bg-[var(--card-bg)] rounded-2xl p-6 border border-[var(--card-border)] relative overflow-hidden group">
           <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity">
-            <Users size={64} className="text-blue-500" />
+            <Users
+              size={64}
+              className="text-primary-600 dark:text-primary-300"
+            />
           </div>
           <div className="flex justify-between items-start mb-4 relative z-10">
-            <div className="p-3 bg-blue-500/10 rounded-xl">
-              <Users size={24} className="text-blue-400" />
+            <div className="p-3 bg-[var(--surface-subtle)] rounded-xl">
+              <Users
+                size={24}
+                className="text-primary-600 dark:text-primary-300"
+              />
             </div>
-            <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">
+            <span className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-widest">
               Total Pengguna
             </span>
           </div>
           <div className="relative z-10">
-            <h3 className="text-4xl font-bold text-white mb-1">
+            <h3 className="text-4xl font-bold text-[var(--fg)] mb-1">
               {metrics.totalUsers}
             </h3>
-            <p className="text-sm text-slate-500">Akun Terdaftar</p>
+            <p className="text-sm text-[var(--text-muted)]">Akun Terdaftar</p>
           </div>
         </div>
 
         {/* Active Subscriptions */}
-        <div className="bg-[#1E293B] rounded-2xl p-6 border border-slate-800 shadow-lg relative overflow-hidden group">
+        <div className="bg-[var(--card-bg)] rounded-2xl p-6 border border-[var(--card-border)] relative overflow-hidden group">
           <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity">
-            <ShieldCheck size={64} className="text-emerald-500" />
+            <ShieldCheck
+              size={64}
+              className="text-primary-600 dark:text-primary-300"
+            />
           </div>
           <div className="flex justify-between items-start mb-4 relative z-10">
-            <div className="p-3 bg-emerald-500/10 rounded-xl">
-              <ShieldCheck size={24} className="text-emerald-400" />
+            <div className="p-3 bg-[var(--surface-subtle)] rounded-xl">
+              <ShieldCheck
+                size={24}
+                className="text-primary-600 dark:text-primary-300"
+              />
             </div>
-            <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">
+            <span className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-widest">
               Langganan Aktif
             </span>
           </div>
           <div className="relative z-10">
-            <h3 className="text-4xl font-bold text-white mb-1">
+            <h3 className="text-4xl font-bold text-[var(--fg)] mb-1">
               {metrics.activeSubscriptions}
             </h3>
-            <p className="text-sm text-slate-500">Premium / Aktif</p>
+            <p className="text-sm text-[var(--text-muted)]">Premium / Aktif</p>
           </div>
         </div>
 
         {/* Total Usage */}
-        <div className="bg-[#1E293B] rounded-2xl p-6 border border-slate-800 shadow-lg relative overflow-hidden group">
+        <div className="bg-[var(--card-bg)] rounded-2xl p-6 border border-[var(--card-border)] relative overflow-hidden group">
           <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity">
-            <Activity size={64} className="text-purple-500" />
+            <Activity
+              size={64}
+              className="text-primary-600 dark:text-primary-300"
+            />
           </div>
           <div className="flex justify-between items-start mb-4 relative z-10">
-            <div className="p-3 bg-purple-500/10 rounded-xl">
-              <Activity size={24} className="text-purple-400" />
+            <div className="p-3 bg-[var(--surface-subtle)] rounded-xl">
+              <Activity
+                size={24}
+                className="text-primary-600 dark:text-primary-300"
+              />
             </div>
-            <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">
+            <span className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-widest">
               Soal Digunakan
             </span>
           </div>
           <div className="relative z-10">
             <div className="flex items-baseline gap-2 mb-1">
-              <h3 className="text-4xl font-bold text-white">
+              <h3 className="text-4xl font-bold text-[var(--fg)]">
                 {metrics.totalUsage}
               </h3>
-              <span className="text-lg text-slate-400">
+              <span className="text-lg text-[var(--text-muted)]">
                 / {metrics.totalQuota}
               </span>
             </div>
-            <p className="text-sm text-slate-500">
+            <p className="text-sm text-[var(--text-muted)]">
               Terpakai / Total Kuota Bulan Ini
             </p>
           </div>
@@ -88,7 +106,7 @@ export default async function AdminPage() {
       </div>
 
       {/* Table Section */}
-      <p className="text-sm text-slate-400">
+      <p className="text-sm text-[var(--text-muted)]">
         Bulan ini: {metrics.failed} generasi gagal • {metrics.reserved}{' '}
         reservasi aktif • {metrics.tokens.toLocaleString('id-ID')} token.
         Kegagalan tidak mengurangi kuota pengguna.
