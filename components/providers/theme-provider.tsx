@@ -1,36 +1,52 @@
 'use client';
-
-import { useEffect, useState } from 'react';
-
+import { useEffect, useSyncExternalStore } from 'react';
+function subscribe(notify: () => void) {
+  const observer = new MutationObserver(notify);
+  observer.observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ['class'],
+  });
+  return () => observer.disconnect();
+}
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [mounted, setMounted] = useState(false);
-
   useEffect(() => {
-    setMounted(true);
-    // Check system preference and saved preference
-    const saved = localStorage.getItem('teatch-theme');
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    const isDark = saved ? saved === 'dark' : prefersDark;
-    document.documentElement.classList.toggle('dark', isDark);
+    const media = window.matchMedia('(prefers-color-scheme: dark)');
+    const sync = () => {
+      let saved: string | null = null;
+      try {
+        saved = localStorage.getItem('teatch-theme');
+      } catch {
+        /* Storage may be disabled. */
+      }
+      document.documentElement.classList.toggle(
+        'dark',
+        saved ? saved === 'dark' : media.matches
+      );
+    };
+    sync();
+    media.addEventListener('change', sync);
+    window.addEventListener('storage', sync);
+    return () => {
+      media.removeEventListener('change', sync);
+      window.removeEventListener('storage', sync);
+    };
   }, []);
-
-  if (!mounted) return <>{children}</>;
   return <>{children}</>;
 }
-
 export function useTheme() {
-  const [isDark, setIsDark] = useState(false);
-
-  useEffect(() => {
-    setIsDark(document.documentElement.classList.contains('dark'));
-  }, []);
-
+  const isDark = useSyncExternalStore(
+    subscribe,
+    () => document.documentElement.classList.contains('dark'),
+    () => false
+  );
   const toggle = () => {
     const next = !isDark;
-    setIsDark(next);
     document.documentElement.classList.toggle('dark', next);
-    localStorage.setItem('teatch-theme', next ? 'dark' : 'light');
+    try {
+      localStorage.setItem('teatch-theme', next ? 'dark' : 'light');
+    } catch {
+      /* Keep the session preference. */
+    }
   };
-
   return { isDark, toggle };
 }

@@ -3,7 +3,7 @@
 import { useActionState, useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { completeOnboarding, type OnboardingState } from '@/app/actions/profile';
+import { completeOnboarding } from '@/app/actions/profile';
 import { createClient } from '@/lib/supabase/client';
 import { Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -35,7 +35,7 @@ export default function OnboardingPage() {
         .eq('auth_user_id', user.id)
         .single();
 
-      const profile = data as any;
+      const profile = data;
 
       if (profile) {
         if (profile.is_onboarded) {

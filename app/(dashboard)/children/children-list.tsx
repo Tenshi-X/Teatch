@@ -12,10 +12,10 @@ import { toast } from 'sonner';
 import type { Child } from '@/types';
 
 interface ChildrenListProps {
-  children: Child[];
+  childProfiles: Child[];
 }
 
-export function ChildrenList({ children }: ChildrenListProps) {
+export function ChildrenList({ childProfiles: children }: ChildrenListProps) {
   const [deleteTarget, setDeleteTarget] = useState<Child | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 

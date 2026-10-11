@@ -1,159 +1,175 @@
 'use client';
-
-import { useState } from 'react';
-import { QuestionPreview } from '@/components/worksheets/question-preview';
-import { Card } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { formatDate } from '@/lib/utils';
-import {
-  Eye,
-  EyeOff,
-  PlayCircle,
-  FileDown,
-  ArrowLeft,
-  Clock,
-} from 'lucide-react';
-import Link from 'next/link';
-import { WorksheetPrintable } from '@/components/worksheets/worksheet-printable';
+import { useRef, useState } from 'react';
 import { useReactToPrint } from 'react-to-print';
-import { useRef } from 'react';
-import type { Worksheet, Question, AIGeneratedQuestion } from '@/types';
-
-interface WorksheetDetailProps {
-  worksheet: Worksheet & { subjects: { name: string; icon: string; color: string } | null };
+import Link from 'next/link';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { WorksheetPrintable } from '@/components/worksheets/worksheet-printable';
+import { QuestionPreview } from '@/components/worksheets/question-preview';
+import { WorksheetEditor } from '@/components/worksheets/worksheet-editor';
+import { hydrateQuestion } from '@/lib/learning/contracts';
+import { reportQuestion } from '@/app/actions/worksheets';
+import type { Worksheet, Question } from '@/types';
+import { toast } from 'sonner';
+import { MathText } from '@/components/ui/math-text';
+export function WorksheetDetail({
+  worksheet,
+  questions,
+  editable,
+}: {
+  worksheet: Worksheet;
   questions: Question[];
-}
-
-export function WorksheetDetail({ worksheet, questions }: WorksheetDetailProps) {
+  editable: boolean;
+}) {
   const [showAnswers, setShowAnswers] = useState(false);
-  const printRef = useRef<HTMLDivElement>(null);
-  const printRefWithAnswers = useRef<HTMLDivElement>(null);
-
-  const handlePrint = useReactToPrint({
-    contentRef: printRef,
-    documentTitle: `${worksheet.title} - Soal`,
-  });
-
-  const handlePrintWithAnswers = useReactToPrint({
-    contentRef: printRefWithAnswers,
-    documentTitle: `${worksheet.title} - Kunci Jawaban`,
-  });
-
-  const difficultyColors: Record<string, string> = {
-    mudah: 'success',
-    sedang: 'warning',
-    sulit: 'danger',
+  const [editing, setEditing] = useState(worksheet.status === 'draft');
+  const [reportTarget, setReportTarget] = useState<string | null>(null);
+  const [reason, setReason] = useState('');
+  const [reportBusy, setReportBusy] = useState(false);
+  const ref = useRef<HTMLDivElement>(null),
+    answerRef = useRef<HTMLDivElement>(null);
+  const print = useReactToPrint({
+      contentRef: ref,
+      documentTitle: worksheet.title,
+    }),
+    printAnswers = useReactToPrint({
+      contentRef: answerRef,
+      documentTitle: `${worksheet.title} - kunci`,
+    });
+  const hydrated = questions.map(hydrateQuestion);
+  const interactive =
+    questions.length > 0 &&
+    hydrated.every((q) => q !== null) &&
+    questions.length === worksheet.question_count;
+  const report = async () => {
+    if (!reportTarget) return;
+    setReportBusy(true);
+    try {
+      await reportQuestion(reportTarget, reason);
+      toast.success('Laporan tersimpan. Terima kasih.');
+      setReportTarget(null);
+      setReason('');
+    } catch {
+      toast.error('Isi alasan 5–1000 karakter, lalu coba lagi.');
+    } finally {
+      setReportBusy(false);
+    }
   };
-
   return (
-    <div className="max-w-4xl mx-auto space-y-6 animate-fade-in">
-      {/* Back link */}
-      <Link
-        href="/history"
-        className="inline-flex items-center gap-1 text-sm text-surface-400 hover:text-surface-600 dark:hover:text-surface-300 transition-colors"
-      >
-        <ArrowLeft size={16} />
-        Kembali ke Riwayat
+    <div className="max-w-4xl mx-auto space-y-5">
+      <Link href="/history" className="text-sm">
+        ← Soal saya
       </Link>
-
-      {/* Header */}
       <Card padding="lg">
-        <div className="flex flex-col sm:flex-row items-start justify-between gap-4">
-          <div>
-            <h1 className="text-xl font-bold mb-2">{worksheet.title}</h1>
-            <div className="flex flex-wrap gap-2 mb-3">
-              {worksheet.subjects && (
-                <Badge variant="primary" size="md">
-                  {worksheet.subjects.icon} {worksheet.subjects.name}
-                </Badge>
-              )}
-              <Badge
-                variant={difficultyColors[worksheet.difficulty] as 'success' | 'warning' | 'danger'}
-                size="md"
-              >
-                {worksheet.difficulty.charAt(0).toUpperCase() + worksheet.difficulty.slice(1)}
-              </Badge>
-              <Badge variant="outline" size="md">
-                {questions.length} soal
-              </Badge>
-            </div>
-            <div className="flex items-center gap-1 text-sm text-surface-400">
-              <Clock size={14} />
-              <span>{formatDate(worksheet.created_at)}</span>
-            </div>
-          </div>
-
-          <div className="flex flex-wrap gap-2 shrink-0">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => handlePrint()}
-            >
-              <FileDown size={16} />
-              PDF Soal
+        <h1 className="text-xl font-bold">{worksheet.title}</h1>
+        <p className="text-sm my-3">
+          {questions.length} soal •{' '}
+          {worksheet.status === 'draft'
+            ? 'Draf — periksa dan setujui sebelum latihan'
+            : 'Siap dikerjakan'}
+        </p>
+        <div className="flex flex-wrap gap-2">
+          <Button variant="outline" onClick={() => print()}>
+            Cetak soal / PDF
+          </Button>
+          <Button variant="outline" onClick={() => printAnswers()}>
+            Cetak kunci
+          </Button>
+          <Button variant="ghost" onClick={() => setShowAnswers(!showAnswers)}>
+            {showAnswers ? 'Sembunyikan kunci' : 'Lihat kunci'}
+          </Button>
+          {editable && interactive && (
+            <Button variant="outline" onClick={() => setEditing(!editing)}>
+              {editing ? 'Tutup editor' : 'Edit soal'}
             </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => handlePrintWithAnswers()}
-            >
-              <FileDown size={16} />
-              PDF + Kunci
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowAnswers(!showAnswers)}
-            >
-              {showAnswers ? <EyeOff size={16} /> : <Eye size={16} />}
-              {showAnswers ? 'Sembunyikan' : 'Jawaban'}
-            </Button>
+          )}
+          {interactive && worksheet.status === 'generated' && (
             <Link href={`/worksheets/${worksheet.id}/attempt`}>
-              <Button size="sm">
-                <PlayCircle size={16} />
-                Kerjakan
-              </Button>
+              <Button>Kerjakan / ulangi latihan</Button>
             </Link>
-          </div>
+          )}
         </div>
+        {!interactive && (
+          <p className="text-sm mt-4">
+            Sebagian data soal lama belum lengkap. Latihan ini dapat dibaca dan
+            dicetak; buat latihan baru untuk penilaian.
+          </p>
+        )}
       </Card>
-
-      {/* Questions */}
-      <div className="space-y-3 stagger-children">
-        {questions.map((q, i) => {
-          const previewQ: AIGeneratedQuestion = {
-            type: q.type,
-            question: q.question,
-            options: Array.isArray(q.options) ? (q.options as string[]) : [],
-            answer: q.answer || '',
-            explanation: q.explanation || '',
-          };
-
-          return (
-            <QuestionPreview
-              key={q.id}
-              question={previewQ}
-              index={i}
-              showAnswer={showAnswers}
+      {editing && editable && interactive ? (
+        <WorksheetEditor
+          id={worksheet.id}
+          initial={{
+            title: worksheet.title,
+            questions: hydrated.filter((q) => q !== null),
+          }}
+          onClose={() => setEditing(false)}
+        />
+      ) : (
+        questions.map((row, i) => (
+          <div key={row.id}>
+            {hydrated[i] ? (
+              <QuestionPreview
+                question={hydrated[i]!}
+                index={i}
+                showAnswer={showAnswers}
+              />
+            ) : (
+              <Card padding="md">
+                <MathText content={row.question} />
+                {showAnswers && (
+                  <>
+                    <MathText content={row.answer || ''} />
+                    <MathText content={row.explanation || ''} />
+                  </>
+                )}
+              </Card>
+            )}
+            <button
+              className="text-xs underline mt-2"
+              onClick={() => setReportTarget(row.id)}
+            >
+              Laporkan soal keliru
+            </button>
+          </div>
+        ))
+      )}
+      {reportTarget && (
+        <Card padding="md">
+          <label className="text-sm">
+            Apa yang perlu diperbaiki?
+            <textarea
+              className="input-base w-full my-2"
+              value={reason}
+              maxLength={1000}
+              onChange={(e) => setReason(e.target.value)}
             />
-          );
-        })}
-      </div>
-
-      {/* Hidden Printables */}
+          </label>
+          <div className="flex gap-3">
+            <Button
+              isLoading={reportBusy}
+              disabled={reason.trim().length < 5}
+              onClick={report}
+            >
+              Kirim laporan
+            </Button>
+            <Button variant="ghost" onClick={() => setReportTarget(null)}>
+              Batal
+            </Button>
+          </div>
+        </Card>
+      )}
       <div className="hidden">
         <WorksheetPrintable
-          ref={printRef}
+          ref={ref}
           worksheet={worksheet}
           questions={questions}
-          showAnswers={false}
         />
         <WorksheetPrintable
-          ref={printRefWithAnswers}
+          ref={answerRef}
           worksheet={worksheet}
           questions={questions}
-          showAnswers={true}
+          showAnswers
         />
       </div>
     </div>

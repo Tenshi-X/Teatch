@@ -1,3 +1,4 @@
+import { signedAvatar } from '@/lib/server/avatars';
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import { ChildrenList } from './children-list';
@@ -31,5 +32,15 @@ export default async function ChildrenPage() {
     .eq('parent_id', profile.id)
     .order('created_at', { ascending: true });
 
-  return <ChildrenList children={children || []} />;
+  return (
+    <ChildrenList
+      childProfiles={await Promise.all(
+        (children || []).map(async (c) => ({
+          ...c,
+          photo_url:
+            (await signedAvatar(supabase, c.photo_url, user.id)) || null,
+        }))
+      )}
+    />
+  );
 }

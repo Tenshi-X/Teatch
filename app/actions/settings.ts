@@ -1,57 +1,32 @@
 'use server';
-
-import { createClient } from '@/lib/supabase/server';
+import { getParent } from '@/lib/server/ownership';
+import { uploadAvatar } from '@/lib/server/avatars';
 import { revalidatePath } from 'next/cache';
-
+import { z } from 'zod';
 export async function updateProfile(formData: FormData) {
-  const supabase = await createClient();
-  const fullName = formData.get('fullName') as string;
-  const avatarFile = formData.get('avatar') as File | null;
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    return { error: 'Unauthorized' };
-  }
-
-  let avatarUrl = undefined;
-
-  if (avatarFile && avatarFile.size > 0) {
-    const fileExt = avatarFile.name.split('.').pop();
-    const fileName = `${user.id}-${crypto.randomUUID()}.${fileExt}`;
-    
-    const { error: uploadError } = await supabase.storage
-      .from('avatars')
-      .upload(fileName, avatarFile, { upsert: true });
-      
-    if (uploadError) {
-      return { error: `Gagal mengunggah foto: ${uploadError.message}` };
+  const parsed = z
+    .string()
+    .trim()
+    .min(2, 'Nama minimal 2 karakter.')
+    .max(100)
+    .safeParse(formData.get('fullName'));
+  if (!parsed.success) return { error: 'Nama harus 2–100 karakter.' };
+  try {
+    const { supabase, user, profile } = await getParent();
+    const path = await uploadAvatar(supabase, formData.get('avatar'), user.id);
+    const { error } = await supabase
+      .from('profiles')
+      .update({ full_name: parsed.data, ...(path ? { avatar_url: path } : {}) })
+      .eq('id', profile.id);
+    if (error) {
+      if (path) await supabase.storage.from('avatars').remove([path]);
+      return { error: 'Profil belum tersimpan.' };
     }
-    
-    const { data: { publicUrl } } = supabase.storage
-      .from('avatars')
-      .getPublicUrl(fileName);
-      
-    avatarUrl = publicUrl;
+    revalidatePath('/', 'layout');
+    return { success: true };
+  } catch (e) {
+    return {
+      error: e instanceof Error ? e.message : 'Profil belum tersimpan.',
+    };
   }
-
-  const updates: any = { full_name: fullName };
-  if (avatarUrl) {
-    updates.avatar_url = avatarUrl;
-  }
-
-  const { error } = await (supabase as any)
-    .from('profiles')
-    .update(updates)
-    .eq('auth_user_id', user.id);
-
-  if (error) {
-    return { error: error.message };
-  }
-
-  revalidatePath('/dashboard');
-  revalidatePath('/settings');
-  return { success: true };
 }

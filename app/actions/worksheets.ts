@@ -1,98 +1,49 @@
 'use server';
-
-import { createClient } from '@/lib/supabase/server';
+import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
-import type { AIGeneratedWorksheet, AIGenerateParams } from '@/types';
+import { getOwnedWorksheet, getParent } from '@/lib/server/ownership';
+import { createAdminClient } from '@/lib/supabase/admin';
+import { validateWorksheet } from '@/lib/learning/contracts';
+import type { Json } from '@/types/database';
 
-async function getWikimediaImageUrl(keyword: string): Promise<string | null> {
-  try {
-    const res = await fetch(`https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrnamespace=6&gsrsearch=${encodeURIComponent(keyword)}&gsrlimit=1&prop=imageinfo&iiprop=url&format=json`);
-    const data = await res.json();
-    const pages = data?.query?.pages;
-    if (pages) {
-      const pageId = Object.keys(pages)[0];
-      if (pageId && pageId !== '-1') {
-        return pages[pageId].imageinfo?.[0]?.url || null;
-      }
-    }
-    return null;
-  } catch (e) {
-    return null;
-  }
+export async function publishWorksheet(id: string, value: unknown) {
+  z.uuid().parse(id);
+  const { profile, worksheet } = await getOwnedWorksheet(id);
+  const result = validateWorksheet(value, {
+    questionCount: worksheet.question_count,
+    questionType: worksheet.question_type,
+  });
+  const { error } = await createAdminClient().rpc('update_worksheet_content', {
+    p_parent: profile.id,
+    p_worksheet: id,
+    p_result: JSON.parse(JSON.stringify(result)) as Json,
+  });
+  if (error)
+    throw new Error(
+      error.message.includes('ALREADY_ATTEMPTED')
+        ? 'Latihan yang sudah dikerjakan tidak dapat diubah.'
+        : 'Perubahan belum tersimpan.'
+    );
+  revalidatePath(`/worksheets/${id}`);
+  revalidatePath('/history');
+  revalidatePath('/dashboard');
+  return { success: true };
 }
 
-export async function saveWorksheet(
-  params: AIGenerateParams & { subjectId: string; childId: string },
-  aiResult: AIGeneratedWorksheet,
-  aiPrompt: string
-) {
-  const supabase = await createClient();
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) throw new Error('Unauthorized');
-
-  // Create worksheet
-  const { data: worksheetData, error: wsError } = await (supabase as any)
-    .from('worksheets')
-    .insert({
-      child_id: params.childId,
-      subject_id: params.subjectId,
-      title: aiResult.title,
-      difficulty: params.difficulty,
-      question_type: params.questionType,
-      question_count: params.questionCount,
-      topic: params.topic || null,
-      ai_prompt: aiPrompt,
-      ai_response: aiResult as unknown as Record<string, unknown>,
-      status: 'generated',
-    })
-    .select()
+export async function reportQuestion(questionId: string, reason: string) {
+  z.uuid().parse(questionId);
+  const text = z.string().trim().min(5).max(1000).parse(reason);
+  const { supabase, profile } = await getParent();
+  const { data: question } = await supabase
+    .from('questions')
+    .select('worksheet_id')
+    .eq('id', questionId)
     .single();
-
-  if (wsError || !worksheetData) {
-    throw new Error(wsError?.message || 'Failed to save worksheet');
-  }
-  const worksheet = worksheetData as any;
-
-  // Create questions
-  const questions = await Promise.all(aiResult.questions.map(async (q, index) => {
-    let imageUrl = q.emoji || null;
-    
-    if (q.search_keyword) {
-      const wikiUrl = await getWikimediaImageUrl(q.search_keyword);
-      if (wikiUrl) {
-        imageUrl = wikiUrl;
-      } else {
-        // Fallback
-        imageUrl = `https://loremflickr.com/800/600/${encodeURIComponent(q.search_keyword)}?lock=${Math.floor(Math.random() * 10000)}`;
-      }
-    }
-
-    return {
-      worksheet_id: worksheet.id,
-      type: q.type,
-      question: q.question,
-      options: q.pairs ? q.pairs : (q.options || []),
-      answer: q.answer,
-      explanation: q.explanation,
-      image_url: imageUrl,
-      order_index: index,
-    };
-  }));
-
-  const { error: qError } = await (supabase as any).from('questions').insert(questions);
-
-  if (qError) {
-    // Cleanup worksheet if questions fail
-    await supabase.from('worksheets').delete().eq('id', worksheet.id);
-    throw new Error(qError.message);
-  }
-
-  revalidatePath('/dashboard');
-  revalidatePath('/history');
-
-  return worksheet;
+  if (!question) throw new Error('Soal tidak ditemukan.');
+  await getOwnedWorksheet(question.worksheet_id);
+  const { error } = await createAdminClient()
+    .from('question_reports')
+    .insert({ parent_id: profile.id, question_id: questionId, reason: text });
+  if (error) throw new Error('Laporan belum tersimpan.');
+  return { success: true };
 }

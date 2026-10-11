@@ -22,7 +22,7 @@ export default async function EditChildPage({
     .single();
 
   if (!childData) notFound();
-  const child = childData as any;
+  const child = childData;
 
   return (
     <div className="animate-fade-in-up">

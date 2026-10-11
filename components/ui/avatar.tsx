@@ -1,4 +1,5 @@
 import { cn, getInitials } from '@/lib/utils';
+import Image from 'next/image';
 
 export interface AvatarProps {
   src?: string | null;
@@ -17,7 +18,10 @@ export function Avatar({ src, name, size = 'md', className }: AvatarProps) {
 
   if (src) {
     return (
-      <img
+      <Image
+        width={80}
+        height={80}
+        unoptimized
         src={src}
         alt={name}
         className={cn(

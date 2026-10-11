@@ -39,7 +39,8 @@ export async function completeOnboarding(
     return { error: 'Anda belum login' };
   }
 
-  const { error } = await (supabase.from('profiles') as any)
+  const { error } = await supabase
+    .from('profiles')
     .update({
       full_name: parsed.data.fullName,
       phone_number: parsed.data.phoneNumber,

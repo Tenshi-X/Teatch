@@ -44,7 +44,13 @@ export async function updateSession(request: NextRequest) {
     request.nextUrl.pathname.startsWith('/robots.txt') ||
     request.nextUrl.pathname.startsWith('/sitemap.xml');
 
-  if (!user && !isAuthPage && !isCallbackPage && !isPublicPage) {
+  if (
+    !user &&
+    !isAuthPage &&
+    !isCallbackPage &&
+    !isPublicPage &&
+    !request.nextUrl.pathname.startsWith('/api/')
+  ) {
     const url = request.nextUrl.clone();
     url.pathname = '/login';
     return NextResponse.redirect(url);

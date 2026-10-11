@@ -1,12 +1,21 @@
 'use client';
 
 import { useActionState } from 'react';
-import { createChild, updateChild, type ChildFormState } from '@/app/actions/children';
+import {
+  createChild,
+  updateChild,
+  type ChildFormState,
+} from '@/app/actions/children';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
 import { Card } from '@/components/ui/card';
-import { EDUCATION_LEVELS, GRADES_BY_LEVEL, type EducationLevel, type Child } from '@/types';
+import {
+  EDUCATION_LEVELS,
+  GRADES_BY_LEVEL,
+  type EducationLevel,
+  type Child,
+} from '@/types';
 import { useState, useMemo } from 'react';
 
 interface ChildFormProps {
@@ -19,14 +28,13 @@ export function ChildForm({ child, mode }: ChildFormProps) {
     (child?.level as EducationLevel) || 'SD'
   );
 
-  const boundAction = mode === 'edit' && child
-    ? updateChild.bind(null, child.id)
-    : createChild;
+  const boundAction =
+    mode === 'edit' && child ? updateChild.bind(null, child.id) : createChild;
 
-  const [state, formAction, isPending] = useActionState<ChildFormState, FormData>(
-    boundAction,
-    {}
-  );
+  const [state, formAction, isPending] = useActionState<
+    ChildFormState,
+    FormData
+  >(boundAction, {});
 
   const levelOptions = EDUCATION_LEVELS.map((level) => ({
     value: level,
@@ -84,6 +92,7 @@ export function ChildForm({ child, mode }: ChildFormProps) {
 
           {gradeOptions.length > 0 && (
             <Select
+              key={selectedLevel}
               name="grade"
               label="Kelas"
               options={gradeOptions}
@@ -99,6 +108,13 @@ export function ChildForm({ child, mode }: ChildFormProps) {
           placeholder="contoh: membaca, menggambar, musik"
           defaultValue={child?.interests?.join(', ')}
           helperText="Opsional. Bantu AI membuat soal yang lebih menarik."
+        />
+        <Input
+          name="photo"
+          type="file"
+          label="Foto anak (opsional)"
+          accept="image/png,image/jpeg,image/webp"
+          helperText="Maksimal 2 MB. Foto hanya dapat diakses oleh akun orang tua."
         />
 
         <Input

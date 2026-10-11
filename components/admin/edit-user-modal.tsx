@@ -3,21 +3,26 @@
 import { useState } from 'react';
 import { updateAdminUser } from '@/app/actions/admin';
 import { Loader2, X } from 'lucide-react';
+import type { Profile } from '@/types';
+import { SUBSCRIPTION_LIMITS } from '@/lib/subscription';
+import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 
 interface EditUserModalProps {
-  user: any;
+  user: Profile;
   onClose: () => void;
 }
 
 export function EditUserModal({ user, onClose }: EditUserModalProps) {
   const [isLoading, setIsLoading] = useState(false);
-  
+  const [resetQuota, setResetQuota] = useState(false);
+  const router = useRouter();
+
   const [role, setRole] = useState<'admin' | 'user'>(user.role || 'user');
   const [tier, setTier] = useState(user.subscription_tier || 'free_trial');
   const [status, setStatus] = useState(user.subscription_status || 'active');
   const [endDate, setEndDate] = useState(
-    user.subscription_period_end 
+    user.subscription_period_end
       ? new Date(user.subscription_period_end).toISOString().split('T')[0]
       : ''
   );
@@ -28,14 +33,20 @@ export function EditUserModal({ user, onClose }: EditUserModalProps) {
     try {
       await updateAdminUser(user.id, {
         role,
+        resetQuota,
         subscription_tier: tier,
         subscription_status: status,
-        subscription_period_end: endDate ? new Date(endDate).toISOString() : null,
+        subscription_period_end: endDate
+          ? new Date(endDate).toISOString()
+          : null,
       });
       toast.success('Pengguna berhasil diperbarui');
       onClose();
-    } catch (error: any) {
-      toast.error(error.message || 'Gagal memperbarui pengguna');
+      router.refresh();
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : 'Gagal memperbarui pengguna'
+      );
     } finally {
       setIsLoading(false);
     }
@@ -46,7 +57,7 @@ export function EditUserModal({ user, onClose }: EditUserModalProps) {
       <div className="bg-[#1E293B] rounded-2xl w-full max-w-md border border-slate-700 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
         <div className="flex items-center justify-between p-6 border-b border-slate-800">
           <h2 className="text-xl font-semibold text-white">Edit Pengguna</h2>
-          <button 
+          <button
             onClick={onClose}
             className="text-slate-400 hover:text-white transition-colors"
           >
@@ -56,17 +67,21 @@ export function EditUserModal({ user, onClose }: EditUserModalProps) {
 
         <form onSubmit={handleSubmit} className="p-6 space-y-5">
           <div>
-            <label className="block text-sm font-medium text-slate-300 mb-1.5">Email / Akun</label>
+            <label className="block text-sm font-medium text-slate-300 mb-1.5">
+              Email / Akun
+            </label>
             <div className="px-3 py-2 bg-slate-800/50 rounded-lg text-slate-400 text-sm border border-slate-700">
               {user.email || user.full_name || 'Tanpa Nama'}
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-300 mb-1.5">Peran (Role)</label>
+            <label className="block text-sm font-medium text-slate-300 mb-1.5">
+              Peran (Role)
+            </label>
             <select
               value={role}
-              onChange={(e) => setRole(e.target.value as any)}
+              onChange={(e) => setRole(e.target.value as 'admin' | 'user')}
               className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="user">User Biasa</option>
@@ -75,21 +90,26 @@ export function EditUserModal({ user, onClose }: EditUserModalProps) {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-300 mb-1.5">Paket Berlangganan</label>
+            <label className="block text-sm font-medium text-slate-300 mb-1.5">
+              Paket Berlangganan
+            </label>
             <select
               value={tier}
               onChange={(e) => setTier(e.target.value)}
               className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              <option value="free_trial">Free Trial</option>
-              <option value="basic">Basic</option>
-              <option value="family">Family</option>
-              <option value="teacher">Teacher</option>
+              {Object.entries(SUBSCRIPTION_LIMITS).map(([value, plan]) => (
+                <option key={value} value={value}>
+                  {plan.label} — {plan.maxQuestions} soal
+                </option>
+              ))}
             </select>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-300 mb-1.5">Status Berlangganan</label>
+            <label className="block text-sm font-medium text-slate-300 mb-1.5">
+              Status Berlangganan
+            </label>
             <select
               value={status}
               onChange={(e) => setStatus(e.target.value)}
@@ -102,7 +122,9 @@ export function EditUserModal({ user, onClose }: EditUserModalProps) {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-300 mb-1.5">Tanggal Berakhir (Masa Aktif)</label>
+            <label className="block text-sm font-medium text-slate-300 mb-1.5">
+              Tanggal Berakhir (Masa Aktif)
+            </label>
             <input
               type="date"
               value={endDate}
@@ -111,6 +133,14 @@ export function EditUserModal({ user, onClose }: EditUserModalProps) {
             />
           </div>
 
+          <label className="flex items-center gap-2 text-sm text-slate-300">
+            <input
+              type="checkbox"
+              checked={resetQuota}
+              onChange={(e) => setResetQuota(e.target.checked)}
+            />
+            Isi ulang kuota sesuai paket (opsional)
+          </label>
           <div className="pt-4 flex items-center justify-end gap-3">
             <button
               type="button"

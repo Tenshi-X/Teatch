@@ -15,14 +15,22 @@ export type Answer = Database['public']['Tables']['answers']['Row'];
 // Insert Types
 // ============================================================
 export type ChildInsert = Database['public']['Tables']['children']['Insert'];
-export type WorksheetInsert = Database['public']['Tables']['worksheets']['Insert'];
+export type WorksheetInsert =
+  Database['public']['Tables']['worksheets']['Insert'];
 export type AttemptInsert = Database['public']['Tables']['attempts']['Insert'];
 export type AnswerInsert = Database['public']['Tables']['answers']['Insert'];
 
 // ============================================================
 // Education Levels
 // ============================================================
-export const EDUCATION_LEVELS = ['PAUD', 'TK A', 'TK B', 'SD', 'SMP', 'SMA'] as const;
+export const EDUCATION_LEVELS = [
+  'PAUD',
+  'TK A',
+  'TK B',
+  'SD',
+  'SMP',
+  'SMA',
+] as const;
 export type EducationLevel = (typeof EDUCATION_LEVELS)[number];
 
 export const GRADES_BY_LEVEL: Record<EducationLevel, string[]> = {
@@ -37,7 +45,11 @@ export const GRADES_BY_LEVEL: Record<EducationLevel, string[]> = {
 // ============================================================
 // Question Types
 // ============================================================
-export const QUESTION_TYPES: { value: QuestionType; label: string; icon: string }[] = [
+export const QUESTION_TYPES: {
+  value: QuestionType;
+  label: string;
+  icon: string;
+}[] = [
   { value: 'multiple_choice', label: 'Pilihan Ganda', icon: '📋' },
   { value: 'essay', label: 'Uraian', icon: '✍️' },
   { value: 'short_answer', label: 'Isian Singkat', icon: '📝' },
@@ -72,7 +84,7 @@ export type Difficulty = 'mudah' | 'sedang' | 'sulit';
 // ============================================================
 export interface AIGenerateParams {
   segmentId?: string;
-  childName: string;
+  childName?: string;
   age: number;
   level: EducationLevel;
   grade: string;
@@ -81,23 +93,13 @@ export interface AIGenerateParams {
   difficulty: Difficulty;
   questionCount: number;
   topic?: string;
+  objectiveId?: string;
+  objective?: string;
+  interest?: string;
 }
 
-export interface AIGeneratedQuestion {
-  type: QuestionType;
-  question: string;
-  options?: string[];
-  answer: string;
-  explanation: string;
-  emoji?: string;
-  search_keyword?: string;
-  image_options?: string[]; // for choose_image (array of search keywords)
-  pairs?: { left: string; right: string }[];
-  categories?: string[]; // for grouping
-  items?: { name: string; category: string }[]; // for grouping
-  correct_order?: string[]; // for ordering
-  story?: string; // for story_qa
-}
+export type AIGeneratedQuestion =
+  import('@/lib/learning/contracts').GeneratedQuestion;
 
 export interface AIGeneratedWorksheet {
   title: string;

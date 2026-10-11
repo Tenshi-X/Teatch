@@ -1,34 +1,40 @@
 'use client';
 
+import { useChildStore } from '@/lib/stores/child-store';
 import { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Button } from '@/components/ui/button';
-import { formatDate, formatDuration } from '@/lib/utils';
-import {
-  FileText,
-  Clock,
-  Trophy,
-  PlayCircle,
-  History,
-} from 'lucide-react';
+import { formatDate } from '@/lib/utils';
+import { FileText, Trophy } from 'lucide-react';
 import Link from 'next/link';
 import type { Worksheet, Attempt, Child } from '@/types';
 
 interface HistoryListProps {
   worksheets: (Worksheet & {
-    subjects: { name: string; icon: string; color: string } | null;
+    subjects: {
+      name: string;
+      icon: string | null;
+      color: string | null;
+    } | null;
     children: { name: string } | null;
   })[];
   attempts: Attempt[];
   childrenData: Child[];
 }
 
-export function HistoryList({ worksheets, attempts, childrenData }: HistoryListProps) {
-  const [activeChildId, setActiveChildId] = useState<string>(childrenData[0]?.id || '');
+export function HistoryList({
+  worksheets,
+  attempts,
+  childrenData,
+}: HistoryListProps) {
+  const { activeChild, setActiveChild } = useChildStore();
+  const activeChildId = activeChild?.id || '';
   const [selectedSubject, setSelectedSubject] = useState<string>('Semua');
-  const [statusFilter, setStatusFilter] = useState<'Semua' | 'Selesai' | 'Belum'>('Semua');
+  const [statusFilter, setStatusFilter] = useState<
+    'Semua' | 'Selesai' | 'Belum'
+  >('Semua');
 
   const attemptsByWorksheet = attempts.reduce(
     (acc, a) => {
@@ -39,15 +45,22 @@ export function HistoryList({ worksheets, attempts, childrenData }: HistoryListP
     {} as Record<string, Attempt[]>
   );
 
-  const filteredWorksheets = worksheets.filter((ws) => ws.child_id === activeChildId);
-  const uniqueSubjects = Array.from(new Set(filteredWorksheets.map(ws => ws.subjects?.name || 'Lainnya')));
+  const filteredWorksheets = worksheets.filter(
+    (ws) => ws.child_id === activeChildId
+  );
+  const uniqueSubjects = Array.from(
+    new Set(filteredWorksheets.map((ws) => ws.subjects?.name || 'Lainnya'))
+  );
 
-  const displayedWorksheets = filteredWorksheets.filter(ws => {
+  const displayedWorksheets = filteredWorksheets.filter((ws) => {
     // Subject filter
-    if (selectedSubject !== 'Semua' && (ws.subjects?.name || 'Lainnya') !== selectedSubject) {
+    if (
+      selectedSubject !== 'Semua' &&
+      (ws.subjects?.name || 'Lainnya') !== selectedSubject
+    ) {
       return false;
     }
-    
+
     // Status filter
     const wsAttempts = attemptsByWorksheet[ws.id] || [];
     const isSelesai = wsAttempts.length > 0;
@@ -58,23 +71,29 @@ export function HistoryList({ worksheets, attempts, childrenData }: HistoryListP
     return true;
   });
 
-  const worksheetsBySubject = displayedWorksheets.reduce((acc, ws) => {
-    const subjectName = ws.subjects?.name || 'Lainnya';
-    if (!acc[subjectName]) acc[subjectName] = [];
-    acc[subjectName].push(ws);
-    return acc;
-  }, {} as Record<string, typeof displayedWorksheets>);
+  const worksheetsBySubject = displayedWorksheets.reduce(
+    (acc, ws) => {
+      const subjectName = ws.subjects?.name || 'Lainnya';
+      if (!acc[subjectName]) acc[subjectName] = [];
+      acc[subjectName].push(ws);
+      return acc;
+    },
+    {} as Record<string, typeof displayedWorksheets>
+  );
 
   return (
     <div className="max-w-5xl mx-auto animate-fade-in">
       <h1 className="text-2xl font-bold mb-6">Soal Saya</h1>
+      <p className="text-sm text-surface-500 mb-4">
+        100 latihan dan 100 hasil pengerjaan terbaru dari akun ini.
+      </p>
 
       {childrenData.length > 0 && (
         <div className="flex overflow-x-auto hide-scrollbar gap-2 mb-6 pb-2">
           {childrenData.map((child) => (
             <button
               key={child.id}
-              onClick={() => setActiveChildId(child.id)}
+              onClick={() => setActiveChild(child.id)}
               className={`px-4 py-2 rounded-full whitespace-nowrap text-sm font-medium transition-all ${
                 activeChildId === child.id
                   ? 'bg-primary-600 text-white shadow-md'
@@ -90,21 +109,25 @@ export function HistoryList({ worksheets, attempts, childrenData }: HistoryListP
       {/* Filters */}
       {filteredWorksheets.length > 0 && (
         <div className="flex flex-col sm:flex-row gap-3 mb-6 animate-fade-in-up">
-          <select 
+          <select
             className="w-full sm:w-auto px-4 py-2.5 rounded-xl border border-surface-200 dark:border-surface-700 bg-surface-50 dark:bg-surface-800 text-sm outline-none focus:ring-2 focus:ring-primary-500/50 cursor-pointer"
             value={selectedSubject}
             onChange={(e) => setSelectedSubject(e.target.value)}
           >
             <option value="Semua">Semua Pelajaran</option>
-            {uniqueSubjects.map(sub => (
-              <option key={sub} value={sub}>{sub}</option>
+            {uniqueSubjects.map((sub) => (
+              <option key={sub} value={sub}>
+                {sub}
+              </option>
             ))}
           </select>
 
-          <select 
+          <select
             className="w-full sm:w-auto px-4 py-2.5 rounded-xl border border-surface-200 dark:border-surface-700 bg-surface-50 dark:bg-surface-800 text-sm outline-none focus:ring-2 focus:ring-primary-500/50 cursor-pointer"
             value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value as any)}
+            onChange={(e) =>
+              setStatusFilter(e.target.value as 'Semua' | 'Selesai' | 'Belum')
+            }
           >
             <option value="Semua">Semua Status (Selesai & Belum)</option>
             <option value="Selesai">Sudah Dikerjakan</option>
@@ -127,9 +150,9 @@ export function HistoryList({ worksheets, attempts, childrenData }: HistoryListP
       ) : (
         <div className="space-y-10 stagger-children">
           {Object.entries(worksheetsBySubject).map(([subjectName, wss]) => {
-            const firstWsWithSubject = wss.find(ws => ws.subjects?.icon);
+            const firstWsWithSubject = wss.find((ws) => ws.subjects?.icon);
             const icon = firstWsWithSubject?.subjects?.icon || '📚';
-            
+
             return (
               <div key={subjectName} className="animate-fade-in-up">
                 <div className="flex items-center gap-3 mb-4">
@@ -138,34 +161,79 @@ export function HistoryList({ worksheets, attempts, childrenData }: HistoryListP
                   </div>
                   <h2 className="text-xl font-bold">{subjectName}</h2>
                 </div>
-                
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {wss.map((ws) => {
                     const wsAttempts = attemptsByWorksheet[ws.id] || [];
-                    const bestAttempt = wsAttempts.sort((a, b) => (b.score || 0) - (a.score || 0))[0];
+                    const bestAttempt = wsAttempts
+                      .filter((a) => a.status === 'completed')
+                      .sort((a, b) => (b.score || 0) - (a.score || 0))[0];
 
                     return (
-                      <Card key={ws.id} padding="md" hover className="flex flex-col h-full border-2 border-transparent hover:border-primary-500/30 transition-colors">
-                        <Link href={`/worksheets/${ws.id}`} className="flex flex-col h-full gap-3">
+                      <Card
+                        key={ws.id}
+                        padding="md"
+                        hover
+                        className="flex flex-col h-full border-2 border-transparent hover:border-primary-500/30 transition-colors"
+                      >
+                        <Link
+                          href={`/worksheets/${ws.id}`}
+                          className="flex flex-col h-full gap-3"
+                        >
                           <div className="flex justify-between items-start">
                             <Badge
-                              variant={ws.difficulty === 'mudah' ? 'success' : ws.difficulty === 'sedang' ? 'warning' : 'danger'}
+                              variant={
+                                ws.difficulty === 'mudah'
+                                  ? 'success'
+                                  : ws.difficulty === 'sedang'
+                                    ? 'warning'
+                                    : 'danger'
+                              }
                               size="sm"
                             >
                               {ws.difficulty}
                             </Badge>
                             {bestAttempt ? (
                               <div className="flex items-center gap-1 font-bold text-sm">
-                                <Trophy size={14} className={bestAttempt.score && bestAttempt.score >= 80 ? 'text-secondary-500' : bestAttempt.score && bestAttempt.score >= 60 ? 'text-warning-500' : 'text-danger-500'} />
+                                <Trophy
+                                  size={14}
+                                  className={
+                                    bestAttempt.score && bestAttempt.score >= 80
+                                      ? 'text-secondary-500'
+                                      : bestAttempt.score &&
+                                          bestAttempt.score >= 60
+                                        ? 'text-warning-500'
+                                        : 'text-danger-500'
+                                  }
+                                />
                                 <span>{bestAttempt.score}%</span>
                               </div>
                             ) : (
-                              <Badge variant="outline" size="sm" className="bg-surface-50 dark:bg-surface-800/50 text-[10px]">
+                              <Badge
+                                variant="outline"
+                                size="sm"
+                                className="bg-surface-50 dark:bg-surface-800/50 text-[10px]"
+                              >
                                 Belum dikerjakan
                               </Badge>
                             )}
                           </div>
-                          
+
+                          {ws.status === 'draft' && (
+                            <Badge variant="warning">
+                              Perlu pratinjau orang tua
+                            </Badge>
+                          )}
+                          {wsAttempts.some(
+                            (a) => a.status === 'pending_review'
+                          ) && (
+                            <p className="text-sm text-amber-600">
+                              Menunggu tinjauan jawaban
+                            </p>
+                          )}
+                          {bestAttempt?.scoring_version === 1 && (
+                            <p className="text-xs">Nilai sistem lama</p>
+                          )}
                           <h3 className="font-semibold text-base leading-snug flex-1">
                             {ws.title}
                           </h3>

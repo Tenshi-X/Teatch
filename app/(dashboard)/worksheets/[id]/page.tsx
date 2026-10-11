@@ -22,18 +22,23 @@ export default async function WorksheetPage({
     .single();
 
   if (!worksheetData) notFound();
-  const worksheet = worksheetData as any;
+  const worksheet = worksheetData;
 
   const { data: questions } = await supabase
     .from('questions')
     .select('*')
     .eq('worksheet_id', id)
     .order('order_index', { ascending: true });
+  const { count } = await supabase
+    .from('attempts')
+    .select('id', { count: 'exact', head: true })
+    .eq('worksheet_id', id);
 
   return (
     <WorksheetDetail
       worksheet={worksheet}
       questions={questions || []}
+      editable={count === 0}
     />
   );
 }

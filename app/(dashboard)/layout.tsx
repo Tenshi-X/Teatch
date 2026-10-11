@@ -1,3 +1,4 @@
+import { signedAvatar } from '@/lib/server/avatars';
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import { DashboardShell } from '@/components/layout/dashboard-shell';
@@ -35,7 +36,7 @@ export default async function DashboardLayout({
   if (!profileData) {
     redirect('/login');
   }
-  const profile = profileData as any;
+  const profile = profileData;
 
   if (!profile.is_onboarded) {
     redirect('/onboarding');
@@ -52,10 +53,16 @@ export default async function DashboardLayout({
     <DashboardShell
       userName={profile.full_name}
       userRole={profile.role}
-      avatarUrl={profile.avatar_url}
+      avatarUrl={await signedAvatar(supabase, profile.avatar_url, user.id)}
       worksheetQuota={profile.worksheet_quota || 0}
-      subscriptionPeriodEnd={profile.subscription_period_end}
-      initialChildren={childrenData || []}
+      subscriptionPeriodEnd={profile.subscription_period_end || undefined}
+      initialChildren={await Promise.all(
+        (childrenData || []).map(async (c) => ({
+          ...c,
+          photo_url:
+            (await signedAvatar(supabase, c.photo_url, user.id)) || null,
+        }))
+      )}
     >
       {children}
     </DashboardShell>

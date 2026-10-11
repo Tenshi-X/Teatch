@@ -26,37 +26,41 @@ export default async function HistoryPage() {
   const profile = profileData as { id: string };
 
   // Fetch children IDs
-  const { data: children } = await supabase
+  const { data: children, error: childError } = await supabase
     .from('children')
     .select('*')
     .eq('parent_id', profile.id);
+  if (childError) throw new Error('Profil anak belum dapat dimuat.');
 
-  const childIds = (children as any[])?.map((c) => c.id) || [];
+  const childIds = children?.map((c) => c.id) || [];
 
   if (childIds.length === 0) {
     return (
       <div className="max-w-4xl mx-auto animate-fade-in">
         <h1 className="text-2xl font-bold mb-6">Soal Saya</h1>
-        <p className="text-surface-400">Tambahkan profil anak terlebih dahulu.</p>
+        <p className="text-surface-400">
+          Tambahkan profil anak terlebih dahulu.
+        </p>
       </div>
     );
   }
 
   // Fetch worksheets with attempts
-  const { data: worksheets } = await supabase
+  const { data: worksheets, error: worksheetError } = await supabase
     .from('worksheets')
     .select('*, subjects(name, icon, color), children(name)')
     .in('child_id', childIds)
     .order('created_at', { ascending: false })
-    .limit(50);
+    .limit(100);
 
-  const { data: attempts } = await supabase
+  const { data: attempts, error: attemptError } = await supabase
     .from('attempts')
     .select('*')
     .in('child_id', childIds)
-    .eq('status', 'completed')
     .order('created_at', { ascending: false })
-    .limit(50);
+    .limit(100);
+  if (worksheetError || attemptError)
+    throw new Error('Riwayat belum dapat dimuat.');
 
   return (
     <HistoryList

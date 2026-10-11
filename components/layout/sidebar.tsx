@@ -6,8 +6,7 @@ import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { useLanguageStore } from '@/lib/stores/language-store';
 import { t } from '@/lib/i18n';
-import { format, differenceInDays } from 'date-fns';
-import { id } from 'date-fns/locale';
+
 import {
   LayoutDashboard,
   Users,
@@ -15,9 +14,7 @@ import {
   BarChart3,
   History,
   Settings,
-  BookOpen,
   X,
-  FileText,
   ShieldAlert,
 } from 'lucide-react';
 
@@ -26,6 +23,7 @@ const navItems = [
   { href: '/children', labelKey: 'nav.children', icon: Users },
   { href: '/worksheets/new', labelKey: 'nav.create', icon: PenTool },
   { href: '/history', labelKey: 'nav.history', icon: History },
+  { href: '/review', labelKey: 'nav.review', icon: ShieldAlert },
   { href: '/statistics', labelKey: 'nav.statistics', icon: BarChart3 },
 ];
 
@@ -43,7 +41,8 @@ export function Sidebar({ isOpen, onClose, userRole }: SidebarProps) {
     if (window.innerWidth < 1024) {
       onClose();
     }
-  };  return (
+  };
+  return (
     <>
       {/* Mobile overlay */}
       {isOpen && (
@@ -65,13 +64,20 @@ export function Sidebar({ isOpen, onClose, userRole }: SidebarProps) {
         <div className="flex items-center justify-between px-6 py-5 border-b border-[var(--sidebar-border)]">
           <Link href="/dashboard" className="flex items-center gap-3 group">
             <div className="w-10 h-10 rounded-full flex items-center justify-center border border-[var(--card-border)] bg-white shadow-sm transition-shadow overflow-hidden relative">
-              <Image src="/teatch_logo.png" alt="Teatch Logo" fill className="object-cover" />
+              <Image
+                src="/teatch_logo.png"
+                alt="Teatch Logo"
+                fill
+                className="object-cover"
+              />
             </div>
             <div>
               <h1 className="text-xl font-bold text-primary-600 dark:text-primary-500">
                 Teatch
               </h1>
-              <p className="text-[10px] text-surface-400 -mt-0.5">AI Learning Platform</p>
+              <p className="text-[10px] text-surface-400 -mt-0.5">
+                AI Learning Platform
+              </p>
             </div>
           </Link>
           <button
@@ -107,7 +113,7 @@ export function Sidebar({ isOpen, onClose, userRole }: SidebarProps) {
                     isActive ? 'text-primary-600 dark:text-primary-400' : ''
                   )}
                 />
-                {t(item.labelKey as any, language)}
+                {t(item.labelKey, language)}
               </Link>
             );
           })}
@@ -123,8 +129,6 @@ export function Sidebar({ isOpen, onClose, userRole }: SidebarProps) {
             </Link>
           )}
         </nav>
-
-
 
         {/* Bottom section */}
         <div className="px-3 py-4 border-t border-[var(--sidebar-border)]">

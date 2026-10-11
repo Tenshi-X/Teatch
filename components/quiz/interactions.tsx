@@ -1,244 +1,230 @@
 'use client';
-
-import { useState, useMemo } from 'react';
-import { cn } from '@/lib/utils';
-import { CheckCircle, X } from 'lucide-react';
+import { useState } from 'react';
+import type { GeneratedQuestion } from '@/lib/learning/contracts';
+import { AssetVisual, PlantVisual } from '@/components/worksheets/asset-visual';
 import { MathText } from '@/components/ui/math-text';
+import { ASSETS, type AssetId } from '@/lib/learning/assets';
+const parse = (s: string): unknown => {
+  try {
+    return JSON.parse(s);
+  } catch {
+    return null;
+  }
+};
+const mapValue = (v: unknown): Record<string, string> =>
+  v && typeof v === 'object' && !Array.isArray(v)
+    ? (v as Record<string, string>)
+    : {};
+const choiceClass = (selected: boolean) =>
+  `border-2 rounded-lg p-3 text-left ${selected ? 'border-primary-500 bg-primary-50 text-surface-900' : 'border-surface-200'}`;
 
-export function InteractiveJumble({ options, value, onChange }: { options: string[], value: string, onChange: (val: string) => void }) {
-  const selectedItems: string[] = value ? value.split(' ') : [];
-  const availableItems = options.filter((opt) => {
-    // Count how many times this option is in selected
-    const selectedCount = selectedItems.filter(i => i === opt).length;
-    const totalCount = options.filter(i => i === opt).length;
-    return selectedCount < totalCount;
-  });
-
-  const handleSelect = (item: string) => {
-    const newItems = [...selectedItems, item];
-    onChange(newItems.join(' '));
-  };
-
-  const handleRemove = (index: number) => {
-    const newItems = [...selectedItems];
-    newItems.splice(index, 1);
-    onChange(newItems.join(' '));
-  };
-
-  return (
-    <div className="space-y-6">
-      {/* Answer Box */}
-      <div className="min-h-[80px] p-4 border-2 border-dashed border-primary-300 bg-primary-50 dark:bg-primary-900/10 rounded-xl flex flex-wrap gap-2 items-center">
-        {selectedItems.length === 0 && <span className="text-surface-400 text-sm">Pilih item di bawah secara berurutan...</span>}
-        {selectedItems.map((item, idx) => (
-          <button
-            key={idx}
-            onClick={() => handleRemove(idx)}
-            className="flex items-center gap-1 bg-primary-600 text-white px-3 py-1.5 rounded-lg text-sm shadow-sm hover:bg-danger-500 transition-colors"
-          >
-            <MathText content={item} />
-            <X size={14} />
-          </button>
-        ))}
-      </div>
-
-      {/* Available Items Box */}
-      <div className="flex flex-wrap gap-2 p-4 bg-surface-50 dark:bg-surface-800 rounded-xl">
-        {availableItems.length === 0 && <span className="text-surface-400 text-sm">Semua item telah dipilih</span>}
-        {availableItems.map((item, idx) => (
-          <button
-            key={idx}
-            onClick={() => handleSelect(item)}
-            className="bg-white dark:bg-surface-900 border border-surface-200 dark:border-surface-700 px-3 py-2 rounded-lg text-sm shadow-sm hover:border-primary-400 transition-colors cursor-pointer"
-          >
-            <MathText content={item} />
-          </button>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-export function InteractiveOrdering({ options, value, onChange }: { options: string[], value: string, onChange: (val: string) => void }) {
-  // Essentially the same logic as jumble, but returns comma separated
-  const selectedItems: string[] = value ? value.split(', ') : [];
-  const availableItems = options.filter((opt) => !selectedItems.includes(opt));
-
-  const handleSelect = (item: string) => {
-    const newItems = [...selectedItems, item];
-    onChange(newItems.join(', '));
-  };
-
-  const handleRemove = (index: number) => {
-    const newItems = [...selectedItems];
-    newItems.splice(index, 1);
-    onChange(newItems.join(', '));
-  };
-
-  return (
-    <div className="space-y-6">
-      <div className="min-h-[80px] p-4 border-2 border-dashed border-primary-300 bg-primary-50 dark:bg-primary-900/10 rounded-xl flex flex-col gap-2">
-        {selectedItems.length === 0 && <span className="text-surface-400 text-sm">Klik item di bawah untuk mengurutkan...</span>}
-        {selectedItems.map((item, idx) => (
-          <button
-            key={idx}
-            onClick={() => handleRemove(idx)}
-            className="flex items-center gap-2 bg-white dark:bg-surface-900 border border-primary-200 p-3 rounded-lg text-sm shadow-sm hover:bg-danger-50 dark:hover:bg-danger-900/20 hover:border-danger-300 transition-colors text-left"
-          >
-            <span className="font-bold text-primary-500 w-6">{idx + 1}.</span>
-            <span className="flex-1"><MathText content={item} /></span>
-            <X size={16} className="text-surface-400" />
-          </button>
-        ))}
-      </div>
-
-      <div className="flex flex-wrap gap-2 p-4 bg-surface-50 dark:bg-surface-800 rounded-xl">
-        {availableItems.map((item, idx) => (
-          <button
-            key={idx}
-            onClick={() => handleSelect(item)}
-            className="bg-white dark:bg-surface-900 border border-surface-200 dark:border-surface-700 px-4 py-2 rounded-lg text-sm shadow-sm hover:border-primary-400 transition-colors cursor-pointer"
-          >
-            <MathText content={item} />
-          </button>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-export function InteractiveGrouping({ categories, items, value, onChange }: { categories: string[], items: {name: string, category: string}[], value: string, onChange: (val: string) => void }) {
-  // Value format: "Karnivora:Harimau,Singa|Herbivora:Sapi"
-  const parseValue = () => {
-    if (!value) return {};
-    const groups: Record<string, string[]> = {};
-    value.split('|').forEach(groupStr => {
-      const [cat, itemsStr] = groupStr.split(':');
-      if (cat && itemsStr) {
-        groups[cat] = itemsStr.split(',');
-      }
-    });
-    return groups;
-  };
-
-  const selections = parseValue();
-  const allSelectedItems = Object.values(selections).flat();
-  const availableItems = items.filter(i => !allSelectedItems.includes(i.name));
-
-  const [activeItem, setActiveItem] = useState<string | null>(null);
-
-  const handleItemClick = (itemName: string) => {
-    setActiveItem(itemName === activeItem ? null : itemName);
-  };
-
-  const handleCategoryClick = (category: string) => {
-    if (activeItem) {
-      const newSelections = { ...selections };
-      if (!newSelections[category]) newSelections[category] = [];
-      newSelections[category].push(activeItem);
-
-      // Serialize
-      const valStr = Object.entries(newSelections)
-        .map(([cat, arr]) => `${cat}:${arr.join(',')}`)
-        .join('|');
-      
-      onChange(valStr);
-      setActiveItem(null);
-    }
-  };
-
-  const handleRemove = (category: string, itemName: string) => {
-    const newSelections = { ...selections };
-    if (newSelections[category]) {
-      newSelections[category] = newSelections[category].filter(i => i !== itemName);
-      if (newSelections[category].length === 0) delete newSelections[category];
-    }
-    const valStr = Object.entries(newSelections)
-      .map(([cat, arr]) => `${cat}:${arr.join(',')}`)
-      .join('|');
-    onChange(valStr);
-  };
-
-  return (
-    <div className="space-y-6">
-      {/* Available Items */}
-      <div className="p-4 bg-surface-50 dark:bg-surface-800 rounded-xl flex flex-wrap gap-2 min-h-[60px]">
-        {availableItems.length === 0 && <span className="text-surface-400 text-sm">Semua item telah dikelompokkan</span>}
-        {availableItems.map((item, i) => (
+export function QuestionInput({
+  question: q,
+  value,
+  onChange,
+}: {
+  question: GeneratedQuestion;
+  value: string;
+  onChange: (v: string) => void;
+}) {
+  const [selectedLeft, setSelectedLeft] = useState<string | null>(null);
+  if (q.type === 'multiple_choice' || q.type === 'true_false') {
+    const options =
+      q.type === 'multiple_choice' ? q.options : ['Benar', 'Salah'];
+    return (
+      <div className="grid gap-3" role="group" aria-label="Pilihan jawaban">
+        {options.map((o, i) => (
           <button
             key={i}
-            onClick={() => handleItemClick(item.name)}
-            className={cn(
-              "px-3 py-2 rounded-lg text-sm shadow-sm transition-all cursor-pointer font-medium border",
-              activeItem === item.name
-                ? "bg-primary-600 text-white border-primary-600 ring-2 ring-primary-300"
-                : "bg-white dark:bg-surface-900 border-surface-200 dark:border-surface-700 hover:border-primary-400"
-            )}
+            className={choiceClass(value === o)}
+            aria-pressed={value === o}
+            onClick={() => onChange(o)}
           >
-            {item.name}
+            <MathText content={o} />
           </button>
         ))}
       </div>
-      
-      {activeItem && <p className="text-center text-sm text-primary-600 font-medium animate-pulse">👆 Klik salah satu kotak di bawah untuk memasukkan "{activeItem}"</p>}
-
-      {/* Categories Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {categories.map((cat, idx) => (
-          <div 
-            key={idx}
-            onClick={() => handleCategoryClick(cat)}
-            className={cn(
-              "min-h-[120px] p-4 border-2 rounded-xl transition-all",
-              activeItem ? "border-primary-400 bg-primary-50/50 dark:bg-primary-900/10 cursor-pointer hover:bg-primary-100" : "border-surface-200 bg-surface-50 dark:bg-surface-800"
-            )}
-          >
-            <h3 className="font-bold text-center mb-3 pb-2 border-b border-surface-200 dark:border-surface-700">{cat}</h3>
-            <div className="flex flex-wrap gap-2">
-              {(selections[cat] || []).map((itemName, i) => (
+    );
+  }
+  if (
+    q.type === 'word_jumble' ||
+    q.type === 'sentence_jumble' ||
+    q.type === 'ordering'
+  ) {
+    const raw = parse(value);
+    const selected: string[] = Array.isArray(raw)
+      ? raw.filter((v): v is string => typeof v === 'string')
+      : [];
+    const used = new Set<number>();
+    selected.forEach((s) => {
+      const i = q.options.findIndex((v, i) => v === s && !used.has(i));
+      if (i >= 0) used.add(i);
+    });
+    return (
+      <div className="space-y-4">
+        <p className="text-sm">
+          Klik potongan sesuai urutan. Klik kembali untuk menghapus.
+        </p>
+        <div className="min-h-20 border-2 border-dashed rounded-lg p-3 flex flex-wrap gap-2">
+          {selected.map((s, i) => (
+            <button
+              key={i}
+              className="border rounded p-2"
+              onClick={() =>
+                onChange(JSON.stringify(selected.filter((_, j) => i !== j)))
+              }
+            >
+              <MathText content={s} />
+              <span aria-hidden> ×</span>
+            </button>
+          ))}
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {q.options.map(
+            (s, i) =>
+              !used.has(i) && (
                 <button
                   key={i}
-                  onClick={(e) => { e.stopPropagation(); handleRemove(cat, itemName); }}
-                  className="flex items-center gap-1 bg-white dark:bg-surface-900 border border-surface-200 px-2 py-1 rounded text-xs shadow-sm hover:bg-danger-50 hover:text-danger-600 hover:border-danger-200 transition-colors"
+                  className="border rounded p-3"
+                  onClick={() => onChange(JSON.stringify([...selected, s]))}
                 >
-                  {itemName} <X size={12} />
+                  <MathText content={s} />
                 </button>
-              ))}
-            </div>
+              )
+          )}
+        </div>
+      </div>
+    );
+  }
+  if (q.type === 'matching' || q.type === 'image_matching') {
+    const selected = mapValue(parse(value));
+    const right = [...q.pairs.slice(1), q.pairs[0]].map((p) => p.right);
+    return (
+      <div>
+        <p className="text-sm mb-3">
+          Pilih objek di kiri, lalu pasangannya di kanan.
+        </p>
+        <div className="grid grid-cols-2 gap-4">
+          <div className="grid gap-2">
+            {q.pairs.map((p) => (
+              <button
+                key={p.left}
+                className={choiceClass(selectedLeft === p.left)}
+                onClick={() => setSelectedLeft(p.left)}
+                aria-pressed={selectedLeft === p.left}
+              >
+                {q.type === 'image_matching' ? (
+                  <AssetVisual id={p.left as AssetId} />
+                ) : (
+                  <MathText content={p.left} />
+                )}
+                <span className="text-xs">
+                  {selected[p.left] || 'Belum dipasangkan'}
+                </span>
+              </button>
+            ))}
           </div>
+          <div className="grid gap-2">
+            {right.map((r) => (
+              <button
+                key={r}
+                className="border rounded p-3"
+                disabled={!selectedLeft}
+                onClick={() => {
+                  if (selectedLeft) {
+                    const updated = { ...selected };
+                    Object.keys(updated).forEach((k) => {
+                      if (updated[k] === r) delete updated[k];
+                    });
+                    updated[selectedLeft] = r;
+                    onChange(JSON.stringify(updated));
+                    setSelectedLeft(null);
+                  }
+                }}
+              >
+                <MathText content={r} />
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+  if (q.type === 'grouping') {
+    const selected = mapValue(parse(value));
+    return (
+      <div className="space-y-3">
+        {q.items.map((item) => (
+          <label
+            className="flex items-center justify-between gap-3"
+            key={item.name}
+          >
+            <MathText content={item.name} />
+            <select
+              className="input-base max-w-64"
+              value={selected[item.name] || ''}
+              onChange={(e) => {
+                const next = { ...selected };
+                if (e.target.value) next[item.name] = e.target.value;
+                else delete next[item.name];
+                onChange(Object.keys(next).length ? JSON.stringify(next) : '');
+              }}
+            >
+              <option value="">Pilih kategori</option>
+              {q.categories.map((c) => (
+                <option key={c}>{c}</option>
+              ))}
+            </select>
+          </label>
         ))}
       </div>
-    </div>
-  );
-}
-
-export function InteractiveImageOptions({ options, value, onChange }: { options: string[], value: string, onChange: (val: string) => void }) {
-  return (
-    <div className="grid grid-cols-2 gap-4">
-      {options.map((keyword, i) => {
-        const isSelected = value === keyword;
-        return (
+    );
+  }
+  if (q.type === 'choose_image')
+    return (
+      <div className="grid grid-cols-2 gap-4">
+        {q.image_options.map((id) => (
           <button
-            key={i}
-            onClick={() => onChange(keyword)}
-            className={cn(
-              "relative rounded-xl overflow-hidden border-4 transition-all aspect-[4/3] bg-white cursor-pointer",
-              isSelected ? "border-primary-500 shadow-md transform scale-[1.02]" : "border-surface-200 hover:border-primary-300"
-            )}
+            key={id}
+            aria-label={`Pilih gambar ${ASSETS[id].label}`}
+            aria-pressed={value === id}
+            className={choiceClass(value === id)}
+            onClick={() => onChange(id)}
           >
-            <img 
-              src={`https://loremflickr.com/400/300/${encodeURIComponent(keyword)}?lock=${i + 1}`}
-              alt={keyword}
-              className="w-full h-full object-cover"
-            />
-            {isSelected && (
-              <div className="absolute top-2 right-2 bg-primary-500 text-white rounded-full p-1 shadow-md">
-                <CheckCircle size={20} />
-              </div>
-            )}
+            <AssetVisual id={id} />
           </button>
-        );
-      })}
+        ))}
+      </div>
+    );
+  return (
+    <div>
+      {'asset_id' in q && (
+        <AssetVisual
+          id={q.asset_id}
+          count={q.type === 'count_image' ? q.count : 1}
+        />
+      )}{' '}
+      {q.type === 'image_label' && <PlantVisual target={q.label_target} />}
+      <label className="block">
+        <span className="text-sm">Jawaban</span>
+        {q.type === 'essay' ? (
+          <textarea
+            className="input-base w-full"
+            rows={6}
+            maxLength={5000}
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+          />
+        ) : (
+          <input
+            className="input-base w-full"
+            type={q.type === 'count_image' ? 'number' : 'text'}
+            maxLength={1000}
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+          />
+        )}
+      </label>
     </div>
   );
 }

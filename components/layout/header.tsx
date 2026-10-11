@@ -1,6 +1,6 @@
 'use client';
 
-import { Menu, Moon, Sun, LogOut, User } from 'lucide-react';
+import { Menu, Moon, Sun, LogOut } from 'lucide-react';
 import { ChildSelector } from './child-selector';
 import { useTheme } from '@/components/providers/theme-provider';
 import { signOut } from '@/app/actions/auth';
@@ -20,7 +20,13 @@ interface HeaderProps {
   subscriptionPeriodEnd?: string;
 }
 
-export function Header({ onMenuToggle, userName, avatarUrl, worksheetQuota, subscriptionPeriodEnd }: HeaderProps) {
+export function Header({
+  onMenuToggle,
+  userName,
+  avatarUrl,
+  worksheetQuota,
+  subscriptionPeriodEnd,
+}: HeaderProps) {
   const { isDark, toggle } = useTheme();
   const { language } = useLanguageStore();
   const [showUserMenu, setShowUserMenu] = useState(false);
@@ -61,7 +67,9 @@ export function Header({ onMenuToggle, userName, avatarUrl, worksheetQuota, subs
                 Aktif s.d:
               </span>
               <span className="text-sm font-bold text-primary-600 dark:text-primary-400">
-                {format(new Date(subscriptionPeriodEnd), 'dd MMM yyyy', { locale: id })}
+                {format(new Date(subscriptionPeriodEnd), 'dd MMM yyyy', {
+                  locale: id,
+                })}
               </span>
             </div>
           )}
@@ -72,10 +80,14 @@ export function Header({ onMenuToggle, userName, avatarUrl, worksheetQuota, subs
               <span className="text-sm font-medium text-surface-600 dark:text-surface-300">
                 {t('header.quota', language)}
               </span>
-              <span className={cn(
-                "text-sm font-bold",
-                worksheetQuota > 5 ? "text-primary-600 dark:text-primary-400" : "text-warning-600 dark:text-warning-500"
-              )}>
+              <span
+                className={cn(
+                  'text-sm font-bold',
+                  worksheetQuota > 5
+                    ? 'text-primary-600 dark:text-primary-400'
+                    : 'text-warning-600 dark:text-warning-500'
+                )}
+              >
                 {worksheetQuota}
               </span>
             </div>
@@ -102,7 +114,9 @@ export function Header({ onMenuToggle, userName, avatarUrl, worksheetQuota, subs
               <div className="absolute right-0 top-full mt-2 w-56 card p-2 shadow-sm border border-[var(--card-border)] animate-scale-in">
                 <div className="px-3 py-2 border-b border-[var(--card-border)] mb-2">
                   <p className="text-sm font-medium">{userName}</p>
-                  <p className="text-xs text-surface-400">{t('header.parentAccount', language)}</p>
+                  <p className="text-xs text-surface-400">
+                    {t('header.parentAccount', language)}
+                  </p>
                 </div>
                 <button
                   onClick={() => {

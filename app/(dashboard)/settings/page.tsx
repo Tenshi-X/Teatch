@@ -1,3 +1,4 @@
+import { signedAvatar } from '@/lib/server/avatars';
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import { SettingsClient } from './settings-client';
@@ -23,14 +24,14 @@ export default async function SettingsPage() {
     .single();
 
   if (!profileData) redirect('/login');
-  const profile = profileData as any;
+  const profile = profileData;
 
   return (
     <div className="max-w-3xl mx-auto space-y-6 animate-fade-in">
-      <SettingsClient 
-        initialName={profile.full_name} 
-        email={user.email || ''} 
-        avatarUrl={profile.avatar_url}
+      <SettingsClient
+        initialName={profile.full_name}
+        email={user.email || ''}
+        avatarUrl={await signedAvatar(supabase, profile.avatar_url, user.id)}
       />
     </div>
   );
