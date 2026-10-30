@@ -4,6 +4,8 @@ Tanggal: 30 Oktober 2026. Konteks: belum ada pengguna pelanggan; pengujian priba
 
 ## Pembaruan model dan fallback
 
+**Konfigurasi billing terbaru:** runtime kini memisahkan credential trial (`GEMINI_FREE_API_KEY`) dan pelanggan aktif (`GEMINI_PAID_API_KEY`) berdasarkan paket dari database. Key generik lama tidak dipakai runtime web. Siapkan dua proyek Google dengan tier yang sesuai sebelum deployment; petunjuk verifikasi Billing Trenova, environment, dan biaya per soal ada di [gemini-billing.md](gemini-billing.md). Kode tidak dapat memastikan status billing hanya dari nama model atau screenshot dropdown.
+
 Model utama sekarang `gemini-3.8-flash`, dengan fallback berurutan `gemini-3.5-flash-lite` lalu `gemini-3.6-flash` sesuai permintaan pemilik pada 30 Oktober 2026. Konfigurasi lokal sudah diperbarui; kredensial lain dipertahankan. Sebelum push, ubah **Vercel → Settings → Environment Variables → Production → `TEATCH_AI_MODEL=gemini-3.8-flash`**, lalu deploy versi kode ini. Variabel fallback tambahan dan migrasi database baru tidak diperlukan.
 
 | Model | Thinking level | Batas tiap percobaan |
@@ -83,7 +85,7 @@ npm run build
 npm audit --omit=dev --audit-level=high
 ```
 
-Hasil terakhir yang sudah diperiksa: 79 tes lulus, lint lulus, typecheck lulus. Cakupan mencakup pemulihan instalasi 006 parsial, pelestarian data/kuota/isolasi akun, serta status laporan gagal yang dibedakan dari laporan kosong. Tes fallback membuktikan urutan dan penghentian model, timeout/abort, payload SDK Gemini 3, tidak ada retry SDK, serta satu reservasi/debit atau refund pada database lokal dengan rekaman seluruh percobaan. Build produksi penuh melalui Webpack berhasil pada direktori `.next-verify`. Build normal sempat mendapat `EPERM` ketika worker Windows membuat folder output; mode verifikasi menyiapkan folder di proses utama dan memakai satu worker:
+Hasil terakhir yang sudah diperiksa: 89 tes lulus, lint lulus, typecheck lulus. Cakupan mencakup pemulihan instalasi 006 parsial, pelestarian data/kuota/isolasi akun, serta status laporan gagal yang dibedakan dari laporan kosong. Tes fallback membuktikan urutan dan penghentian model, timeout/abort, payload SDK Gemini 3, tidak ada retry SDK, serta satu reservasi/debit atau refund pada database lokal dengan rekaman seluruh percobaan. Tes billing membuktikan pemisahan key trial/pelanggan, penolakan fallback antar-key dan metadata biaya tanpa secret. Build produksi penuh melalui Webpack berhasil pada direktori `.next-verify`. Build normal sempat mendapat `EPERM` ketika worker Windows membuat folder output; mode verifikasi menyiapkan folder di proses utama dan memakai satu worker:
 
 ```sh
 npm run build:verify

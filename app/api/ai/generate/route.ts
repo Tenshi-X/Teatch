@@ -16,7 +16,10 @@ import { generateWorksheet, GenerationError } from '@/services/ai/gemini';
 import type { Json } from '@/types/database';
 import { GRADES_BY_LEVEL } from '@/types';
 import { generationScopeMessage } from '@/lib/learning/generation-availability';
-import { resolveAIModel } from '@/services/ai/config';
+import {
+  resolveAIProvider,
+  AIProviderError,
+} from '@/services/ai/billing-policy';
 
 export const maxDuration = 60;
 const reservationSchema = z.object({
@@ -42,13 +45,8 @@ export async function POST(request: Request) {
         availability.message || 'Pembuatan soal AI belum diaktifkan.',
         503
       );
-    try {
-      resolveAIModel(process.env.TEATCH_AI_MODEL);
-    } catch {
-      return fail('Konfigurasi model belum tersedia. Hubungi pengelola.', 503);
-    }
-    if (!process.env.GEMINI_API_KEY)
-      return fail('Layanan AI belum dikonfigurasi.', 503);
+    // Preflight before taking quota; never infer paid access from browser fields.
+    resolveAIProvider(profile);
     const text = await request.text();
     if (text.length > 4000) return fail('Permintaan terlalu panjang.', 400);
     const parsed = generationInputSchema.safeParse(JSON.parse(text));
@@ -163,7 +161,19 @@ export async function POST(request: Request) {
     requestId = reservation.id;
     pipelineHandled = true;
     const worksheetId = await fulfillGeneration({
-      generate: () => generateWorksheet(params),
+      generate: async () => {
+        // Re-read after reservation to cover an admin tier change during preflight.
+        // admin_update_profile refuses further tier changes while a request is reserved.
+        const { data: current, error } = await admin
+          .from('profiles')
+          .select(
+            'subscription_tier,subscription_status,subscription_period_end'
+          )
+          .eq('id', profile.id)
+          .single();
+        if (error || !current) throw new Error('PROFILE_NOT_FOUND');
+        return generateWorksheet(params, resolveAIProvider(current));
+      },
       save: async ({ worksheet, usage }) => {
         const { data, error } = await admin.rpc('finalize_generation', {
           p_request: reservation.id,
@@ -223,6 +233,10 @@ export async function POST(request: Request) {
         );
       }
     }
+    if (error instanceof AIProviderError)
+      return fail(error.message, error.status);
+    if (error instanceof Error && error.message === 'AI_CONFIG_INVALID')
+      return fail('Konfigurasi model belum tersedia. Hubungi pengelola.', 503);
     if (error instanceof Error && error.message === 'UNAUTHORIZED')
       return fail('Silakan masuk terlebih dahulu.', 401);
     if (error instanceof SyntaxError)

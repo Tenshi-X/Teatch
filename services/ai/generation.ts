@@ -11,6 +11,7 @@ import {
   validateWorksheet,
 } from '@/lib/learning/contracts';
 import type { AIGenerateParams } from '@/types';
+import type { AIBillingTier, AIKeySource } from './billing-policy';
 import {
   AI_MODEL,
   AI_MODEL_SETTINGS,
@@ -23,6 +24,11 @@ import {
 export { AI_MODEL } from './config';
 export interface GenerationUsage {
   model: string;
+  billingTier?: AIBillingTier;
+  keySource?: AIKeySource;
+  configuredProjectId?: string;
+  estimatedCostUSD?: number | null;
+  pricingDate?: string;
   requestedModel?: string;
   attempts?: ModelAttemptUsage[];
   promptVersion: number;

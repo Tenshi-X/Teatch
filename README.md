@@ -15,6 +15,8 @@ Buka `http://localhost:3000`. Terapkan migrasi 001–006 sebelum memakai dashboa
 
 ## Pemeriksaan
 
+Jalur trial dan pelanggan memakai dua key dari proyek Google berbeda: `GEMINI_FREE_API_KEY` dan `GEMINI_PAID_API_KEY`. Runtime tidak lagi memakai key generik `GEMINI_API_KEY`. Siapkan kedua jalur sebelum deployment; lihat [setup billing dan estimasi biaya per soal](docs/gemini-billing.md).
+
 ```sh
 npm run lint
 npm run typecheck
@@ -33,6 +35,7 @@ Pratinjau hanya tersedia pada `http://127.0.0.1:3002` dan menggunakan contoh lok
 
 ## Dokumentasi
 
+- [Pemisahan AI trial/pelanggan, verifikasi billing, dan estimasi biaya](docs/gemini-billing.md).
 - [Status implementasi tahap 1–3 dan cara menjalankan pengujian pribadi](docs/development-status.md).
 - [Implementation plan: urutan PR, dependensi, dan kriteria penerimaan](docs/implementation-plan.md).
 - [Migrasi, keamanan, biaya, pilot, dan gate produksi](docs/rollout.md).
