@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 export default function TermsPage() {
   return (
-    <LegalLayout title="Syarat & Ketentuan" updated="10 Oktober 2026">
+    <LegalLayout title="Syarat & Ketentuan" updated="30 Oktober 2026">
       <section>
         <h2>1. Penerimaan Ketentuan</h2>
         <p>
@@ -53,7 +53,9 @@ export default function TermsPage() {
           </li>
           <li>
             Aktivasi paket dilakukan setelah konfirmasi pembayaran dari Shopee
-            diterima oleh tim kami.
+            diterima oleh tim kami. Aktivasi dan pengisian kuota dilakukan
+            manual. Hubungi dukungan dengan email akun yang digunakan.
+            Perpanjangan otomatis belum tersedia.
           </li>
         </ul>
       </section>

@@ -28,7 +28,7 @@ export const generationInputSchema = z.object({
   difficulty: z.enum(['mudah', 'sedang', 'sulit']),
   questionCount: z.number().int().min(1).max(20),
   topic: z.string().trim().max(200).default(''),
-  objectiveId: z.string().max(150).optional(),
+  objectiveId: z.string().trim().min(1).max(150).optional(),
 });
 const text = z.string().trim().min(1).max(1500);
 const base = {

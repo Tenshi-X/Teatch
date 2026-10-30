@@ -1,67 +1,52 @@
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
+import { isPublicPath, copySessionResponse } from '@/lib/auth-session';
 
 export async function updateSession(request: NextRequest) {
-  let supabaseResponse = NextResponse.next({
-    request,
-  });
-
+  if (isPublicPath(request.nextUrl.pathname)) return NextResponse.next();
+  let response = NextResponse.next({ request });
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
-        getAll() {
-          return request.cookies.getAll();
-        },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value }) =>
+        getAll: () => request.cookies.getAll(),
+        setAll(cookies, headers) {
+          cookies.forEach(({ name, value }) =>
             request.cookies.set(name, value)
           );
-          supabaseResponse = NextResponse.next({
-            request,
-          });
-          cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options)
+          const next = NextResponse.next({ request });
+          copySessionResponse(response, next);
+          response = next;
+          cookies.forEach(({ name, value, options }) =>
+            response.cookies.set(name, value, options)
+          );
+          Object.entries(headers || {}).forEach(([name, value]) =>
+            response.headers.set(name, value)
           );
         },
       },
     }
   );
-
-  // Refresh the session - important for Server Components
+  // Keep the fresh server check, including session revocation.
   const {
     data: { user },
   } = await supabase.auth.getUser();
-
-  // Protected routes - redirect to login if not authenticated
-  const isAuthPage = request.nextUrl.pathname.startsWith('/login');
-  const isCallbackPage = request.nextUrl.pathname.startsWith('/callback');
-  const isPublicPage =
-    request.nextUrl.pathname === '/' ||
-    request.nextUrl.pathname.startsWith('/privacy') ||
-    request.nextUrl.pathname.startsWith('/terms') ||
-    request.nextUrl.pathname.startsWith('/robots.txt') ||
-    request.nextUrl.pathname.startsWith('/sitemap.xml');
-
+  response.headers.set('Cache-Control', 'private, no-store');
+  const pathname = request.nextUrl.pathname;
+  let destination: string | undefined;
   if (
     !user &&
-    !isAuthPage &&
-    !isCallbackPage &&
-    !isPublicPage &&
-    !request.nextUrl.pathname.startsWith('/api/')
-  ) {
-    const url = request.nextUrl.clone();
-    url.pathname = '/login';
-    return NextResponse.redirect(url);
-  }
-
-  // Redirect authenticated users away from auth pages
-  if (user && isAuthPage) {
-    const url = request.nextUrl.clone();
-    url.pathname = '/dashboard';
-    return NextResponse.redirect(url);
-  }
-
-  return supabaseResponse;
+    pathname !== '/login' &&
+    pathname !== '/callback' &&
+    !pathname.startsWith('/api/')
+  )
+    destination = '/login';
+  if (user && pathname === '/login') destination = '/dashboard';
+  if (!destination) return response;
+  const url = request.nextUrl.clone();
+  url.pathname = destination;
+  const redirect = NextResponse.redirect(url);
+  copySessionResponse(response, redirect);
+  return redirect;
 }

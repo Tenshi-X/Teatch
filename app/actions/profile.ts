@@ -2,14 +2,10 @@
 
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
-import { z } from 'zod';
-
-const onboardingSchema = z.object({
-  fullName: z.string().min(2, 'Nama minimal 2 karakter'),
-  phoneNumber: z.string().min(9, 'Nomor HP tidak valid'),
-});
+import { onboardingSchema } from '@/lib/profile-validation';
 
 export type OnboardingState = {
+  values?: { fullName: string; phoneNumber: string };
   error?: string;
   success?: boolean;
 };
@@ -19,14 +15,17 @@ export async function completeOnboarding(
   formData: FormData
 ): Promise<OnboardingState> {
   const rawData = {
-    fullName: formData.get('fullName') as string,
-    phoneNumber: formData.get('phoneNumber') as string,
+    fullName: String(formData.get('fullName') || '').slice(0, 100),
+    phoneNumber: String(formData.get('phoneNumber') || ''),
   };
 
   const parsed = onboardingSchema.safeParse(rawData);
   if (!parsed.success) {
     const firstIssue = parsed.error.issues[0];
-    return { error: firstIssue ? firstIssue.message : 'Data tidak valid' };
+    return {
+      error: firstIssue ? firstIssue.message : 'Data tidak valid',
+      values: rawData,
+    };
   }
 
   const supabase = await createClient();
@@ -36,21 +35,21 @@ export async function completeOnboarding(
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return { error: 'Anda belum login' };
+    return { error: 'Anda belum login', values: rawData };
   }
 
   const { error } = await supabase
     .from('profiles')
     .update({
       full_name: parsed.data.fullName,
-      phone_number: parsed.data.phoneNumber,
+      phone_number: parsed.data.phoneNumber || null,
       is_onboarded: true,
     })
     .eq('auth_user_id', user.id);
 
   if (error) {
-    return { error: error.message };
+    return { error: 'Profil belum tersimpan. Coba kembali.', values: rawData };
   }
 
-  redirect('/dashboard');
+  redirect('/children/new');
 }

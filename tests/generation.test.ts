@@ -10,6 +10,7 @@ import {
 import { fulfillGeneration, PipelineError } from '@/services/ai/pipeline';
 import type { AIGenerateParams } from '@/types';
 import { fixtures } from './fixtures';
+import { resolveAIModel } from '@/services/ai/config';
 const params: AIGenerateParams = {
   age: 8,
   level: 'SD',
@@ -75,6 +76,59 @@ test('invalid, truncated and transport-failed responses never retry or use fallb
     );
     assert.equal(calls, 1);
   }
+});
+
+test('model choice is server allowlisted and errors keep distinct codes without exposing provider text', async () => {
+  assert.throws(() => resolveAIModel('arbitrary-model'), /AI_CONFIG_INVALID/);
+  assert.equal(
+    resolveAIModel('gemini-2.5-flash-lite'),
+    'gemini-2.5-flash-lite'
+  );
+  for (const [failure, code] of [
+    [{ status: 403, message: 'secret' }, 'AI_ACCESS_DENIED'],
+    [{ status: 429 }, 'AI_RATE_LIMIT'],
+    [{ name: 'TimeoutError' }, 'AI_TIMEOUT'],
+    [{ message: 'offline' }, 'AI_TRANSPORT'],
+  ] as const) {
+    await assert.rejects(
+      generateWorksheetWithClient(params, {
+        generateContent: async () => {
+          throw failure;
+        },
+      }),
+      (e) =>
+        e instanceof GenerationError &&
+        e.code === code &&
+        !e.message.includes('secret') &&
+        e.usage.calls === 1
+    );
+  }
+  let calls = 0;
+  await assert.rejects(
+    generateWorksheetWithClient(
+      params,
+      {
+        generateContent: async () => {
+          calls++;
+          return response({});
+        },
+      },
+      'invalid'
+    ),
+    (e) => e instanceof GenerationError && e.code === 'AI_CONFIG_INVALID'
+  );
+  assert.equal(calls, 0);
+  const result = await generateWorksheetWithClient(
+    params,
+    {
+      generateContent: async (req) => {
+        assert.equal(req.model, 'gemini-2.5-flash-lite');
+        return response({ title: 'Tambah', questions: [fixtures[2]] });
+      },
+    },
+    'gemini-2.5-flash-lite'
+  );
+  assert.equal(result.usage.grade, 'Kelas 2');
 });
 const usage: GenerationUsage = {
   model: AI_MODEL,

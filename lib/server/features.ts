@@ -8,8 +8,12 @@ export function generationAvailability(parentId: string) {
       .split(',')
       .map((id) => id.trim())
       .filter(Boolean),
-    parentId
+    parentId,
+    generationAccessMode()
   );
+}
+export function generationAccessMode() {
+  return process.env.TEATCH_AI_ACCESS_MODE || 'pilot';
 }
 export function enabledQuestionTypes() {
   const requested = (

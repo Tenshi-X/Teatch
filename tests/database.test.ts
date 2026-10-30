@@ -8,6 +8,8 @@ import { fixtures, correctInput } from './fixtures';
 import { validateWorksheet, hydrateQuestion } from '@/lib/learning/contracts';
 import { gradeAnswer } from '@/lib/learning/scoring';
 import type { Question } from '@/types';
+import { buildInsights, type AnswerEvidence } from '@/lib/learning/insights';
+import type { LearningTopic } from '@/lib/learning/summary';
 let db: PGlite;
 const legacyQuestionId = randomUUID(),
   legacyAttemptId = randomUUID();
@@ -74,6 +76,9 @@ before(async () => {
   );
   await db.exec(
     await readFile('supabase/migrations/005_reliable_learning.sql', 'utf8')
+  );
+  await db.exec(
+    await readFile('supabase/migrations/006_runtime_readiness.sql', 'utf8')
   );
 });
 after(async () => {
@@ -516,4 +521,228 @@ test('refunded repeated failures are rate limited to prevent API spending abuse'
   }
   assert.equal(await balance(a.parent), 20);
   await assert.rejects(reserve(a.parent, randomUUID(), 1), /RATE_LIMIT/);
+});
+
+test('database summaries match local scoring rules, exclude legacy/pending/old evidence and isolate parents', async () => {
+  const a = await account(),
+    b = await account(),
+    w = await worksheet(a),
+    other = await worksheet(b);
+  await db.query("UPDATE worksheets SET topic='',objective_id='' WHERE id=$1", [
+    w.id,
+  ]);
+  for (let i = 0; i < 13; i++) {
+    const aid = randomUUID();
+    await db.query(
+      `INSERT INTO attempts(id,worksheet_id,child_id,score,total_questions,correct_answers,status,scoring_version,created_at)
+      VALUES($1,$2,$3,$4,1,$5,$6,$7,now()-($8||' days')::interval)`,
+      [
+        aid,
+        w.id,
+        a.child,
+        i < 5 ? 0 : 100,
+        i < 5 ? 0 : 1,
+        i === 11 ? 'pending_review' : 'completed',
+        i === 10 ? 1 : 2,
+        i === 12 ? 100 : i,
+      ]
+    );
+    await db.query(
+      'INSERT INTO answers(attempt_id,question_id,is_correct)VALUES($1,$2,$3)',
+      [aid, w.qid, i >= 5]
+    );
+  }
+  await db.query(
+    "INSERT INTO attempts(worksheet_id,child_id,score,total_questions,correct_answers,status,scoring_version)VALUES($1,$2,100,1,1,'completed',2)",
+    [other.id, b.child]
+  );
+  const evidenceRows = await db.query<{
+    id: string;
+    score: number;
+    date: Date | string;
+    correct: boolean;
+  }>(
+    `SELECT a.id,a.score,a.created_at date,x.is_correct correct FROM attempts a JOIN answers x ON x.attempt_id=a.id WHERE a.child_id=$1 AND a.scoring_version=2 AND a.status='completed' AND a.created_at>=now()-interval '90 days' ORDER BY x.id`,
+    [a.child]
+  );
+  const evidence: AnswerEvidence[] = evidenceRows.rows.map((r) => ({
+    childId: a.child,
+    subjectId: a.subject,
+    subject: 'Matematika',
+    topic: 'Latihan',
+    objectiveId: null,
+    difficulty: 'mudah',
+    correct: r.correct,
+    attemptId: r.id,
+    score: Number(r.score),
+    date: new Date(r.date).toISOString(),
+  }));
+  await asUser(a.uid, async () => {
+    const summaries = await scalar<LearningTopic[]>(
+      'SELECT learning_summary()'
+    );
+    assert.equal(summaries.length, 1);
+    const { childId, ...topic } = summaries[0];
+    assert.equal(childId, a.child);
+    assert.deepEqual(topic, buildInsights(evidence)[0]);
+    const overview = await scalar<
+      Record<
+        string,
+        {
+          stats: {
+            totalWorksheets: number;
+            totalAttempts: number;
+            totalQuestions: number;
+            averageScore: number;
+          };
+          activities: unknown[];
+          pendingReviews: number;
+          latestWorksheet: { id: string };
+        }
+      >
+    >('SELECT dashboard_overview()');
+    assert.deepEqual(Object.keys(overview), [a.child]);
+    assert.equal(overview[a.child].stats.totalWorksheets, 1);
+    assert.equal(overview[a.child].stats.totalAttempts, 11);
+    assert.equal(overview[a.child].pendingReviews, 1);
+    assert.equal(overview[a.child].latestWorksheet.id, w.id);
+    assert.equal(overview[a.child].activities.length, 5);
+    await assert.rejects(
+      db.query('SELECT admin_runtime_summary()'),
+      /permission denied/
+    );
+  });
+  const empty = await account();
+  await asUser(empty.uid, async () => {
+    assert.deepEqual(await scalar('SELECT learning_summary()'), []);
+  });
+});
+
+test('feedback/events enforce ownership, service-only writes, duplicate keys, rate limits and maintenance retention', async () => {
+  const a = await account(),
+    b = await account(),
+    w = await worksheet(a);
+  const id = await scalar('SELECT submit_product_feedback($1,$2,$3,$4)', [
+    a.parent,
+    w.id,
+    'problem',
+    'Contoh kendala',
+  ]);
+  await assert.rejects(
+    db.query('SELECT submit_product_feedback($1,$2,$3,$4)', [
+      b.parent,
+      w.id,
+      'idea',
+      'Tidak boleh',
+    ]),
+    /OWNERSHIP_INVALID/
+  );
+  const key = randomUUID();
+  for (let i = 0; i < 2; i++)
+    await db.query('SELECT record_product_event($1,$2,$3,$4)', [
+      a.parent,
+      key,
+      'attempt_started',
+      w.id,
+    ]);
+  assert.equal(
+    Number(
+      await scalar('SELECT count(*) FROM product_events WHERE parent_id=$1', [
+        a.parent,
+      ])
+    ),
+    1
+  );
+  for (let i = 0; i < 59; i++)
+    await db.query('SELECT record_product_event($1,$2,$3,NULL)', [
+      a.parent,
+      randomUUID(),
+      'visit',
+    ]);
+  await assert.rejects(
+    db.query('SELECT record_product_event($1,$2,$3,NULL)', [
+      a.parent,
+      randomUUID(),
+      'visit',
+    ]),
+    /RATE_LIMIT/
+  );
+  await asUser(a.uid, async () => {
+    assert.equal(
+      (
+        await scalar<{ id: string }[]>(
+          'SELECT jsonb_agg(t) FROM product_feedback t'
+        )
+      )[0].id,
+      id
+    );
+    await assert.rejects(
+      db.query('SELECT record_product_event($1,$2,$3,NULL)', [
+        a.parent,
+        randomUUID(),
+        'visit',
+      ]),
+      /permission denied/
+    );
+    await assert.rejects(
+      db.query('SELECT maintain_runtime()'),
+      /permission denied/
+    );
+    await assert.rejects(
+      db.query(
+        "INSERT INTO product_feedback(parent_id,category)VALUES($1,'idea')",
+        [a.parent]
+      ),
+      /permission denied/
+    );
+  });
+  await asUser(b.uid, async () =>
+    assert.equal(
+      Number(await scalar('SELECT count(*) FROM product_feedback')),
+      0
+    )
+  );
+  for (let i = 0; i < 4; i++)
+    await db.query('SELECT submit_product_feedback($1,NULL,$2,$3)', [
+      a.parent,
+      'helpful',
+      '',
+    ]);
+  await assert.rejects(
+    db.query('SELECT submit_product_feedback($1,NULL,$2,$3)', [
+      a.parent,
+      'helpful',
+      '',
+    ]),
+    /RATE_LIMIT/
+  );
+  await db.query(
+    "UPDATE product_events SET created_at=now()-interval '91 days' WHERE event_key=$1",
+    [key]
+  );
+  const r = await reserve(a.parent, randomUUID(), 1);
+  await db.query(
+    "UPDATE generation_requests SET created_at=now()-interval '16 minutes' WHERE id=$1",
+    [r.id]
+  );
+  const maintenance = await scalar<{ deletedEvents: number }>(
+    'SELECT maintain_runtime()'
+  );
+  assert.equal(maintenance.deletedEvents, 1);
+  assert.equal(
+    (await scalar<{ deletedEvents: number }>('SELECT maintain_runtime()'))
+      .deletedEvents,
+    0
+  );
+  const admin = await scalar<{
+    profiles: { id: string }[];
+    matchedUsers: number;
+  }>('SELECT admin_runtime_summary(0,$1)', [a.uid]);
+  assert.equal(admin.matchedUsers, 1);
+  assert.equal(admin.profiles[0].id, a.parent);
+  assert.equal(
+    (await scalar<{ discrepancies: number }>('SELECT quota_audit()'))
+      .discrepancies,
+    0
+  );
 });

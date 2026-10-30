@@ -1,3 +1,4 @@
+import { PlanLink } from '@/components/feedback/plan-link';
 import { SUBSCRIPTION_LIMITS as PLANS } from '@/lib/subscription';
 import { enabledQuestionTypes } from '@/lib/server/features';
 import { TYPE_LABELS } from '@/components/worksheets/question-content';
@@ -142,7 +143,7 @@ const faqs = [
   {
     question: 'Bagaimana cara berlangganan paket berbayar?',
     answer:
-      'Berlangganan dilakukan melalui toko resmi kami di Shopee (tautan tersedia pada bagian harga). Pembayaran diproses aman oleh Shopee, lalu paket Anda segera diaktifkan.',
+      'Berlangganan dilakukan melalui toko resmi kami di Shopee (tautan tersedia pada bagian harga). Aktivasi dan pengisian kuota dilakukan manual setelah pembayaran diverifikasi. Hubungi dukungan dengan email akun; perpanjangan otomatis belum tersedia.',
   },
   {
     question: 'Apakah data anak saya aman?',
@@ -656,7 +657,7 @@ export default function LandingPage() {
                 </li>
                 <li className="flex items-start gap-3 text-sm text-surface-600 dark:text-surface-300">
                   <CheckCircle className="w-5 h-5 text-primary-500 shrink-0" />
-                  <span>Semua tipe soal standar</span>
+                  <span>Tipe soal yang tersedia pada tahap pengembangan</span>
                 </li>
               </ul>
               <Link
@@ -670,7 +671,7 @@ export default function LandingPage() {
             {/* Basic */}
             <div className="card p-8 border-2 border-primary-500 bg-white dark:bg-[var(--card-bg)] flex flex-col rounded-[var(--radius-card)] shadow-sm relative">
               <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary-300 text-surface-900 px-4 py-1 rounded-full text-xs font-bold uppercase tracking-widest">
-                Terpopuler
+                Pendampingan harian
               </div>
               <div className="mb-6 mt-2">
                 <h3 className="text-xl font-bold mb-2">Basic</h3>
@@ -704,14 +705,14 @@ export default function LandingPage() {
                   <span>Prioritas dukungan (Support)</span>
                 </li>
               </ul>
-              <a
+              <PlanLink
                 href="https://shopee.co.id/trenovaintelligence"
                 target="_blank"
                 rel="noreferrer"
                 className="w-full py-3 px-4 text-center rounded-full font-semibold action-primary transition-colors"
               >
                 Berlangganan
-              </a>
+              </PlanLink>
             </div>
 
             {/* Pro */}
@@ -741,21 +742,21 @@ export default function LandingPage() {
                 </li>
                 <li className="flex items-start gap-3 text-sm text-surface-600 dark:text-surface-300">
                   <CheckCircle className="w-5 h-5 text-primary-500 shrink-0" />
-                  <span>Fitur premium lanjutan</span>
+                  <span>Laporan dan latihan ulang untuk setiap anak</span>
                 </li>
                 <li className="flex items-start gap-3 text-sm text-surface-600 dark:text-surface-300">
                   <CheckCircle className="w-5 h-5 text-primary-500 shrink-0" />
-                  <span>Dukungan teknis prioritas 24/7</span>
+                  <span>Bantuan penggunaan melalui kontak dukungan</span>
                 </li>
               </ul>
-              <a
+              <PlanLink
                 href="https://shopee.co.id/trenovaintelligence"
                 target="_blank"
                 rel="noreferrer"
                 className="w-full py-3 px-4 text-center rounded-full font-semibold border-[1.5px] border-surface-200 dark:border-surface-700 text-surface-700 dark:text-surface-200 hover:bg-surface-50 dark:hover:bg-surface-800 transition-all active:translate-y-[1px]"
               >
                 Berlangganan
-              </a>
+              </PlanLink>
             </div>
           </div>
 
@@ -765,7 +766,8 @@ export default function LandingPage() {
                 size={16}
                 className="text-secondary-600 dark:text-secondary-400"
               />
-              Pembayaran aman melalui Shopee — toko resmi kami.
+              Pembayaran melalui Shopee. Aktivasi paket dilakukan manual setelah
+              verifikasi.
             </span>
             <span className="hidden sm:block text-surface-300 dark:text-surface-600">
               ·
@@ -857,8 +859,7 @@ export default function LandingPage() {
         </div>
         <div className="max-w-6xl mx-auto border-t border-[var(--card-border)] pt-8 text-center md:text-left flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-xs text-[var(--text-muted)]">
-            © {new Date().getFullYear()} Trenova Intelligence. Seluruh hak cipta
-            dilindungi.
+            © {new Date().getFullYear()} Teatch. Seluruh hak cipta dilindungi.
           </p>
           <div className="flex gap-4">
             <Link

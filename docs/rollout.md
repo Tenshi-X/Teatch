@@ -1,5 +1,7 @@
 # Peluncuran roadmap Teatch
 
+> Pembaruan 30 Oktober 2026: kode tahap 1–3 telah dikembangkan untuk kondisi belum ada pelanggan. Gunakan [status pengembangan](development-status.md) untuk migrasi 006, konfigurasi akses pribadi, hasil pemeriksaan, dan keterbatasan aktual. Bagian berikut berasal dari rollout migrasi 005; keterangan historis bukan bukti deployment terbaru.
+
 ## Status implementasi
 
 Kode aplikasi dan migrasi sudah tersedia secara lokal. Database produksi belum diubah dan aplikasi belum diterbitkan. Tes menggunakan PostgreSQL lokal melalui PGlite, klien model tiruan, dan contoh soal; tidak ada panggilan Gemini berbayar selama pemeriksaan ini.

@@ -18,7 +18,9 @@ export function buildInsights(evidence: AnswerEvidence[]) {
       row.objectiveId || row.topic,
       row.difficulty,
     ]);
-    groups.set(key, [...(groups.get(key) || []), row]);
+    const group = groups.get(key);
+    if (group) group.push(row);
+    else groups.set(key, [row]);
   }
   return [...groups.values()]
     .map((rows) => {
@@ -28,7 +30,11 @@ export function buildInsights(evidence: AnswerEvidence[]) {
       const attempts = [
         ...new Map(
           [...rows]
-            .sort((a, b) => b.date.localeCompare(a.date))
+            .sort(
+              (a, b) =>
+                b.date.localeCompare(a.date) ||
+                b.attemptId.localeCompare(a.attemptId)
+            )
             .map((r) => [r.attemptId, r])
         ).values(),
       ];

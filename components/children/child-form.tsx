@@ -65,7 +65,7 @@ export function ChildForm({ child, mode }: ChildFormProps) {
           name="name"
           label="Nama Anak"
           placeholder="Masukkan nama anak"
-          defaultValue={child?.name}
+          defaultValue={state.values?.name ?? child?.name}
           error={state.fieldErrors?.name?.[0]}
           required
         />
@@ -74,7 +74,7 @@ export function ChildForm({ child, mode }: ChildFormProps) {
           name="birth_date"
           type="date"
           label="Tanggal Lahir"
-          defaultValue={child?.birth_date}
+          defaultValue={state.values?.birth_date ?? child?.birth_date}
           error={state.fieldErrors?.birth_date?.[0]}
           required
         />
@@ -96,8 +96,10 @@ export function ChildForm({ child, mode }: ChildFormProps) {
               name="grade"
               label="Kelas"
               options={gradeOptions}
-              defaultValue={child?.grade || ''}
+              defaultValue={state.values?.grade ?? child?.grade ?? ''}
               placeholder="Pilih kelas"
+              required
+              error={state.fieldErrors?.grade?.[0]}
             />
           )}
         </div>
@@ -106,7 +108,7 @@ export function ChildForm({ child, mode }: ChildFormProps) {
           name="interests"
           label="Minat (pisahkan dengan koma)"
           placeholder="contoh: membaca, menggambar, musik"
-          defaultValue={child?.interests?.join(', ')}
+          defaultValue={state.values?.interests ?? child?.interests?.join(', ')}
           helperText="Opsional. Bantu AI membuat soal yang lebih menarik."
         />
         <Input
@@ -121,7 +123,10 @@ export function ChildForm({ child, mode }: ChildFormProps) {
           name="favorite_subjects"
           label="Mata Pelajaran Favorit (pisahkan dengan koma)"
           placeholder="contoh: Matematika, IPA"
-          defaultValue={child?.favorite_subjects?.join(', ')}
+          defaultValue={
+            state.values?.favorite_subjects ??
+            child?.favorite_subjects?.join(', ')
+          }
           helperText="Opsional. Mata pelajaran yang paling disukai anak."
         />
 

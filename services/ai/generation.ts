@@ -7,8 +7,9 @@ import {
   validateWorksheet,
 } from '@/lib/learning/contracts';
 import type { AIGenerateParams } from '@/types';
+import { AI_MODEL, resolveAIModel, classifyGenerationError } from './config';
 
-export const AI_MODEL = 'gemini-2.5-flash';
+export { AI_MODEL } from './config';
 export interface GenerationUsage {
   model: string;
   promptVersion: number;
@@ -25,6 +26,8 @@ export interface GenerationUsage {
   subject: string;
   questionType: string;
   difficulty: string;
+  grade?: string;
+  objectiveId?: string;
 }
 export class GenerationError extends Error {
   constructor(
@@ -38,11 +41,12 @@ export class GenerationError extends Error {
 }
 export async function generateWorksheetWithClient(
   params: AIGenerateParams,
-  client: Pick<GoogleGenAI['models'], 'generateContent'>
+  client: Pick<GoogleGenAI['models'], 'generateContent'>,
+  model: string = AI_MODEL
 ) {
   const started = Date.now();
   const usage: GenerationUsage = {
-    model: AI_MODEL,
+    model,
     promptVersion: 2,
     inputTokens: 0,
     outputTokens: 0,
@@ -57,6 +61,8 @@ export async function generateWorksheetWithClient(
     subject: params.subject,
     questionType: params.questionType,
     difficulty: params.difficulty,
+    grade: params.grade,
+    objectiveId: params.objectiveId,
   };
   const schema = z.toJSONSchema(
     z.object({
@@ -69,10 +75,12 @@ export async function generateWorksheetWithClient(
     })
   );
   delete schema.$schema;
+  let stage: 'transport' | 'truncated' | 'validation' = 'transport';
   try {
+    resolveAIModel(model);
     usage.calls = 1;
     const response = await client.generateContent({
-      model: AI_MODEL,
+      model,
       contents: buildGeneratePrompt(params),
       config: {
         systemInstruction: buildSystemPrompt(),
@@ -99,9 +107,14 @@ export async function generateWorksheetWithClient(
     usage.totalTokens = response.usageMetadata?.totalTokenCount || 0;
     usage.metered =
       typeof response.usageMetadata?.promptTokenCount === 'number' &&
-      typeof response.usageMetadata?.totalTokenCount === 'number';
+      typeof response.usageMetadata?.candidatesTokenCount === 'number' &&
+      typeof response.usageMetadata?.totalTokenCount === 'number' &&
+      usage.totalTokens >=
+        usage.inputTokens + usage.outputTokens + usage.thinkingTokens;
+    stage = 'truncated';
     if (response.candidates?.[0]?.finishReason !== 'STOP')
       throw new Error('INCOMPLETE');
+    stage = 'validation';
     const raw = JSON.parse(response.text || '') as unknown;
     // Shape validation precedes deterministic visual corrections.
     const shape = z
@@ -124,8 +137,15 @@ export async function generateWorksheetWithClient(
     usage.valid = true;
     usage.durationMs = Date.now() - started;
     return { worksheet, usage };
-  } catch {
+  } catch (error) {
     usage.durationMs = Date.now() - started;
-    throw new GenerationError(usage, 'GENERATION_INVALID');
+    throw new GenerationError(
+      usage,
+      stage === 'transport'
+        ? classifyGenerationError(error)
+        : stage === 'truncated'
+          ? 'AI_TRUNCATED'
+          : 'GENERATION_INVALID'
+    );
   }
 }

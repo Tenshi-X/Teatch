@@ -1,6 +1,7 @@
 import 'server-only';
+import { cache } from 'react';
 import { createClient } from '@/lib/supabase/server';
-export async function getParent() {
+export const getParent = cache(async () => {
   const supabase = await createClient();
   const {
     data: { user },
@@ -13,7 +14,18 @@ export async function getParent() {
     .single();
   if (error || !profile) throw new Error('PROFILE_NOT_FOUND');
   return { supabase, user, profile };
-}
+});
+
+export const getChildren = cache(async () => {
+  const { supabase, profile } = await getParent();
+  const { data, error } = await supabase
+    .from('children')
+    .select('*')
+    .eq('parent_id', profile.id)
+    .order('created_at');
+  if (error) throw new Error('Profil anak belum dapat dimuat.');
+  return data || [];
+});
 export async function getOwnedWorksheet(id: string) {
   const context = await getParent();
   const { data: worksheet } = await context.supabase

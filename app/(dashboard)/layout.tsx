@@ -1,5 +1,5 @@
 import { signedAvatar } from '@/lib/server/avatars';
-import { createClient } from '@/lib/supabase/server';
+import { getParent, getChildren } from '@/lib/server/ownership';
 import { redirect } from 'next/navigation';
 import { DashboardShell } from '@/components/layout/dashboard-shell';
 import type { Metadata } from 'next';
@@ -16,41 +16,28 @@ export default async function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const supabase = await createClient();
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect('/login');
-  }
-
-  // Fetch parent profile
-  const { data: profileData } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('auth_user_id', user.id)
-    .single();
-
-  if (!profileData) {
-    redirect('/login');
-  }
-  const profile = profileData;
+  const context = await getParent().catch((e) => {
+    if (
+      e instanceof Error &&
+      ['UNAUTHORIZED', 'PROFILE_NOT_FOUND'].includes(e.message)
+    )
+      return null;
+    throw e;
+  });
+  if (!context) redirect('/login');
+  const { supabase, user, profile } = context;
 
   if (!profile.is_onboarded) {
     redirect('/onboarding');
   }
 
   // Fetch children
-  const { data: childrenData } = await supabase
-    .from('children')
-    .select('*')
-    .eq('parent_id', profile.id)
-    .order('created_at', { ascending: true });
+  const childrenData = await getChildren();
 
   return (
     <DashboardShell
+      key={profile.id}
+      ownerId={profile.id}
       userName={profile.full_name}
       userRole={profile.role}
       avatarUrl={await signedAvatar(supabase, profile.avatar_url, user.id)}

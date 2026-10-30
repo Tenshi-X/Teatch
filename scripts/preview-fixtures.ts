@@ -14,8 +14,14 @@ async function main() {
     alias: { '@': resolve('.') },
     define: { 'process.env.NODE_ENV': '"development"' },
   });
-  const chunks = resolve('.next/static/chunks');
-  const styles = (await readdir(chunks)).filter((n) => n.endsWith('.css'));
+  const chunks = resolve(
+    process.env.TEATCH_ISOLATED_BUILD === 'true'
+      ? '.next-verify/static'
+      : '.next/static'
+  );
+  const styles = (await readdir(chunks, { recursive: true })).filter((n) =>
+    n.endsWith('.css')
+  );
   const css = (
     await Promise.all(styles.map((n) => readFile(resolve(chunks, n), 'utf8')))
   ).join('\n');

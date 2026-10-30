@@ -2,7 +2,7 @@
 import { useRef } from 'react';
 import { useReactToPrint } from 'react-to-print';
 import { useChildStore } from '@/lib/stores/child-store';
-import { buildInsights, type AnswerEvidence } from '@/lib/learning/insights';
+import type { LearningTopic } from '@/lib/learning/summary';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
@@ -12,16 +12,14 @@ const labels = {
   practice: 'Perlu latihan',
   developing: 'Sedang berkembang',
 };
-export function LearningSummary({ evidence }: { evidence: AnswerEvidence[] }) {
+export function LearningSummary({ topics }: { topics: LearningTopic[] }) {
   const { activeChild } = useChildStore();
   const ref = useRef<HTMLDivElement>(null);
   const print = useReactToPrint({
     contentRef: ref,
     documentTitle: 'Laporan perkembangan Teatch',
   });
-  const insights = buildInsights(
-    evidence.filter((r) => r.childId === activeChild?.id)
-  );
+  const insights = topics.filter((r) => r.childId === activeChild?.id);
   return (
     <Card padding="lg">
       <div className="flex flex-wrap justify-between gap-3 mb-4">

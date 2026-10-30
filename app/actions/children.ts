@@ -19,11 +19,12 @@ const childSchema = z
     interests: z.string().max(300),
     favorite_subjects: z.string().max(300),
   })
-  .refine((c) => !c.grade || GRADES_BY_LEVEL[c.level].includes(c.grade), {
+  .refine((c) => GRADES_BY_LEVEL[c.level].includes(c.grade), {
     path: ['grade'],
     message: 'Kelas tidak sesuai jenjang',
   });
 export type ChildFormState = {
+  values?: Record<string, string>;
   error?: string;
   fieldErrors?: Record<string, string[]>;
   success?: boolean;
@@ -49,8 +50,14 @@ async function saveChild(
     ].map((key) => [key, formData.get(key) || ''])
   );
   const parsed = childSchema.safeParse(raw);
+  const values = Object.fromEntries(
+    Object.entries(raw).map(([k, v]) => [
+      k,
+      typeof v === 'string' ? v.slice(0, 300) : '',
+    ])
+  );
   if (!parsed.success)
-    return { fieldErrors: parsed.error.flatten().fieldErrors };
+    return { fieldErrors: parsed.error.flatten().fieldErrors, values };
   try {
     const { supabase, profile, user } = await getParent();
     if (childId) {
@@ -61,7 +68,7 @@ async function saveChild(
         .eq('id', childId)
         .eq('parent_id', profile.id)
         .single();
-      if (!data) return { error: 'Profil anak tidak ditemukan.' };
+      if (!data) return { error: 'Profil anak tidak ditemukan.', values };
     }
     const path = await uploadAvatar(supabase, formData.get('photo'), user.id);
     const { interests, favorite_subjects, ...fields } = parsed.data;
@@ -83,6 +90,7 @@ async function saveChild(
     if (error) {
       if (path) await supabase.storage.from('avatars').remove([path]);
       return {
+        values,
         error: error.message.includes('CHILD_LIMIT')
           ? 'Batas profil anak pada paket ini sudah tercapai.'
           : 'Profil anak belum tersimpan.',
@@ -90,11 +98,12 @@ async function saveChild(
     }
   } catch (e) {
     return {
+      values,
       error: e instanceof Error ? e.message : 'Profil anak belum tersimpan.',
     };
   }
   revalidatePath('/', 'layout');
-  redirect('/children');
+  redirect(childId ? '/children' : '/worksheets/new');
 }
 export async function createChild(
   _prevState: ChildFormState,

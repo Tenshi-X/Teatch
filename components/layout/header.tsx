@@ -3,7 +3,7 @@
 import { Menu, Moon, Sun, LogOut } from 'lucide-react';
 import { ChildSelector } from './child-selector';
 import { useTheme } from '@/components/providers/theme-provider';
-import { signOut } from '@/app/actions/auth';
+import { logout } from '@/lib/device-session';
 import { useState, useRef, useEffect } from 'react';
 import { format } from 'date-fns';
 import { id } from 'date-fns/locale';
@@ -121,7 +121,7 @@ export function Header({
                 <button
                   onClick={() => {
                     setShowUserMenu(false);
-                    signOut();
+                    void logout();
                   }}
                   className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-danger-600 dark:text-danger-500 hover:bg-danger-50 dark:hover:bg-danger-500/10 transition-colors cursor-pointer"
                 >

@@ -216,9 +216,57 @@ export type Database = {
           >,
         ]
       >;
+      product_feedback: Table<
+        {
+          id: string;
+          parent_id: string;
+          worksheet_id: string | null;
+          category: 'helpful' | 'problem' | 'idea';
+          comment: string;
+          status: 'open' | 'resolved';
+          created_at: string;
+        },
+        'parent_id' | 'category'
+      >;
+      product_events: Table<
+        {
+          id: string;
+          parent_id: string;
+          event_key: string;
+          kind: 'visit' | 'attempt_started' | 'plan_clicked';
+          worksheet_id: string | null;
+          created_at: string;
+        },
+        'parent_id' | 'event_key' | 'kind'
+      >;
     };
     Views: Record<string, never>;
     Functions: {
+      learning_summary: { Args: { p_since?: string }; Returns: Json };
+      dashboard_overview: { Args: Record<string, never>; Returns: Json };
+      maintain_runtime: { Args: Record<string, never>; Returns: Json };
+      admin_runtime_summary: {
+        Args: { p_offset?: number; p_search?: string };
+        Returns: Json;
+      };
+      submit_product_feedback: {
+        Args: {
+          p_parent: string;
+          p_worksheet: string | null;
+          p_category: string;
+          p_comment: string;
+        };
+        Returns: string;
+      };
+      record_product_event: {
+        Args: {
+          p_parent: string;
+          p_key: string;
+          p_kind: string;
+          p_worksheet: string | null;
+        };
+        Returns: undefined;
+      };
       reconcile_generation_reservations: {
         Args: Record<string, never>;
         Returns: number;

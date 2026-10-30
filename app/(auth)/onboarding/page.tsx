@@ -3,14 +3,20 @@
 import { useActionState, useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { completeOnboarding } from '@/app/actions/profile';
+import {
+  completeOnboarding,
+  type OnboardingState,
+} from '@/app/actions/profile';
 import { createClient } from '@/lib/supabase/client';
 import { Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 export default function OnboardingPage() {
   const router = useRouter();
-  const [state, formAction, isPending] = useActionState(completeOnboarding, {
+  const [state, formAction, isPending] = useActionState<
+    OnboardingState,
+    FormData
+  >(completeOnboarding, {
     error: undefined,
   });
 
@@ -79,7 +85,7 @@ export default function OnboardingPage() {
               id="fullName"
               name="fullName"
               type="text"
-              defaultValue={defaultName}
+              defaultValue={state.values?.fullName ?? defaultName}
               placeholder="Masukkan nama lengkap Anda"
               required
               className="w-full"
@@ -91,18 +97,19 @@ export default function OnboardingPage() {
               htmlFor="phoneNumber"
               className="block text-sm font-medium mb-1.5"
             >
-              Nomor WhatsApp / HP
+              Nomor WhatsApp / HP (opsional)
             </label>
             <Input
               id="phoneNumber"
               name="phoneNumber"
+              defaultValue={state.values?.phoneNumber || ''}
               type="tel"
               placeholder="Contoh: 08123456789"
-              required
               className="w-full"
             />
             <p className="text-xs text-[var(--text-muted)] mt-1">
-              Nomor ini akan digunakan untuk informasi terkait akun.
+              Boleh dilengkapi nanti di pengaturan. Tidak diperlukan untuk
+              mencoba latihan.
             </p>
           </div>
 

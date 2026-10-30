@@ -3,14 +3,26 @@ import { AdminTable } from './admin-table';
 import { QuestionReports } from '@/components/admin/question-reports';
 import { QuotaMonitor } from '@/components/admin/quota-monitor';
 import { Activity, Users, ShieldCheck } from 'lucide-react';
+import { ProductFeedback } from '@/components/admin/product-feedback';
+import Link from 'next/link';
 
 export const metadata = {
   title: 'Admin Dashboard | Teatch',
 };
 
-export default async function AdminPage() {
-  const { profiles, metrics, reports, quotaAudit } =
-    await getAdminDashboardData();
+export default async function AdminPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string; q?: string }>;
+}) {
+  const query = await searchParams;
+  const page = Math.min(
+    100000,
+    Math.max(0, Number.parseInt(query.page || '0', 10) || 0)
+  );
+  const search = (query.q || '').slice(0, 100);
+  const { profiles, metrics, reports, quotaAudit, feedback, matchedUsers } =
+    await getAdminDashboardData(page, search);
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
@@ -113,8 +125,48 @@ export default async function AdminPage() {
       </p>
       <QuestionReports reports={reports} />
       <QuotaMonitor audit={quotaAudit} />
+      <p className="text-sm">
+        Akun aktif 7 hari: {metrics.activeParents7d} · Masukan terbuka:{' '}
+        {metrics.feedbackOpen}. Kunjungan adalah sinyal perangkat; hasil latihan
+        tetap berasal dari database.
+      </p>
+      <ProductFeedback items={feedback} />
       <div className="space-y-4">
+        <form className="flex flex-wrap gap-2" action="/admin">
+          <input
+            name="q"
+            defaultValue={search}
+            maxLength={100}
+            aria-label="Cari seluruh pengguna"
+            placeholder="Cari nama atau email"
+            className="input-base"
+          />
+          <button className="rounded-lg border px-4 py-2">
+            Cari semua akun
+          </button>
+        </form>
         <AdminTable profiles={profiles} />
+        <nav className="flex gap-4 text-sm" aria-label="Halaman pengguna">
+          {page > 0 && (
+            <Link
+              className="underline"
+              href={`/admin?page=${page - 1}&q=${encodeURIComponent(search)}`}
+            >
+              Sebelumnya
+            </Link>
+          )}
+          <span>
+            Halaman {page + 1} · {matchedUsers} akun sesuai pencarian
+          </span>
+          {(page + 1) * 50 < matchedUsers && (
+            <Link
+              className="underline"
+              href={`/admin?page=${page + 1}&q=${encodeURIComponent(search)}`}
+            >
+              Berikutnya
+            </Link>
+          )}
+        </nav>
       </div>
     </div>
   );

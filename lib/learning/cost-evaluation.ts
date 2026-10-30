@@ -15,12 +15,17 @@ export const measurementSchema = z.object({
   calls: z.number().int().nonnegative(),
   reviewedQuestions: z.number().int().nonnegative(),
   inconsistentKeys: z.number().int().nonnegative(),
+  grade: z.string().optional(),
+  objectiveId: z.string().optional(),
+  promptVersion: z.number().int().optional(),
+  caseId: z.string().optional(),
 });
 export type Measurement = z.infer<typeof measurementSchema>;
 const key = (r: Measurement) =>
   JSON.stringify([
     r.model,
     r.level,
+    r.grade || '',
     r.subject,
     r.questionType,
     r.difficulty,

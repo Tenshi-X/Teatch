@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 export default function PrivacyPage() {
   return (
-    <LegalLayout title="Kebijakan Privasi" updated="10 Oktober 2026">
+    <LegalLayout title="Kebijakan Privasi" updated="30 Oktober 2026">
       <section>
         <h2>1. Data yang Kami Kumpulkan</h2>
         <p>
@@ -67,6 +67,20 @@ export default function PrivacyPage() {
       </section>
       <section>
         <h2>4. Hak Anda</h2>
+        <p>
+          Masukan yang Anda kirim berisi kategori, komentar opsional, dan
+          referensi latihan jika dipilih. Masukan dipakai untuk perbaikan
+          layanan dan ditinjau pengelola. Hindari menuliskan informasi pribadi
+          anak dalam komentar.
+        </p>
+        <p>
+          Kami mencatat ID akun internal, waktu kunjungan, awal latihan, dan
+          klik pilihan paket untuk memahami pemakaian. Catatan ini tidak memuat
+          nama anak, tanggal lahir, isi jawaban, atau kontak. Event mentah
+          dihapus setelah 90 hari melalui pemeliharaan terjadwal. Data hasil
+          latihan tetap disimpan untuk laporan perkembangan sampai Anda meminta
+          penghapusan.
+        </p>
         <ul>
           <li>Meminta salinan data yang kami simpan.</li>
           <li>

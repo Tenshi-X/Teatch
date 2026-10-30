@@ -9,19 +9,21 @@ import { User, Mail, Moon, Sun, LogOut, Camera, Globe } from 'lucide-react';
 import { useTheme } from '@/components/providers/theme-provider';
 import { Avatar } from '@/components/ui/avatar';
 import { updateProfile } from '@/app/actions/settings';
-import { signOut } from '@/app/actions/auth';
+import { logout } from '@/lib/device-session';
 import { useLanguageStore } from '@/lib/stores/language-store';
 import { t } from '@/lib/i18n';
 import { toast } from 'sonner';
 
 interface SettingsClientProps {
   initialName: string;
+  initialPhone?: string;
   email: string;
   avatarUrl?: string;
 }
 
 export function SettingsClient({
   initialName,
+  initialPhone = '',
   email,
   avatarUrl,
 }: SettingsClientProps) {
@@ -29,6 +31,7 @@ export function SettingsClient({
   const { language, setLanguage } = useLanguageStore();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [name, setName] = useState(initialName);
+  const [phone, setPhone] = useState(initialPhone);
   const [avatar, setAvatar] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string>(avatarUrl || '');
 
@@ -42,6 +45,7 @@ export function SettingsClient({
     setIsSubmitting(true);
     const formData = new FormData();
     formData.append('fullName', name);
+    formData.append('phoneNumber', phone);
     if (avatar) {
       formData.append('avatar', avatar);
     }
@@ -145,9 +149,19 @@ export function SettingsClient({
               </div>
             </div>
           </div>
+          <Input
+            label="Nomor WhatsApp (opsional)"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            type="tel"
+            maxLength={25}
+          />
           <Button
             type="submit"
-            disabled={isSubmitting || (name === initialName && !avatar)}
+            disabled={
+              isSubmitting ||
+              (name === initialName && phone === initialPhone && !avatar)
+            }
             className="w-full sm:w-auto"
           >
             {isSubmitting
@@ -233,7 +247,7 @@ export function SettingsClient({
         </p>
         <Button
           variant="outline"
-          onClick={() => signOut()}
+          onClick={() => void logout()}
           className="text-danger-600 dark:text-danger-500 hover:text-danger-700 dark:hover:text-danger-500 hover:bg-danger-50 border-danger-200 dark:border-danger-500/60 dark:hover:bg-danger-500/10"
         >
           {t('settings.logoutBtn', language)}

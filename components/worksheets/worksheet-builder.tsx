@@ -15,6 +15,8 @@ import {
 } from '@/lib/learning/contracts';
 import { TYPE_LABELS } from './question-content';
 import type { GenerationAvailability } from '@/lib/learning/generation-availability';
+import { generationScopeMessage } from '@/lib/learning/generation-availability';
+import { useGenerationRecovery } from './use-generation-recovery';
 import { Users } from 'lucide-react';
 import { toast } from 'sonner';
 import Link from 'next/link';
@@ -36,11 +38,15 @@ function readPending(key: string) {
 }
 
 export function WorksheetBuilder({
+  ownerId,
+  scopeMode = 'public',
   initialTopic = '',
   initialSubject = '',
   enabledTypes,
   availability,
 }: {
+  ownerId: string;
+  scopeMode?: string;
   initialTopic?: string;
   initialSubject?: string;
   enabledTypes: GenerationInput['questionType'][];
@@ -54,12 +60,12 @@ export function WorksheetBuilder({
     useState<GenerationInput['questionType']>('multiple_choice');
   const [difficulty, setDifficulty] =
     useState<GenerationInput['difficulty']>('sedang');
-  const [count, setCount] = useState(5);
+  const [count, setCount] = useState(10);
   const [topic, setTopic] = useState(initialTopic);
   const [objectiveId, setObjectiveId] = useState('');
   const [busy, setBusy] = useState(false);
   const [generationError, setGenerationError] = useState<string | null>(null);
-  const pendingKey = `teatch:generation:${activeChild?.id || 'none'}`;
+  const pendingKey = `teatch:generation:${ownerId}:${activeChild?.id || 'none'}`;
   const rawPending = useSyncExternalStore(
     subscribePending,
     () => readPending(pendingKey),
@@ -73,8 +79,12 @@ export function WorksheetBuilder({
   } catch {
     /* No pending generation. */
   }
-  const pending = availability.enabled ? storedPending : undefined;
+  const pending = storedPending;
   const requestKey = pending?.requestKey;
+  const { status: recovery, recheck } = useGenerationRecovery(
+    requestKey,
+    pendingKey
+  );
   const savePending = (input: GenerationInput | null) => {
     try {
       if (input) localStorage.setItem(pendingKey, JSON.stringify(input));
@@ -98,14 +108,20 @@ export function WorksheetBuilder({
       .order('name')
       .then(({ data, error }) => {
         if (!cancelled) {
-          setSubjects(data || []);
+          setSubjects(
+            (data || []).filter(
+              (s) =>
+                scopeMode !== 'pilot' ||
+                ['Matematika', 'Bahasa Indonesia'].includes(s.name)
+            )
+          );
           if (error) toast.error('Pelajaran belum dapat dimuat.');
         }
       });
     return () => {
       cancelled = true;
     };
-  }, [activeChild]);
+  }, [activeChild, scopeMode]);
   if (!activeChild)
     return (
       <EmptyState
@@ -133,6 +149,12 @@ export function WorksheetBuilder({
   const objectives = subject
     ? getObjectives(subject.name, activeChild.level, activeChild.grade || '')
     : [];
+  const scopeMessage = generationScopeMessage(
+    activeChild.level,
+    activeChild.grade,
+    subject?.name,
+    scopeMode
+  );
   const chosenObjective = pending?.objectiveId || objectiveId;
   const validObjective = objectives.some((o) => o.id === chosenObjective)
     ? chosenObjective
@@ -145,8 +167,8 @@ export function WorksheetBuilder({
         : 20;
   const actualCount = pending?.questionCount || Math.min(count, maxCount);
   const generate = async () => {
-    if (!availability.enabled) {
-      setGenerationError(availability.message);
+    if (!availability.enabled || scopeMessage) {
+      setGenerationError(scopeMessage || availability.message);
       return;
     }
     if (!subject) return;
@@ -210,6 +232,68 @@ export function WorksheetBuilder({
         </p>
       </header>
       <Card padding="lg">
+        <h2 className="text-lg font-semibold">Mulai dari materi pilihan</h2>
+        <p className="mt-1 text-sm text-[var(--text-muted)]">
+          Pilih pelajaran, lalu tujuan belajar sesuai kelas. Pilihan ini
+          menyiapkan parameter draf AI untuk diperiksa bersama.
+        </p>
+        <div className="mt-3 flex flex-wrap gap-2">
+          {subjects
+            .filter((s) => ['Matematika', 'Bahasa Indonesia'].includes(s.name))
+            .map((s) => (
+              <Button
+                key={s.id}
+                variant={subject?.id === s.id ? 'primary' : 'outline'}
+                disabled={busy || !!requestKey}
+                onClick={() => {
+                  setSubjectId(s.id);
+                  setObjectiveId('');
+                  setTopic('');
+                }}
+              >
+                {s.name}
+              </Button>
+            ))}
+        </div>
+        <div className="mt-3 grid gap-2 sm:grid-cols-3">
+          {objectives.map((o) => (
+            <button
+              key={o.id}
+              disabled={busy || !!requestKey}
+              className="rounded-lg border border-[var(--card-border)] p-3 text-left text-sm hover:bg-[var(--surface-subtle)] disabled:opacity-50"
+              onClick={() => {
+                setObjectiveId(o.id);
+                setTopic(o.label);
+                setCount(10);
+                setDifficulty('mudah');
+                setType('multiple_choice');
+              }}
+            >
+              {o.label}
+            </button>
+          ))}
+        </div>
+      </Card>
+      <Card padding="lg">
+        {scopeMessage && (
+          <p role="status" className="mb-4 text-sm">
+            {scopeMessage}
+          </p>
+        )}
+        {requestKey && (
+          <div
+            role="status"
+            className="mb-4 rounded-lg border border-[var(--card-border)] p-4 text-sm"
+          >
+            {busy
+              ? 'Permintaan terkirim. Sedang menyiapkan draf; jangan tutup halaman sebelum hasil tersimpan.'
+              : recovery?.message ||
+                'Memeriksa hasil permintaan yang tersimpan…'}
+            <p className="mt-1 text-[var(--text-muted)]">
+              Pemeriksaan status tidak memakai kuota tambahan.
+            </p>
+          </div>
+        )}
         {!availability.enabled && (
           <p
             role="status"
@@ -308,9 +392,21 @@ export function WorksheetBuilder({
             koreksi manual dan latihan ulang gratis.
           </p>
           <div className="flex flex-wrap gap-3">
+            {requestKey && (
+              <Button variant="outline" onClick={recheck}>
+                Periksa status
+              </Button>
+            )}
             <Button
               onClick={generate}
-              disabled={!availability.enabled || !subject || !types.length}
+              disabled={
+                !availability.enabled ||
+                !!scopeMessage ||
+                !subject ||
+                !types.length ||
+                recovery?.status === 'reserved' ||
+                recovery?.status === 'failed'
+              }
               isLoading={busy}
             >
               {!availability.enabled
@@ -320,7 +416,19 @@ export function WorksheetBuilder({
                   : 'Buat draf latihan'}
             </Button>
             {requestKey && !busy && (
-              <Button variant="outline" onClick={() => savePending(null)}>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  if (
+                    recovery?.status !== 'failed' &&
+                    !window.confirm(
+                      'Hasil permintaan sebelumnya masih mungkin tersimpan dan memakai kuota. Mulai operasi baru dengan kuota tersendiri?'
+                    )
+                  )
+                    return;
+                  savePending(null);
+                }}
+              >
                 Mulai permintaan baru
               </Button>
             )}

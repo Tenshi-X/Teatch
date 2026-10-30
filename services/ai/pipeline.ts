@@ -1,5 +1,6 @@
 import type { GeneratedWorksheet } from '@/lib/learning/contracts';
 import { GenerationError, type GenerationUsage } from './generation';
+import { generationFailureMessage } from './config';
 export class PipelineError extends Error {
   constructor(
     message: string,
@@ -44,7 +45,7 @@ export async function fulfillGeneration(ops: {
       );
     }
     throw new PipelineError(
-      'Pembuatan gagal. Kuota dikembalikan. Silakan mulai pembuatan baru.'
+      `${generationFailureMessage(code)} Kuota dikembalikan.`
     );
   }
 }

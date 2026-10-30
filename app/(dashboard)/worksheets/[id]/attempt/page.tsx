@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { QuizEngine } from '@/components/quiz/quiz-engine';
 import { hydrateQuestion } from '@/lib/learning/contracts';
 import type { Metadata } from 'next';
+import { getParent } from '@/lib/server/ownership';
 
 export const metadata: Metadata = {
   title: 'Kerjakan Latihan',
@@ -14,6 +15,7 @@ export default async function AttemptPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const { profile } = await getParent();
   const supabase = await createClient();
 
   const { data: worksheetData } = await supabase
@@ -45,6 +47,7 @@ export default async function AttemptPage({
 
   return (
     <QuizEngine
+      ownerId={profile.id}
       worksheetId={worksheet.id}
       childId={worksheet.child_id}
       questions={practice.filter((q) => q !== null)}

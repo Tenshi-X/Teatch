@@ -9,11 +9,14 @@ import { calculateAge } from '@/lib/utils';
 import {
   enabledQuestionTypes,
   generationAvailability,
+  generationAccessMode,
 } from '@/lib/server/features';
 import { fulfillGeneration, PipelineError } from '@/services/ai/pipeline';
 import { generateWorksheet, GenerationError } from '@/services/ai/gemini';
 import type { Json } from '@/types/database';
 import { GRADES_BY_LEVEL } from '@/types';
+import { generationScopeMessage } from '@/lib/learning/generation-availability';
+import { resolveAIModel } from '@/services/ai/config';
 
 export const maxDuration = 60;
 const reservationSchema = z.object({
@@ -39,6 +42,13 @@ export async function POST(request: Request) {
         availability.message || 'Pembuatan soal AI belum diaktifkan.',
         503
       );
+    try {
+      resolveAIModel(process.env.TEATCH_AI_MODEL);
+    } catch {
+      return fail('Konfigurasi model belum tersedia. Hubungi pengelola.', 503);
+    }
+    if (!process.env.GEMINI_API_KEY)
+      return fail('Layanan AI belum dikonfigurasi.', 503);
     const text = await request.text();
     if (text.length > 4000) return fail('Permintaan terlalu panjang.', 400);
     const parsed = generationInputSchema.safeParse(JSON.parse(text));
@@ -69,6 +79,13 @@ export async function POST(request: Request) {
       .eq('level', child.level)
       .single();
     if (!subject) return fail('Pelajaran tidak sesuai jenjang anak.', 400);
+    const scopeMessage = generationScopeMessage(
+      child.level,
+      child.grade,
+      subject.name,
+      generationAccessMode()
+    );
+    if (scopeMessage) return fail(scopeMessage, 403);
     if (
       !subjectSegment(subject.name).allowedQuestionTypes.includes(
         input.questionType
@@ -128,10 +145,13 @@ export async function POST(request: Request) {
     const reservation = reservationSchema.parse(data);
     if (!reservation.created) {
       if (reservation.status === 'succeeded' && reservation.worksheetId)
-        return NextResponse.json({
-          worksheetId: reservation.worksheetId,
-          reused: true,
-        });
+        return NextResponse.json(
+          {
+            worksheetId: reservation.worksheetId,
+            reused: true,
+          },
+          { headers: { 'Cache-Control': 'private, no-store' } }
+        );
       return fail(
         reservation.status === 'reserved'
           ? 'Permintaan ini masih diproses.'

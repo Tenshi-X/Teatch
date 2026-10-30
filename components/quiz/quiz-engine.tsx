@@ -19,6 +19,8 @@ import { formatDuration } from '@/lib/utils';
 import Link from 'next/link';
 import { toast } from 'sonner';
 import { useChildStore } from '@/lib/stores/child-store';
+import { FeedbackForm } from '@/components/feedback/feedback-form';
+import { recordProductEvent } from '@/app/actions/feedback';
 type Progress = {
   answers: Record<string, string>;
   index: number;
@@ -47,17 +49,19 @@ function decode(raw: string): Progress | null {
   }
 }
 export function QuizEngine({
+  ownerId,
   worksheetId,
   childId,
   questions,
   worksheetTitle,
 }: {
+  ownerId: string;
   worksheetId: string;
   childId: string;
   questions: (GeneratedQuestion & { id: string })[];
   worksheetTitle: string;
 }) {
-  const key = `teatch:quiz:${childId}:${worksheetId}`;
+  const key = `teatch:quiz:${ownerId}:${childId}:${worksheetId}`;
   const child = useChildStore((state) =>
     state.children.find((item) => item.id === childId)
   );
@@ -87,6 +91,15 @@ export function QuizEngine({
     Math.max(0, progress?.index || 0)
   );
   const elapsed = progress?.duration || 0;
+  const attemptKey = progress?.requestKey;
+  useEffect(() => {
+    if (attemptKey)
+      void recordProductEvent({
+        key: attemptKey,
+        kind: 'attempt_started',
+        worksheetId,
+      }).catch(() => undefined);
+  }, [attemptKey, worksheetId]);
   useEffect(() => {
     questionHeading.current?.focus({ preventScroll: true });
   }, [index]);
@@ -200,6 +213,7 @@ export function QuizEngine({
             <Button variant="outline">Kembali ke ruang belajar</Button>
           </Link>
         </div>
+        <FeedbackForm worksheetId={worksheetId} />
       </Card>
     );
   const q = questions[index];

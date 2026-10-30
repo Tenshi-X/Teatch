@@ -17,88 +17,72 @@ async function adminClient() {
   if (profile.role !== 'admin') throw new Error('Akses admin diperlukan.');
   return createAdminClient();
 }
-export async function getAdminDashboardData() {
+export async function getAdminDashboardData(page = 0, search = '') {
   const db = await adminClient();
-  const profiles: Profile[] = [];
-  for (let offset = 0; ; offset += 500) {
-    const { data, error } = await db
-      .from('profiles')
+  const offset = z.number().int().min(0).max(100000).parse(page) * 50;
+  const [summary, reports, audit, feedback] = await Promise.all([
+    db.rpc('admin_runtime_summary', {
+      p_offset: offset,
+      p_search: search.slice(0, 100),
+    }),
+    db
+      .from('question_reports')
+      .select('*,questions(*)')
+      .eq('status', 'open')
+      .order('created_at', { ascending: false })
+      .limit(50),
+    db.rpc('quota_audit', {}),
+    db
+      .from('product_feedback')
       .select('*')
-      .order('id')
-      .range(offset, offset + 499);
-    if (error) throw new Error('Daftar pengguna belum dapat dimuat.');
-    profiles.push(...(data || []));
-    if (!data || data.length < 500) break;
-  }
-  const start = new Date();
-  start.setUTCDate(1);
-  start.setUTCHours(0, 0, 0, 0);
-  const usage = new Map<string, number>();
-  let failed = 0,
-    tokens = 0,
-    reserved = 0;
-  for (let offset = 0; ; offset += 500) {
-    const { data, error } = await db
-      .from('generation_requests')
-      .select('parent_id, status, question_count, usage')
-      .gte('created_at', start.toISOString())
-      .order('id')
-      .range(offset, offset + 499);
-    if (error) throw new Error('Pemantauan generasi belum dapat dimuat.');
-    for (const r of data || []) {
-      if (r.status === 'succeeded')
-        usage.set(
-          r.parent_id,
-          (usage.get(r.parent_id) || 0) + r.question_count
-        );
-      if (r.status === 'failed') failed++;
-      if (r.status === 'reserved') reserved++;
-      if (r.usage && typeof r.usage === 'object' && !Array.isArray(r.usage))
-        tokens += Number(r.usage.totalTokens || 0);
-    }
-    if (!data || data.length < 500) break;
-  }
-  const { data: reports, error: reportError } = await db
-    .from('question_reports')
-    .select('*,questions(*)')
-    .eq('status', 'open')
-    .order('created_at', { ascending: false })
-    .limit(100);
-  if (reportError) throw new Error('Laporan soal belum dapat dimuat.');
-  const { data: audit, error: auditError } = await db.rpc('quota_audit', {});
-  if (auditError) throw new Error('Audit kuota belum dapat dimuat.');
+      .eq('status', 'open')
+      .order('created_at', { ascending: false })
+      .limit(50),
+  ]);
+  if (summary.error || reports.error || audit.error || feedback.error)
+    throw new Error('Dashboard admin belum dapat dimuat. Periksa migrasi 006.');
+  const payload = summary.data as unknown as {
+    profiles: (Profile & { usage: number })[];
+    matchedUsers: number;
+    metrics: {
+      totalUsers: number;
+      activeSubscriptions: number;
+      totalUsage: number;
+      totalQuota: number;
+      failed: number;
+      reserved: number;
+      tokens: number;
+      activeParents7d: number;
+      feedbackOpen: number;
+    };
+  };
   const quotaAudit = z
     .object({
       discrepancies: z.number(),
       expiredReservations: z.number(),
       heldQuestions: z.number(),
     })
-    .parse(audit);
-  const enriched: AdminProfile[] = profiles.map((p) => ({
-    ...p,
-    usage: usage.get(p.id) || 0,
-    quota: getTierLimits(p.subscription_tier).maxQuestions,
-  }));
+    .parse(audit.data);
   return {
-    profiles: enriched,
-    reports: reports || [],
+    profiles: payload.profiles.map((p) => ({
+      ...p,
+      quota: getTierLimits(p.subscription_tier).maxQuestions,
+    })),
+    matchedUsers: payload.matchedUsers,
+    metrics: payload.metrics,
+    reports: reports.data || [],
+    feedback: feedback.data || [],
     quotaAudit,
-    metrics: {
-      totalUsers: profiles.length,
-      activeSubscriptions: profiles.filter(
-        (p) =>
-          p.subscription_tier !== 'free_trial' &&
-          p.subscription_status === 'active' &&
-          (!p.subscription_period_end ||
-            new Date(p.subscription_period_end) > new Date())
-      ).length,
-      totalUsage: [...usage.values()].reduce((a, b) => a + b, 0),
-      totalQuota: enriched.reduce((n, p) => n + p.quota, 0),
-      failed,
-      reserved,
-      tokens,
-    },
   };
+}
+export async function resolveProductFeedback(id: string) {
+  const db = await adminClient();
+  const { error } = await db
+    .from('product_feedback')
+    .update({ status: 'resolved' })
+    .eq('id', z.uuid().parse(id));
+  if (error) throw new Error('Masukan belum dapat ditutup.');
+  revalidatePath('/admin');
 }
 const updateSchema = z.object({
   role: z.enum(['admin', 'user']),

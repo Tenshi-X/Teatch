@@ -2,6 +2,7 @@ import { WorksheetBuilder } from '@/components/worksheets/worksheet-builder';
 import {
   enabledQuestionTypes,
   generationAvailability,
+  generationAccessMode,
 } from '@/lib/server/features';
 import { getParent } from '@/lib/server/ownership';
 export default async function NewWorksheetPage({
@@ -13,6 +14,8 @@ export default async function NewWorksheetPage({
   const { profile } = await getParent();
   return (
     <WorksheetBuilder
+      ownerId={profile.id}
+      scopeMode={generationAccessMode()}
       key={`${query.subject || ''}:${query.topic || ''}`}
       enabledTypes={enabledQuestionTypes()}
       availability={generationAvailability(profile.id)}

@@ -6,6 +6,8 @@ import { Sidebar } from '@/components/layout/sidebar';
 import { Header } from '@/components/layout/header';
 import { useChildStore } from '@/lib/stores/child-store';
 import type { Child } from '@/types';
+import { selectDeviceAccount } from '@/lib/device-session';
+import { RuntimeSignals } from '@/components/feedback/runtime-signals';
 function subscribeScreen(notify: () => void) {
   const media = window.matchMedia('(min-width:1024px)');
   media.addEventListener('change', notify);
@@ -13,6 +15,7 @@ function subscribeScreen(notify: () => void) {
 }
 
 interface DashboardShellProps {
+  ownerId: string;
   children: React.ReactNode;
   userName: string;
   userRole?: string;
@@ -23,6 +26,7 @@ interface DashboardShellProps {
 }
 
 export function DashboardShell({
+  ownerId,
   children,
   userName,
   userRole,
@@ -43,17 +47,22 @@ export function DashboardShell({
   const { setChildren } = useChildStore();
 
   useEffect(() => {
+    selectDeviceAccount(ownerId);
     setChildren(initialChildren);
-  }, [initialChildren, setChildren]);
+  }, [ownerId, initialChildren, setChildren]);
 
   if (practicing) {
     return (
-      <main className="min-h-dvh px-4 py-6 sm:px-6 sm:py-10">{children}</main>
+      <main className="min-h-dvh px-4 py-6 sm:px-6 sm:py-10">
+        <RuntimeSignals ownerId={ownerId} />
+        {children}
+      </main>
     );
   }
 
   return (
     <div className="flex h-dvh overflow-hidden">
+      <RuntimeSignals ownerId={ownerId} />
       <Sidebar
         isOpen={sidebarOpen}
         onClose={() => setSidebarOverride(false)}

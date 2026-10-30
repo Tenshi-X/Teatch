@@ -11,7 +11,7 @@ npm ci
 npm run dev
 ```
 
-Buka `http://localhost:3000`. Pembuatan AI tertutup secara default sampai gate biaya dan mutu lulus. Model tetap Gemini 2.5 Flash dengan satu panggilan per pembuatan.
+Buka `http://localhost:3000`. Terapkan migrasi 001–006 sebelum memakai dashboard versi ini. Untuk pengujian pribadi gunakan `TEATCH_AI_ACCESS_MODE=public` dan aktifkan `TEATCH_AI_ENABLED` setelah konfigurasi provider siap. Model default Gemini 2.5 Flash dapat dipilih melalui allowlist server; satu panggilan per pembuatan.
 
 ## Pemeriksaan
 
@@ -33,6 +33,8 @@ Pratinjau hanya tersedia pada `http://127.0.0.1:3002` dan menggunakan contoh lok
 
 ## Dokumentasi
 
+- [Status implementasi tahap 1–3 dan cara menjalankan pengujian pribadi](docs/development-status.md).
+- [Implementation plan: urutan PR, dependensi, dan kriteria penerimaan](docs/implementation-plan.md).
 - [Migrasi, keamanan, biaya, pilot, dan gate produksi](docs/rollout.md).
 - [Sumber dan batas pemetaan tujuan belajar](docs/learning-catalog.md).
 

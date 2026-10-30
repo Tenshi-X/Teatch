@@ -1,6 +1,5 @@
 import { signedAvatar } from '@/lib/server/avatars';
-import { createClient } from '@/lib/supabase/server';
-import { redirect } from 'next/navigation';
+import { getParent } from '@/lib/server/ownership';
 import { SettingsClient } from './settings-client';
 import type { Metadata } from 'next';
 
@@ -9,27 +8,13 @@ export const metadata: Metadata = {
 };
 
 export default async function SettingsPage() {
-  const supabase = await createClient();
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) redirect('/login');
-
-  const { data: profileData } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('auth_user_id', user.id)
-    .single();
-
-  if (!profileData) redirect('/login');
-  const profile = profileData;
+  const { supabase, user, profile } = await getParent();
 
   return (
     <div className="max-w-3xl mx-auto space-y-6 animate-fade-in">
       <SettingsClient
         initialName={profile.full_name}
+        initialPhone={profile.phone_number || ''}
         email={user.email || ''}
         avatarUrl={await signedAvatar(supabase, profile.avatar_url, user.id)}
       />
