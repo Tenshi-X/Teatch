@@ -3,7 +3,11 @@ import { readFile, writeFile, mkdir, rename } from 'node:fs/promises';
 import { dirname } from 'node:path';
 import { createHash } from 'node:crypto';
 import { loadLocalEnvironment } from './environment';
-import { AI_MODEL, resolveAIModel } from '@/services/ai/config';
+import {
+  AI_MODEL,
+  resolveAIModel,
+  generationOutputTokenLimit,
+} from '@/services/ai/config';
 import {
   generateWorksheetWithClient,
   GenerationError,
@@ -133,7 +137,7 @@ async function main() {
         throw Error('Request budget reached.');
       const callCeiling =
         (manifest.budget.inputTokenCeiling * manifest.rates.inputUSDPerMillion +
-          (item.params.questionCount * 240 + 256) *
+          generationOutputTokenLimit(item.params) *
             manifest.rates.outputUSDPerMillion) /
         1e6;
       if (saved.spentUSD + callCeiling > manifest.budget.maxUSD)

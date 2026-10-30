@@ -29,7 +29,7 @@ Profil anak, 16 kontrak tipe soal, editor draf, pengerjaan, penilaian lokal, tin
 - Tipe awal: `multiple_choice`, `short_answer`, `true_false`.
 - Alur utama: login Google → profil anak → pilih materi → buat draf → periksa/terbitkan → kerjakan → lihat hasil dan latihan berikutnya.
 - Pertahankan akses ke profil dan latihan tersimpan di luar cakupan pilot. Pembatasan berlaku pada generasi baru, diperiksa pada server dan formulir.
-- Pertahankan Next.js + Supabase, satu panggilan model per operasi generasi, penilaian lokal, serta hitungan kuota per soal.
+- Pertahankan Next.js + Supabase, penilaian lokal, serta hitungan kuota per soal. Pembaruan 30 Oktober 2026: atas permintaan pemilik, panggilan model kini maksimal tiga dengan fallback 3.8 Flash → 3.5 Flash-Lite → 3.6 Flash, tetap satu operasi generasi dan satu debit kuota.
 - Harga dan kuota saat ini menjadi baseline eksperimen. Perubahan penawaran diputuskan setelah biaya nyata dan respons peserta diketahui.
 
 Rilis pertama belum mencakup aplikasi native, chatbot, akun guru/kelas, pembukaan seluruh tipe soal, pembayaran otomatis, atau sinkronisasi jawaban lintas perangkat. Kebutuhan tersebut dinilai kembali setelah pilot.
@@ -91,7 +91,7 @@ Urutan mulai: OPS-00 dan PR-01, kemudian PR-02 → PR-03 → PR-04 → PR-05 →
 **Tambahan yang direncanakan:** konfigurasi model server, manifest kasus evaluasi, dan script pengambilan sampel AI staging.
 
 - [ ] Pindahkan pilihan model ke konfigurasi server dengan daftar model yang sudah diuji. Model/prompt terpilih dicatat pada usage; browser tidak boleh memilih model bebas.
-- [ ] Uji kompatibilitas schema JSON, pengaturan thinking, batas output, timeout, dan metadata token untuk setiap kandidat. Pertahankan satu request tanpa fallback/retry model otomatis.
+- [ ] Uji kompatibilitas schema JSON, pengaturan thinking, batas output, timeout, dan metadata token untuk setiap kandidat. Evaluasi tiap model tetap satu request tanpa fallback; runtime memakai fallback terbatas yang diminta pemilik, tanpa retry SDK tersembunyi.
 - [ ] Pisahkan kategori kegagalan: konfigurasi/akses model, rate limit, timeout, transport, respons terpotong, JSON/schema tidak valid, dan kegagalan simpan. Simpan kode aman untuk admin serta pesan yang dapat ditindaklanjuti pengguna.
 - [ ] Buat manifest kasus anonim untuk kelas 1–4, dua pelajaran, tiga tipe, tingkat kesulitan yang dibuka, dan variasi jumlah soal. Tambahkan metadata kelas, tujuan, versi prompt, serta ID kasus pada pengukuran agar cakupan kelas tidak hilang dalam label `SD`.
 - [ ] Hitung jumlah panggilan dan proyeksi biaya dari manifest sebelum eksekusi. Terapkan batas jumlah request/biaya, checkpoint, dan penghentian saat anggaran tercapai. Tarif diverifikasi pada tanggal pengukuran; script nyata terpisah dari CI biasa.

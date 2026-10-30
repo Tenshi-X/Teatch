@@ -11,7 +11,7 @@ npm ci
 npm run dev
 ```
 
-Buka `http://localhost:3000`. Terapkan migrasi 001–006 sebelum memakai dashboard versi ini. Untuk pengujian pribadi gunakan `TEATCH_AI_ACCESS_MODE=public` dan aktifkan `TEATCH_AI_ENABLED` setelah konfigurasi provider siap. Model default Gemini 2.5 Flash dapat dipilih melalui allowlist server; satu panggilan per pembuatan.
+Buka `http://localhost:3000`. Terapkan migrasi 001–006 sebelum memakai dashboard versi ini. Untuk pengujian pribadi gunakan `TEATCH_AI_ACCESS_MODE=public` dan aktifkan `TEATCH_AI_ENABLED` setelah konfigurasi provider siap. Model utama **Gemini 3.8 Flash**, dengan fallback berurutan **3.5 Flash-Lite → 3.6 Flash** ketika panggilan provider gagal. Maksimal tiga panggilan dalam 45 detik; satu hasil dan satu debit kuota per pembuatan. Di environment hosting, ubah `TEATCH_AI_MODEL` lama menjadi `gemini-3.8-flash` sebelum deployment baru.
 
 ## Pemeriksaan
 

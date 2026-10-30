@@ -1,6 +1,10 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { GenerateContentResponse, FinishReason } from '@google/genai';
+import {
+  GenerateContentResponse,
+  FinishReason,
+  ThinkingLevel,
+} from '@google/genai';
 import {
   generateWorksheetWithClient,
   GenerationError,
@@ -42,10 +46,17 @@ test('generation uses the production model and exactly one structured-output cal
     generateContent: async (req) => {
       calls++;
       assert.equal(req.model, AI_MODEL);
-      assert.equal(req.config?.candidateCount, 1);
-      assert.equal(req.config?.thinkingConfig?.thinkingBudget, 0);
+      assert.equal(req.model, 'gemini-3.8-flash');
+      assert.equal(req.config?.candidateCount, undefined);
+      assert.equal(req.config?.temperature, undefined);
+      assert.equal(req.config?.thinkingConfig?.thinkingBudget, undefined);
+      assert.equal(
+        req.config?.thinkingConfig?.thinkingLevel,
+        ThinkingLevel.LOW
+      );
+      assert.equal(req.config?.httpOptions?.retryOptions?.attempts, 1);
       assert.equal(req.config?.responseMimeType, 'application/json');
-      assert.ok(Number(req.config?.maxOutputTokens) <= 8192);
+      assert.ok(Number(req.config?.maxOutputTokens) <= 16384);
       assert.ok(req.config?.responseJsonSchema);
       return response({ title: 'Tambah', questions: [fixtures[2]] });
     },
@@ -55,7 +66,7 @@ test('generation uses the production model and exactly one structured-output cal
   assert.equal(result.usage.metered, true);
   assert.equal(result.usage.totalTokens, 160);
 });
-test('invalid, truncated and transport-failed responses never retry or use fallback models', async () => {
+test('single-model evaluation never retries invalid, truncated or transport-failed responses', async () => {
   for (const outcome of ['invalid', 'truncated', 'network']) {
     let calls = 0;
     await assert.rejects(
@@ -81,8 +92,8 @@ test('invalid, truncated and transport-failed responses never retry or use fallb
 test('model choice is server allowlisted and errors keep distinct codes without exposing provider text', async () => {
   assert.throws(() => resolveAIModel('arbitrary-model'), /AI_CONFIG_INVALID/);
   assert.equal(
-    resolveAIModel('gemini-2.5-flash-lite'),
-    'gemini-2.5-flash-lite'
+    resolveAIModel('gemini-3.5-flash-lite'),
+    'gemini-3.5-flash-lite'
   );
   for (const [failure, code] of [
     [{ status: 403, message: 'secret' }, 'AI_ACCESS_DENIED'],
@@ -122,11 +133,11 @@ test('model choice is server allowlisted and errors keep distinct codes without 
     params,
     {
       generateContent: async (req) => {
-        assert.equal(req.model, 'gemini-2.5-flash-lite');
+        assert.equal(req.model, 'gemini-3.5-flash-lite');
         return response({ title: 'Tambah', questions: [fixtures[2]] });
       },
     },
-    'gemini-2.5-flash-lite'
+    'gemini-3.5-flash-lite'
   );
   assert.equal(result.usage.grade, 'Kelas 2');
 });

@@ -2,6 +2,28 @@
 
 Tanggal: 30 Oktober 2026. Konteks: belum ada pengguna pelanggan; pengujian pribadi memakai akun sendiri dan data contoh. Tahap pilot pengguna dan pembayaran otomatis belum dijalankan.
 
+## Pembaruan model dan fallback
+
+Model utama sekarang `gemini-3.8-flash`, dengan fallback berurutan `gemini-3.5-flash-lite` lalu `gemini-3.6-flash` sesuai permintaan pemilik pada 30 Oktober 2026. Konfigurasi lokal sudah diperbarui; kredensial lain dipertahankan. Sebelum push, ubah **Vercel → Settings → Environment Variables → Production → `TEATCH_AI_MODEL=gemini-3.8-flash`**, lalu deploy versi kode ini. Variabel fallback tambahan dan migrasi database baru tidak diperlukan.
+
+| Model | Thinking level | Batas tiap percobaan |
+| --- | --- | --- |
+| 3.8 Flash | `LOW` | 20 detik |
+| 3.5 Flash-Lite | `MINIMAL` | 10 detik |
+| 3.6 Flash | `MEDIUM` | 15 detik |
+
+Rangkaian seluruh model dibatasi 45 detik, menyisakan waktu dari limit route 60 detik untuk autentikasi, reservasi, penyimpanan, atau refund. Setiap model dipanggil sekali; retry SDK dimatikan. Model cadangan hanya dipanggil bila percobaan sebelumnya gagal akses model (403/404), rate limit (429), timeout, koneksi, atau error server. HTTP 400/401, respons terblokir, soal tidak valid, dan output terpotong menghentikan operasi. Setiap respons tetap melewati validasi yang sama.
+
+Request Gemini 3 memakai `thinkingLevel`, tanpa `thinkingBudget`, `temperature`, atau `candidateCount`. Anggaran output memasukkan ruang 4.096 token untuk thinking, dengan total maksimum 16.384 token. Token yang benar-benar digunakan tetap berasal dari metadata provider; tambahan anggaran bukan bukti biaya akan sama dengan model lama.
+
+Fallback berada di dalam satu operasi generasi: reservasi dan debit kuota satu kali, satu worksheet disimpan ketika berhasil, serta refund satu kali bila semua percobaan gagal. JSON `usage` menyimpan model awal, model hasil/terakhir, seluruh percobaan beserta kode kegagalan, dan jumlah token yang diketahui. Koneksi/timeout dapat meninggalkan pemakaian provider yang tidak diketahui; status `metered=false` dipertahankan meskipun fallback akhirnya berhasil. Menghentikan HTTP tidak menjamin provider menghentikan komputasi atau pemakaian token.
+
+`evaluate:sample` tetap menguji satu model per sampel tanpa fallback supaya atribusi biaya dan batas request tetap akurat. Estimasi batas biaya sekarang memakai batas output yang sama dengan runtime, termasuk thinking. Untuk biaya runtime dengan beberapa model, periksa `usage.attempts` dan gunakan tarif masing-masing; jangan menilai seluruh token dengan tarif model hasil saja.
+
+`check:runtime` memeriksa metadata ketiga model. Hasil sesi ini masih `ENOTFOUND` untuk Supabase dan ketiga endpoint model, sehingga akses generasi dan mutu soal nyata belum terverifikasi. Tidak ada panggilan generasi provider pada sesi ini.
+
+Referensi migrasi API: [Gemini 3.8 Flash](https://ai.google.dev/gemini-api/docs/whats-new-gemini-3.8) dan [Gemini 3.6 Flash / 3.5 Flash-Lite](https://ai.google.dev/gemini-api/docs/whats-new-gemini-3.6).
+
 ## Perubahan yang tersedia di kode
 
 | Paket  | Implementasi                                                                                                                                                                              | Bukti lokal / pekerjaan eksternal                                                                                                                                                                                                                |
@@ -26,7 +48,7 @@ Karena belum ada pelanggan, proyek Supabase yang ada dapat dipakai untuk pengemb
 
    ```dotenv
    TEATCH_AI_ACCESS_MODE=public
-   TEATCH_AI_MODEL=gemini-2.5-flash
+   TEATCH_AI_MODEL=gemini-3.8-flash
    TEATCH_ENABLED_TYPES=multiple_choice,short_answer,true_false
    ```
 
@@ -61,7 +83,7 @@ npm run build
 npm audit --omit=dev --audit-level=high
 ```
 
-Hasil terakhir yang sudah diperiksa: 71 tes lulus, lint lulus, typecheck lulus. Tes tambahan membuktikan pemulihan instalasi 006 parsial, pengulangan migrasi dari search path berbeda, pelestarian data/kuota/isolasi akun, serta status laporan gagal yang dibedakan dari laporan kosong. Build produksi penuh melalui Webpack berhasil pada direktori `.next-verify`. Build normal sempat mendapat `EPERM` ketika worker Windows membuat folder output; mode verifikasi menyiapkan folder di proses utama dan memakai satu worker:
+Hasil terakhir yang sudah diperiksa: 79 tes lulus, lint lulus, typecheck lulus. Cakupan mencakup pemulihan instalasi 006 parsial, pelestarian data/kuota/isolasi akun, serta status laporan gagal yang dibedakan dari laporan kosong. Tes fallback membuktikan urutan dan penghentian model, timeout/abort, payload SDK Gemini 3, tidak ada retry SDK, serta satu reservasi/debit atau refund pada database lokal dengan rekaman seluruh percobaan. Build produksi penuh melalui Webpack berhasil pada direktori `.next-verify`. Build normal sempat mendapat `EPERM` ketika worker Windows membuat folder output; mode verifikasi menyiapkan folder di proses utama dan memakai satu worker:
 
 ```sh
 npm run build:verify

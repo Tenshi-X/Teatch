@@ -10,6 +10,9 @@ import { gradeAnswer } from '@/lib/learning/scoring';
 import type { Question } from '@/types';
 import { buildInsights, type AnswerEvidence } from '@/lib/learning/insights';
 import type { LearningTopic } from '@/lib/learning/summary';
+import { GenerateContentResponse, FinishReason } from '@google/genai';
+import { generateWorksheetWithFallback } from '@/services/ai/fallback';
+import { fulfillGeneration, PipelineError } from '@/services/ai/pipeline';
 let db: PGlite;
 const legacyQuestionId = randomUUID(),
   legacyAttemptId = randomUUID();
@@ -498,6 +501,105 @@ test('all 16 types pass real database generation, edit, save, hydrate, answer an
   }
   assert.equal(await balance(a.parent), 44);
 });
+test('fallback keeps one database reservation, one worksheet or refund, and stores every model attempt', async () => {
+  for (const succeeds of [true, false]) {
+    const a = await account(20),
+      key = randomUUID();
+    const reservation = await reserve(a.parent, key, 1);
+    let calls = 0;
+    const pending = fulfillGeneration({
+      generate: () =>
+        generateWorksheetWithFallback(
+          {
+            age: 8,
+            level: 'SD',
+            grade: 'Kelas 2',
+            subject: 'Matematika',
+            questionType: 'short_answer',
+            difficulty: 'mudah',
+            questionCount: 1,
+          },
+          {
+            generateContent: async () => {
+              calls++;
+              if (calls === 1 || !succeeds) throw { status: 429 };
+              const response = new GenerateContentResponse();
+              response.candidates = [
+                {
+                  content: {
+                    parts: [
+                      {
+                        text: JSON.stringify({
+                          title: 'Latihan fallback',
+                          questions: [fixtures[2]],
+                        }),
+                      },
+                    ],
+                  },
+                  finishReason: FinishReason.STOP,
+                },
+              ];
+              response.usageMetadata = {
+                promptTokenCount: 100,
+                candidatesTokenCount: 60,
+                thoughtsTokenCount: 20,
+                totalTokenCount: 180,
+              };
+              return response;
+            },
+          }
+        ),
+      save: ({ worksheet, usage }) =>
+        scalar('SELECT finalize_generation($1,$2,$3,$4,$5,$6)', [
+          reservation.id,
+          a.child,
+          a.subject,
+          { difficulty: 'mudah', questionType: 'short_answer' },
+          worksheet,
+          usage,
+        ]),
+      release: (code, usage) =>
+        scalar('SELECT fail_generation($1,$2,$3)', [
+          reservation.id,
+          code,
+          usage,
+        ]),
+    });
+    if (succeeds) assert.ok(await pending);
+    else await assert.rejects(pending, PipelineError);
+    assert.equal(calls, succeeds ? 2 : 3);
+    assert.equal(await balance(a.parent), succeeds ? 19 : 20);
+    assert.equal(
+      await scalar('SELECT count(*)::int FROM worksheets WHERE child_id=$1', [
+        a.child,
+      ]),
+      succeeds ? 1 : 0
+    );
+    assert.equal(
+      await scalar(
+        'SELECT count(*)::int FROM generation_requests WHERE parent_id=$1',
+        [a.parent]
+      ),
+      1
+    );
+    const stored = await scalar<{
+      model: string;
+      calls: number;
+      metered: boolean;
+      attempts: unknown[];
+    }>('SELECT usage FROM generation_requests WHERE id=$1', [reservation.id]);
+    assert.equal(stored.calls, calls);
+    assert.equal(
+      stored.model,
+      succeeds ? 'gemini-3.5-flash-lite' : 'gemini-3.6-flash'
+    );
+    assert.equal(stored.attempts.length, calls);
+    assert.equal(stored.metered, false);
+    assert.equal((await reserve(a.parent, key, 1)).created, false);
+    assert.equal(await balance(a.parent), succeeds ? 19 : 20);
+  }
+});
+
 test('quota audit records all changes and admin reconciliation refunds stale reservations once', async () => {
   const a = await account(),
     r = await reserve(a.parent);

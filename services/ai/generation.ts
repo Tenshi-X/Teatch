@@ -1,4 +1,8 @@
-import type { GoogleGenAI } from '@google/genai';
+import type {
+  GoogleGenAI,
+  GenerateContentParameters,
+  GenerateContentResponse,
+} from '@google/genai';
 import { z } from 'zod';
 import { buildSystemPrompt, buildGeneratePrompt } from './prompts';
 import {
@@ -7,11 +11,20 @@ import {
   validateWorksheet,
 } from '@/lib/learning/contracts';
 import type { AIGenerateParams } from '@/types';
-import { AI_MODEL, resolveAIModel, classifyGenerationError } from './config';
+import {
+  AI_MODEL,
+  AI_MODEL_SETTINGS,
+  resolveAIModel,
+  classifyGenerationError,
+  canFallbackFromError,
+  generationOutputTokenLimit,
+} from './config';
 
 export { AI_MODEL } from './config';
 export interface GenerationUsage {
   model: string;
+  requestedModel?: string;
+  attempts?: ModelAttemptUsage[];
   promptVersion: number;
   inputTokens: number;
   outputTokens: number;
@@ -29,25 +42,71 @@ export interface GenerationUsage {
   grade?: string;
   objectiveId?: string;
 }
+export type ModelAttemptUsage = Pick<
+  GenerationUsage,
+  | 'model'
+  | 'inputTokens'
+  | 'outputTokens'
+  | 'thinkingTokens'
+  | 'totalTokens'
+  | 'durationMs'
+  | 'valid'
+  | 'calls'
+  | 'metered'
+> & { errorCode?: string };
 export class GenerationError extends Error {
   constructor(
     public usage: GenerationUsage,
-    public code: string
+    public code: string,
+    public fallbackAllowed = false
   ) {
     super(
       'Soal belum berhasil dibuat. Kuota dikembalikan. Silakan coba pembuatan baru.'
     );
   }
 }
+
+// Enforce a local deadline as well as the SDK timeout, and abort the HTTP request.
+// An aborted provider operation may still use tokens; its usage stays unmetered.
+async function callWithTimeout(
+  client: Pick<GoogleGenAI['models'], 'generateContent'>,
+  request: GenerateContentParameters,
+  timeoutMs: number
+): Promise<GenerateContentResponse> {
+  const controller = new AbortController();
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const timeout = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => {
+      reject(new DOMException('Generation timed out', 'TimeoutError'));
+      controller.abort();
+    }, timeoutMs);
+  });
+  try {
+    return await Promise.race([
+      client.generateContent({
+        ...request,
+        config: {
+          ...request.config,
+          httpOptions: { timeout: timeoutMs, retryOptions: { attempts: 1 } },
+          abortSignal: controller.signal,
+        },
+      }),
+      timeout,
+    ]);
+  } finally {
+    clearTimeout(timer);
+  }
+}
 export async function generateWorksheetWithClient(
   params: AIGenerateParams,
   client: Pick<GoogleGenAI['models'], 'generateContent'>,
-  model: string = AI_MODEL
+  model: string = AI_MODEL,
+  options: { timeoutMs?: number } = {}
 ) {
   const started = Date.now();
   const usage: GenerationUsage = {
     model,
-    promptVersion: 2,
+    promptVersion: 3,
     inputTokens: 0,
     outputTokens: 0,
     thinkingTokens: 0,
@@ -77,30 +136,23 @@ export async function generateWorksheetWithClient(
   delete schema.$schema;
   let stage: 'transport' | 'truncated' | 'validation' = 'transport';
   try {
-    resolveAIModel(model);
+    const settings = AI_MODEL_SETTINGS[resolveAIModel(model)];
     usage.calls = 1;
-    const response = await client.generateContent({
-      model,
-      contents: buildGeneratePrompt(params),
-      config: {
-        systemInstruction: buildSystemPrompt(),
-        temperature: 0.4,
-        candidateCount: 1,
-        maxOutputTokens: Math.min(
-          8192,
-          params.questionCount *
-            (params.questionType === 'story_qa'
-              ? 550
-              : params.questionType === 'essay'
-                ? 350
-                : 240) +
-            256
-        ),
-        thinkingConfig: { thinkingBudget: 0 },
-        responseMimeType: 'application/json',
-        responseJsonSchema: schema,
+    const response = await callWithTimeout(
+      client,
+      {
+        model,
+        contents: buildGeneratePrompt(params),
+        config: {
+          systemInstruction: buildSystemPrompt(),
+          maxOutputTokens: generationOutputTokenLimit(params),
+          thinkingConfig: { thinkingLevel: settings.thinkingLevel },
+          responseMimeType: 'application/json',
+          responseJsonSchema: schema,
+        },
       },
-    });
+      options.timeoutMs ?? settings.timeoutMs
+    );
     usage.inputTokens = response.usageMetadata?.promptTokenCount || 0;
     usage.outputTokens = response.usageMetadata?.candidatesTokenCount || 0;
     usage.thinkingTokens = response.usageMetadata?.thoughtsTokenCount || 0;
@@ -145,7 +197,8 @@ export async function generateWorksheetWithClient(
         ? classifyGenerationError(error)
         : stage === 'truncated'
           ? 'AI_TRUNCATED'
-          : 'GENERATION_INVALID'
+          : 'GENERATION_INVALID',
+      stage === 'transport' && canFallbackFromError(error)
     );
   }
 }

@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { generationOutputTokenLimit } from '@/services/ai/config';
 export const evaluationManifestSchema = z.object({
   model: z.string(),
   repeats: z.number().int().min(1).max(100),
@@ -48,7 +49,7 @@ export function evaluationBudget(manifest: EvaluationManifest) {
       (sum, c) =>
         sum +
         (manifest.budget.inputTokenCeiling * manifest.rates.inputUSDPerMillion +
-          (c.params.questionCount * 240 + 256) *
+          generationOutputTokenLimit(c.params) *
             manifest.rates.outputUSDPerMillion) /
           1e6,
       0

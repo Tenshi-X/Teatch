@@ -9,12 +9,12 @@ Kode aplikasi dan migrasi sudah tersedia secara lokal. Database produksi belum d
 | Area            | Implementasi                                                                                          | Gate sebelum produksi                                                                 |
 | --------------- | ----------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
 | Paket dan kuota | Free Trial 10 soal/1 anak, Basic 300/3, Pro 500/6; Family/Teacher lama 500/6 tetap terbaca            | Tinjau paket akun lama; saldo lama dipertahankan                                      |
-| Generasi        | Reservasi atomik, satu panggilan Gemini 2.5 Flash, idempotensi, validasi dan draf, pengembalian kuota | Uji dua koneksi database dan kegagalan jaringan pada staging                          |
+| Generasi        | Reservasi atomik, Gemini 3.8 Flash dengan fallback 3.5 Flash-Lite lalu 3.6 Flash, idempotensi, validasi dan draf, pengembalian kuota | Uji dua koneksi database, akses setiap model dan kegagalan jaringan pada staging |
 | Keamanan        | Izin kolom profil, prosedur hanya server, foto privat dan validasi file                               | Jalankan migrasi, cek kebijakan tambahan di proyek, rotasi kunci                      |
 | Soal            | Kontrak lengkap 16 tipe, payload JSON, aset lokal, pemulihan respons lama                             | Buka setiap tipe setelah penerimaan staging dan peninjauan mutu                       |
 | Penilaian       | Aturan lokal versi 2, uraian dengan rubrik dan tinjauan orang tua                                     | Uji alur login → draf → terbit → latihan → tinjau → cetak                             |
 | Perkembangan    | Bukti jawaban, minimal 5 per tujuan, tren 5 latihan vs 5 sebelumnya, latihan ulang dan laporan cetak  | Uji data akun staging; ringkasan hanya memakai hasil baru yang selesai dinilai        |
-| Biaya           | Token tercatat; evaluator biaya/mutu tersedia; tidak ada retry model otomatis                         | Pengukuran baseline/kandidat dengan tarif produksi yang terverifikasi belum dilakukan |
+| Biaya           | Token dan percobaan tiap model tercatat; evaluasi satu model tanpa fallback; runtime maksimal tiga percobaan | Pengukuran baseline/kandidat dan biaya fallback dengan tarif yang terverifikasi belum dilakukan |
 
 ## 1. Persiapan dan migrasi
 
@@ -57,7 +57,7 @@ Pengaturan awal hanya membuka `multiple_choice,short_answer,true_false`. Kontrak
 
 ## 3. Gate biaya dan mutu
 
-Model tetap `gemini-2.5-flash`, satu kandidat, satu panggilan, timeout 55 detik, tanpa retry SDK atau fallback. Anggaran keluaran maksimal 8.192 token dan dibatasi lagi menurut tipe/jumlah soal. Thinking budget 0 adalah bagian perubahan yang perlu dinilai kualitasnya. Prompt baru tidak memuat nama anak.
+Model utama `gemini-3.8-flash`, fallback `gemini-3.5-flash-lite` lalu `gemini-3.6-flash` atas permintaan pemilik. Maksimal tiga percobaan dalam 45 detik, tanpa retry SDK; pengaturan thinking dan batas waktu tiap model ada di [status pengembangan](development-status.md#pembaruan-model-dan-fallback). Anggaran output dihitung dari tipe/jumlah soal ditambah 4.096 token untuk thinking, maksimum 16.384 token. Request tidak memakai parameter sampling/candidate lama atau thinking budget. Prompt tidak memuat nama anak. Kualitas serta pemakaian token perubahan ini perlu dievaluasi dengan respons nyata.
 
 Pengurangan panjang prompt dan batas keluaran belum membuktikan biaya nyata turun. Jangan mengaktifkan prompt baru hanya berdasarkan tes tiruan. Evaluasi harus memasukkan respons gagal dan seluruh biaya token, termasuk thinking jika ada. Kegagalan jaringan dengan pemakaian tidak diketahui harus direkonsiliasi dengan provider sebelum dianggap terukur.
 
@@ -81,7 +81,7 @@ Isi tarif positif dengan tarif produksi saat pengukuran, bukan angka contoh 0. S
 
 ```json
 {
-  "model": "gemini-2.5-flash",
+    "model": "gemini-3.8-flash",
   "level": "SD",
   "subject": "Matematika",
   "questionType": "short_answer",

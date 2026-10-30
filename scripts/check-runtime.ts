@@ -1,10 +1,11 @@
 import { loadLocalEnvironment } from './environment';
-import { resolveAIModel } from '@/services/ai/config';
+import { resolveAIModel, generationModelOrder } from '@/services/ai/config';
 loadLocalEnvironment();
 async function main() {
   const results: { check: string; status: string; http?: number }[] = [];
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const service = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const geminiKey = process.env.GEMINI_API_KEY;
   for (const key of [
     'NEXT_PUBLIC_SUPABASE_URL',
     'NEXT_PUBLIC_SUPABASE_ANON_KEY',
@@ -51,36 +52,43 @@ async function main() {
         break;
       }
     }
-  if (process.env.GEMINI_API_KEY)
-    try {
-      const r = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/${model}`,
-        {
-          headers: { 'x-goog-api-key': process.env.GEMINI_API_KEY },
-          signal: AbortSignal.timeout(8000),
-        }
-      );
-      results.push({
-        check: 'model_metadata',
-        status: r.ok ? 'reachable' : 'not_ready',
-        http: r.status,
-      });
-    } catch (e) {
-      results.push({
-        check: 'model_metadata',
-        status:
-          (e as { cause?: { code?: string } }).cause?.code ||
-          'network_unavailable',
-      });
-    }
+  if (geminiKey)
+    results.push(
+      ...(await Promise.all(
+        generationModelOrder(model).map(async (candidate) => {
+          try {
+            const r = await fetch(
+              `https://generativelanguage.googleapis.com/v1beta/models/${candidate}`,
+              {
+                headers: { 'x-goog-api-key': geminiKey },
+                signal: AbortSignal.timeout(8000),
+              }
+            );
+            return {
+              check: `model_metadata:${candidate}`,
+              status: r.ok ? 'reachable' : 'not_ready',
+              http: r.status,
+            };
+          } catch (e) {
+            return {
+              check: `model_metadata:${candidate}`,
+              status:
+                (e as { cause?: { code?: string } }).cause?.code ||
+                'network_unavailable',
+            };
+          }
+        })
+      ))
+    );
   console.log(
     JSON.stringify(
       {
         checkedAt: new Date().toISOString(),
         model,
+        modelOrder: generationModelOrder(model),
         results,
         notes:
-          'Read-only checks; no generation, migration, or credential rotation.',
+          'Read-only metadata checks do not prove inference eligibility. No generation, migration, or credential rotation.',
       },
       null,
       2
