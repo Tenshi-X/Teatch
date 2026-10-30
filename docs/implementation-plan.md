@@ -20,14 +20,14 @@ Hasil pemeriksaan lokal pada analisis sebelumnya di sesi yang sama:
 | Database / deployment produksi  | Belum diverifikasi                                                          |
 | Biaya dan mutu respons AI nyata | Belum dibuktikan oleh pemeriksaan lokal                                     |
 
-Profil anak, 16 kontrak tipe soal, editor draf, pengerjaan, penilaian lokal, tinjauan uraian, laporan, cetak, dan reservasi kuota sudah tersedia. Checklist berikut mempertahankan kriteria awal; bukti implementasi lokal serta pekerjaan yang menunggu akses provider dicatat pada dokumen status pengembangan.
+Profil anak, 16 kontrak tipe soal, penyimpanan otomatis hasil generate, pengerjaan, penilaian lokal, tinjauan uraian, laporan, cetak, dan reservasi kuota sudah tersedia. Hasil generate langsung siap digunakan dan tidak dapat diedit pengguna; migrasi 007 menghapus tahap draf dan persetujuan. Bukti implementasi lokal serta pekerjaan yang menunggu akses provider dicatat pada dokumen status pengembangan.
 
 ## 2. Cakupan rilis pertama
 
 - Pengguna pilot: 10–15 orang tua anak SD kelas 1–4, selama sekitar dua minggu.
 - Materi generasi baru: Matematika dan Bahasa Indonesia pada lingkup tujuan belajar yang tersedia.
 - Tipe awal: `multiple_choice`, `short_answer`, `true_false`.
-- Alur utama: login Google → profil anak → pilih materi → buat draf → periksa/terbitkan → kerjakan → lihat hasil dan latihan berikutnya.
+- Alur utama: login Google → profil anak → pilih materi → buat latihan → otomatis tersimpan → kerjakan → lihat hasil dan latihan berikutnya.
 - Pertahankan akses ke profil dan latihan tersimpan di luar cakupan pilot. Pembatasan berlaku pada generasi baru, diperiksa pada server dan formulir.
 - Pertahankan Next.js + Supabase, penilaian lokal, serta hitungan kuota per soal. Pembaruan 30 Oktober 2026: atas permintaan pemilik, panggilan model kini maksimal tiga dengan fallback 3.8 Flash → 3.5 Flash-Lite → 3.6 Flash, tetap satu operasi generasi dan satu debit kuota.
 - Harga dan kuota saat ini menjadi baseline eksperimen. Perubahan penawaran diputuskan setelah biaya nyata dan respons peserta diketahui.
@@ -113,7 +113,7 @@ Urutan mulai: OPS-00 dan PR-01, kemudian PR-02 → PR-03 → PR-04 → PR-05 →
 - [ ] Respons minimal: `not_found`, `reserved`, `succeeded`, atau `failed`, `worksheetId` jika sesuai, dan informasi aman tentang langkah berikutnya. Gunakan `private, no-store`.
 - [ ] Pisahkan pembacaan status dari izin membuat AI baru: hasil milik sendiri tetap dapat diambil saat kill switch dimatikan atau akun keluar dari pilot.
 - [ ] Pada reload/koneksi terputus, cek status permintaan tersimpan terlebih dahulu. Poll dengan jeda meningkat, berhenti saat terminal, tab tersembunyi, unmount, atau batas waktu pemantauan tercapai.
-- [ ] `succeeded` membuka draf yang sama; `reserved` menampilkan proses masih berlangsung; `failed` menjelaskan status kuota. `not_found` tidak otomatis membuat operasi baru.
+- [ ] `succeeded` membuka latihan tersimpan yang sama; `reserved` menampilkan proses masih berlangsung; `failed` menjelaskan status kuota. `not_found` tidak otomatis membuat operasi baru.
 - [ ] Pengiriman ulang POST hanya mengikuti tindakan pengguna dan memakai kunci yang sama saat hasil belum pasti. Tombol operasi baru menjelaskan bahwa operasi sebelumnya masih mungkin selesai dan memakai kuota tersendiri.
 - [ ] Jadwalkan RPC rekonsiliasi yang sudah ada setiap lima menit pada scheduler database jika tersedia. Jika memakai scheduler HTTP eksternal, endpoint harus terautentikasi dengan secret server; kredensial service role tidak pernah masuk URL/browser/log.
 - [ ] Ambang reservasi usang tetap 15 menit. Pemantauan membaca umur reservasi, hasil rekonsiliasi, dan `quota_audit()`; kegagalan scheduler terlihat oleh operator.
@@ -129,12 +129,12 @@ Urutan mulai: OPS-00 dan PR-01, kemudian PR-02 → PR-03 → PR-04 → PR-05 →
 - [ ] Arahkan akun tanpa anak ke tambah anak, lalu ke pemilihan latihan pertama. Simpan ulang form yang gagal tanpa menghilangkan isian.
 - [ ] Tambahkan pilihan materi berbasis kelas dan objective yang sudah tersedia, misalnya penjumlahan sampai 20 dan memahami bacaan pendek. Ini preset parameter generasi, bukan bank soal yang mengaku sudah direview.
 - [ ] Gunakan default 10 soal untuk cakupan pilot, dengan kontrol jumlah dan ringkasan kuota yang jelas. Parameter pilihan materi tetap divalidasi API.
-- [ ] Jelaskan hasil pembuatan sebagai draf, langkah pemeriksaan/terbit, penilaian, dan latihan ulang. Hindari persentase progres generasi yang tidak mempunyai dasar.
+- [ ] Jelaskan bahwa hasil otomatis tersimpan, langsung siap dikerjakan, dan tidak dapat diedit pengguna. Jelaskan penilaian dan latihan ulang. Hindari persentase progres generasi yang tidak mempunyai dasar.
 - [ ] Uji layout 360 px, sentuhan, keyboard, fokus, status loading/error, pergantian profil, serta hasil cetak A4 dan kunci terpisah.
 - [ ] Pisahkan progres tersimpan menurut akun dan anak; bersihkan state sesi serta progres sensitif saat logout secara terkontrol. Pertahankan jawaban saat submit gagal pada akun yang sama.
 - [ ] Nyatakan bahwa progres belum tersinkron lintas perangkat. Uji penyimpanan browser tidak tersedia agar pengguna memperoleh pesan yang jelas.
 
-**Penerimaan:** alur login → profil → 10 soal → draf → terbit → latihan → hasil → cetak selesai di mobile dan desktop. Reload mempertahankan progres pada perangkat yang sama; kegagalan menyimpan tidak menghapus jawaban; pergantian akun tidak menampilkan progres sebelumnya.
+**Penerimaan:** alur login → profil → 10 soal otomatis tersimpan → latihan → hasil → cetak selesai di mobile dan desktop. Tidak ada editor atau langkah persetujuan soal. Reload mempertahankan progres pada perangkat yang sama; kegagalan menyimpan tidak menghapus jawaban; pergantian akun tidak menampilkan progres sebelumnya.
 
 ### PR-05 — Performa dashboard dan laporan
 

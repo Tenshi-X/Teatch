@@ -41,7 +41,7 @@ export function ActivityFeed({ activities }: { activities: RecentActivity[] }) {
               {activity.subject} ·{' '}
               {activity.type === 'attempt_completed'
                 ? `Selesai dinilai${activity.score !== undefined ? ` · ${activity.score}%` : ''}`
-                : 'Draf dibuat'}
+                : 'Latihan dibuat'}
             </p>
             <p className="mt-1 text-sm text-[var(--text-muted)]">
               {formatRelativeTime(activity.createdAt)}

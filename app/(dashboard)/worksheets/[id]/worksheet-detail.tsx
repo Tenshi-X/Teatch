@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { WorksheetPrintable } from '@/components/worksheets/worksheet-printable';
 import { QuestionPreview } from '@/components/worksheets/question-preview';
-import { WorksheetEditor } from '@/components/worksheets/worksheet-editor';
 import { hydrateQuestion } from '@/lib/learning/contracts';
 import { reportQuestion } from '@/app/actions/worksheets';
 import type { Worksheet, Question } from '@/types';
@@ -15,14 +14,11 @@ import { MathText } from '@/components/ui/math-text';
 export function WorksheetDetail({
   worksheet,
   questions,
-  editable,
 }: {
   worksheet: Worksheet;
   questions: Question[];
-  editable: boolean;
 }) {
   const [showAnswers, setShowAnswers] = useState(false);
-  const [editing, setEditing] = useState(worksheet.status === 'draft');
   const [reportTarget, setReportTarget] = useState<string | null>(null);
   const [reason, setReason] = useState('');
   const [reportBusy, setReportBusy] = useState(false);
@@ -64,9 +60,9 @@ export function WorksheetDetail({
         <h1 className="text-xl font-bold">{worksheet.title}</h1>
         <p className="text-sm my-3">
           {questions.length} soal •{' '}
-          {worksheet.status === 'draft'
-            ? 'Draf — periksa dan setujui sebelum latihan'
-            : 'Siap dikerjakan'}
+          {worksheet.status === 'generated'
+            ? 'Siap dikerjakan'
+            : 'Latihan belum tersedia untuk dikerjakan'}
         </p>
         <div className="flex flex-wrap gap-2">
           <Button variant="outline" onClick={() => print()}>
@@ -78,11 +74,6 @@ export function WorksheetDetail({
           <Button variant="ghost" onClick={() => setShowAnswers(!showAnswers)}>
             {showAnswers ? 'Sembunyikan kunci' : 'Lihat kunci'}
           </Button>
-          {editable && interactive && (
-            <Button variant="outline" onClick={() => setEditing(!editing)}>
-              {editing ? 'Tutup editor' : 'Edit soal'}
-            </Button>
-          )}
           {interactive && worksheet.status === 'generated' && (
             <Link href={`/worksheets/${worksheet.id}/attempt`}>
               <Button>Kerjakan / ulangi latihan</Button>
@@ -96,44 +87,33 @@ export function WorksheetDetail({
           </p>
         )}
       </Card>
-      {editing && editable && interactive ? (
-        <WorksheetEditor
-          id={worksheet.id}
-          initial={{
-            title: worksheet.title,
-            questions: hydrated.filter((q) => q !== null),
-          }}
-          onClose={() => setEditing(false)}
-        />
-      ) : (
-        questions.map((row, i) => (
-          <div key={row.id}>
-            {hydrated[i] ? (
-              <QuestionPreview
-                question={hydrated[i]!}
-                index={i}
-                showAnswer={showAnswers}
-              />
-            ) : (
-              <Card padding="md">
-                <MathText content={row.question} />
-                {showAnswers && (
-                  <>
-                    <MathText content={row.answer || ''} />
-                    <MathText content={row.explanation || ''} />
-                  </>
-                )}
-              </Card>
-            )}
-            <button
-              className="text-xs underline mt-2"
-              onClick={() => setReportTarget(row.id)}
-            >
-              Laporkan soal keliru
-            </button>
-          </div>
-        ))
-      )}
+      {questions.map((row, i) => (
+        <div key={row.id}>
+          {hydrated[i] ? (
+            <QuestionPreview
+              question={hydrated[i]!}
+              index={i}
+              showAnswer={showAnswers}
+            />
+          ) : (
+            <Card padding="md">
+              <MathText content={row.question} />
+              {showAnswers && (
+                <>
+                  <MathText content={row.answer || ''} />
+                  <MathText content={row.explanation || ''} />
+                </>
+              )}
+            </Card>
+          )}
+          <button
+            className="text-xs underline mt-2"
+            onClick={() => setReportTarget(row.id)}
+          >
+            Laporkan soal keliru
+          </button>
+        </div>
+      ))}
       {reportTarget && (
         <Card padding="md">
           <label className="text-sm">

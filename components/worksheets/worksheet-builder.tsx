@@ -205,14 +205,14 @@ export function WorksheetBuilder({
         throw new Error(data.error || 'Pembuatan belum berhasil.');
       }
       savePending(null);
-      toast.success('Draf tersimpan. Periksa soal sebelum mulai.');
+      toast.success('Latihan tersimpan dan siap dikerjakan.');
       router.push(`/worksheets/${data.worksheetId}`);
       router.refresh();
     } catch (error) {
       const message =
         error instanceof Error
           ? error.message
-          : 'Sambungan terputus. Kirim ulang untuk mengambil draf yang sama.';
+          : 'Sambungan terputus. Kirim ulang untuk mengambil latihan yang sama.';
       setGenerationError(message);
       toast.error(message);
     } finally {
@@ -227,15 +227,15 @@ export function WorksheetBuilder({
           Buat latihan untuk {activeChild.name}
         </h1>
         <p className="mt-2 text-[var(--text-muted)]">
-          Tentukan materi dan bentuk soal. Draf bisa diperiksa sebelum anak
-          mulai.
+          Tentukan materi dan bentuk soal. Hasilnya otomatis tersimpan dan siap
+          dikerjakan.
         </p>
       </header>
       <Card padding="lg">
         <h2 className="text-lg font-semibold">Mulai dari materi pilihan</h2>
         <p className="mt-1 text-sm text-[var(--text-muted)]">
           Pilih pelajaran, lalu tujuan belajar sesuai kelas. Pilihan ini
-          menyiapkan parameter draf AI untuk diperiksa bersama.
+          menyiapkan latihan AI yang langsung tersimpan setelah selesai dibuat.
         </p>
         <div className="mt-3 flex flex-wrap gap-2">
           {subjects
@@ -286,7 +286,7 @@ export function WorksheetBuilder({
             className="mb-4 rounded-lg border border-[var(--card-border)] p-4 text-sm"
           >
             {busy
-              ? 'Permintaan terkirim. Sedang menyiapkan draf; jangan tutup halaman sebelum hasil tersimpan.'
+              ? 'Permintaan terkirim. Sedang menyiapkan latihan; jangan tutup halaman sebelum hasil tersimpan.'
               : recovery?.message ||
                 'Memeriksa hasil permintaan yang tersimpan…'}
             <p className="mt-1 text-[var(--text-muted)]">
@@ -378,7 +378,7 @@ export function WorksheetBuilder({
           </div>
         </fieldset>
         <div className="mt-7 border-t border-[var(--card-border)] pt-5">
-          <h2 className="font-semibold">3. Periksa sebelum membuat draf</h2>
+          <h2 className="font-semibold">3. Periksa pilihan latihan</h2>
           <p className="mt-2 text-sm">
             {subject?.name || 'Pilih pelajaran'} · {TYPE_LABELS[selectedType]} ·{' '}
             {actualCount} soal · {pending?.difficulty || difficulty}
@@ -386,10 +386,11 @@ export function WorksheetBuilder({
           <p className="text-sm text-[var(--text-muted)] my-4">
             {validObjective &&
             objectives.find((o) => o.id === validObjective)?.curriculumVerified
-              ? 'Tujuan ini dipetakan ke lingkup capaian pembelajaran resmi; draf tetap perlu diperiksa.'
+              ? 'Tujuan ini dipetakan ke lingkup capaian pembelajaran resmi.'
               : 'Panduan topik lokal; pemetaan kurikulum untuk materi ini belum diverifikasi.'}{' '}
-            Jika draf berhasil dibuat, {actualCount} kuota soal akan digunakan;
-            koreksi manual dan latihan ulang gratis.
+            Jika latihan berhasil dibuat, {actualCount} kuota soal akan
+            digunakan. Soal otomatis tersimpan dan tidak dapat diedit. Latihan
+            ulang gratis.
           </p>
           <div className="flex flex-wrap gap-3">
             {requestKey && (
@@ -413,7 +414,7 @@ export function WorksheetBuilder({
                 ? 'Pembuatan AI belum tersedia'
                 : requestKey
                   ? 'Ambil hasil / kirim ulang'
-                  : 'Buat draf latihan'}
+                  : 'Buat latihan'}
             </Button>
             {requestKey && !busy && (
               <Button
@@ -454,7 +455,8 @@ export function WorksheetBuilder({
           )}
           {busy && (
             <p className="text-sm mt-4" role="status">
-              Sedang menyusun dan memeriksa soal. Draf akan disimpan otomatis.
+              Sedang menyusun dan memeriksa soal. Latihan akan disimpan
+              otomatis.
             </p>
           )}
         </div>

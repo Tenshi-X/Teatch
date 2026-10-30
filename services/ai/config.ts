@@ -88,7 +88,9 @@ export function generationFailureMessage(code: string) {
     AI_TRUNCATED:
       'Respons AI belum lengkap. Coba dengan jumlah soal lebih sedikit.',
     GENERATION_INVALID:
-      'Soal belum memenuhi pemeriksaan mutu. Silakan buat draf baru.',
+      'Soal belum memenuhi pemeriksaan mutu. Silakan buat latihan baru.',
   };
-  return messages[code] || 'Pembuatan belum berhasil. Silakan buat draf baru.';
+  return (
+    messages[code] || 'Pembuatan belum berhasil. Silakan buat latihan baru.'
+  );
 }

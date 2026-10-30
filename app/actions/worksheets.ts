@@ -1,34 +1,7 @@
 'use server';
 import { z } from 'zod';
-import { revalidatePath } from 'next/cache';
 import { getOwnedWorksheet, getParent } from '@/lib/server/ownership';
 import { createAdminClient } from '@/lib/supabase/admin';
-import { validateWorksheet } from '@/lib/learning/contracts';
-import type { Json } from '@/types/database';
-
-export async function publishWorksheet(id: string, value: unknown) {
-  z.uuid().parse(id);
-  const { profile, worksheet } = await getOwnedWorksheet(id);
-  const result = validateWorksheet(value, {
-    questionCount: worksheet.question_count,
-    questionType: worksheet.question_type,
-  });
-  const { error } = await createAdminClient().rpc('update_worksheet_content', {
-    p_parent: profile.id,
-    p_worksheet: id,
-    p_result: JSON.parse(JSON.stringify(result)) as Json,
-  });
-  if (error)
-    throw new Error(
-      error.message.includes('ALREADY_ATTEMPTED')
-        ? 'Latihan yang sudah dikerjakan tidak dapat diubah.'
-        : 'Perubahan belum tersimpan.'
-    );
-  revalidatePath(`/worksheets/${id}`);
-  revalidatePath('/history');
-  revalidatePath('/dashboard');
-  return { success: true };
-}
 
 export async function reportQuestion(questionId: string, reason: string) {
   z.uuid().parse(questionId);

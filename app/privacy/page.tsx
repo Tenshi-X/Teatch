@@ -53,7 +53,7 @@ export default function PrivacyPage() {
       <section>
         <h2>Penyedia Layanan AI</h2>
         <p>
-          Untuk menyusun draf, konteks usia, kelas, mata pelajaran, tujuan,
+          Untuk menyusun soal, konteks usia, kelas, mata pelajaran, tujuan,
           topik, dan satu minat diproses oleh Google Gemini. Nama, tanggal lahir
           lengkap, serta foto anak tidak dimasukkan ke prompt. Jangan memasukkan
           identitas pribadi ke topik atau minat. Data akun dan hasil latihan

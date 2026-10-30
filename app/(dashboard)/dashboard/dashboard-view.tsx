@@ -48,7 +48,7 @@ export function DashboardView({
         <ol className="mt-10 grid gap-5 border-t border-[var(--card-border)] pt-6 sm:grid-cols-3">
           {[
             'Pilih materi belajar',
-            'Siapkan dan periksa soal',
+            'Buat dan kerjakan soal',
             'Lihat perkembangan',
           ].map((label, index) => (
             <li key={label}>
@@ -67,7 +67,7 @@ export function DashboardView({
     {
       label: 'Latihan tersedia',
       value: stats.totalWorksheets,
-      detail: 'termasuk draf',
+      detail: 'tersimpan di Soal saya',
     },
     {
       label: 'Latihan dinilai',
@@ -127,7 +127,7 @@ export function DashboardView({
           </h2>
           <p className="mt-2 text-[var(--text-muted)]">
             {latestWorksheet
-              ? 'Latihan terbaru siap dibuka. Periksa soal atau mulai mengerjakannya bersama anak.'
+              ? 'Latihan terbaru sudah tersimpan. Mulai mengerjakannya bersama anak.'
               : 'Pilih materi dan siapkan latihan pertama untuk anak.'}
           </p>
           <div className="mt-6 flex flex-wrap items-center gap-4">
@@ -166,7 +166,7 @@ export function DashboardView({
             <p className="mt-2 text-sm text-[var(--text-muted)]">
               {pendingReviews
                 ? 'Periksa jawaban yang perlu dinilai agar laporan perkembangan dapat diperbarui.'
-                : 'Periksa draf sebelum digunakan. Jawaban uraian membutuhkan tinjauan orang tua.'}
+                : 'Dampingi anak mengerjakan latihan. Jawaban uraian membutuhkan tinjauan orang tua.'}
             </p>
           </div>
           <Link

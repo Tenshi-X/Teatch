@@ -93,7 +93,7 @@ const steps = [
     icon: Brain,
     title: 'AI Menyusun Worksheet',
     description:
-      'AI menyusun draf sesuai kelas dan topik. Orang tua memeriksa atau mengedit sebelum anak mulai.',
+      'AI menyusun soal sesuai kelas dan topik. Hasilnya otomatis tersimpan dan siap dikerjakan tanpa tahap edit.',
   },
   {
     icon: Laptop,
@@ -133,7 +133,7 @@ const faqs = [
   {
     question: 'Jenjang pendidikan apa saja yang didukung?',
     answer:
-      'Teatch mendukung jenjang PAUD, TK A/B, SD kelas 1-6, SMP kelas 7-9, hingga SMA kelas 10-12. Draf mengikuti usia, kelas, dan topik pilihan. Sebagian tujuan sudah dipetakan ke capaian pembelajaran resmi; panduan lainnya ditandai sebagai materi lokal.',
+      'Teatch mendukung jenjang PAUD, TK A/B, SD kelas 1-6, SMP kelas 7-9, hingga SMA kelas 10-12. Soal mengikuti usia, kelas, dan topik pilihan. Sebagian tujuan sudah dipetakan ke capaian pembelajaran resmi; panduan lainnya ditandai sebagai materi lokal.',
   },
   {
     question: 'Apakah soalnya bisa berbeda setiap kali dibuat?',
@@ -148,7 +148,7 @@ const faqs = [
   {
     question: 'Apakah data anak saya aman?',
     answer:
-      'Kami hanya meminta data yang diperlukan untuk menyesuaikan materi belajar (usia, jenjang, topik). Konteks usia, kelas, topik, dan satu minat dikirim ke layanan Gemini untuk menyusun draf. Nama dan foto anak tidak dimasukkan dalam prompt.',
+      'Kami hanya meminta data yang diperlukan untuk menyesuaikan materi belajar (usia, jenjang, topik). Konteks usia, kelas, topik, dan satu minat dikirim ke layanan Gemini untuk menyusun soal. Nama dan foto anak tidak dimasukkan dalam prompt.',
   },
   {
     question: 'Bisakah saya memantau kemajuan belajar anak?',
@@ -295,7 +295,7 @@ export default function LandingPage() {
                 </div>
                 <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-ai-50 dark:bg-ai-900/30 border border-ai-100 dark:border-ai-800/40 text-[11px] font-semibold text-ai-600 dark:text-ai-400">
                   <BookOpen size={12} />
-                  Draf
+                  Siap dikerjakan
                 </span>
               </div>
 

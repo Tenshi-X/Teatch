@@ -1,5 +1,7 @@
 # Peluncuran roadmap Teatch
 
+> Alur terbaru membutuhkan [migrasi 007](../supabase/migrations/007_ready_worksheets.sql): hasil generate langsung tersimpan dan siap dikerjakan, tanpa editor atau persetujuan soal. Draf lama diubah menjadi siap digunakan dengan isi dan kuota tetap sama. Terapkan migrasi sebelum deploy aplikasi; lihat [petunjuk terbaru](development-status.md#hasil-generate-langsung-siap-digunakan). Penyebutan editor/draf/terbit pada catatan migrasi 005 di bawah bersifat historis.
+
 > Pembaruan 30 Oktober 2026: kode tahap 1–3 telah dikembangkan untuk kondisi belum ada pelanggan. Gunakan [status pengembangan](development-status.md) untuk migrasi 006, konfigurasi akses pribadi, hasil pemeriksaan, dan keterbatasan aktual. Bagian berikut berasal dari rollout migrasi 005; keterangan historis bukan bukti deployment terbaru.
 
 ## Status implementasi

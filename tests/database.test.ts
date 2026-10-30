@@ -14,6 +14,7 @@ import { GenerateContentResponse, FinishReason } from '@google/genai';
 import { generateWorksheetWithFallback } from '@/services/ai/fallback';
 import { fulfillGeneration, PipelineError } from '@/services/ai/pipeline';
 let db: PGlite;
+let legacyDraft: Awaited<ReturnType<typeof worksheet>> & { parent: string };
 const legacyQuestionId = randomUUID(),
   legacyAttemptId = randomUUID();
 async function scalar<T = string>(
@@ -59,7 +60,7 @@ before(async () => {
   const subject = await scalar(
     "SELECT id FROM subjects WHERE level='SD' LIMIT 1"
   );
-  const worksheet = await scalar(
+  const legacyWorksheet = await scalar(
     "INSERT INTO worksheets(child_id,subject_id,title,difficulty,question_type,question_count,ai_response)VALUES($1,$2,'Latihan lama','mudah','matching',1,$3)RETURNING id",
     [child, subject, { title: 'Latihan lama', questions: [fixtures[3]] }]
   );
@@ -67,7 +68,7 @@ before(async () => {
     "INSERT INTO questions(id,worksheet_id,type,question,answer,explanation,options,order_index)VALUES($1,$2,'matching',$3,$4,$5,'[]',0)",
     [
       legacyQuestionId,
-      worksheet,
+      legacyWorksheet,
       fixtures[3].question,
       fixtures[3].answer,
       fixtures[3].explanation,
@@ -75,13 +76,22 @@ before(async () => {
   );
   await db.query(
     "INSERT INTO attempts(id,worksheet_id,child_id,score,status)VALUES($1,$2,$3,83.5,'completed')",
-    [legacyAttemptId, worksheet, child]
+    [legacyAttemptId, legacyWorksheet, child]
   );
   await db.exec(
     await readFile('supabase/migrations/005_reliable_learning.sql', 'utf8')
   );
   await db.exec(
     await readFile('supabase/migrations/006_runtime_readiness.sql', 'utf8')
+  );
+  const draftOwner = await account(10);
+  legacyDraft = { ...(await worksheet(draftOwner)), parent: draftOwner.parent };
+  assert.equal(
+    await scalar('SELECT status FROM worksheets WHERE id=$1', [legacyDraft.id]),
+    'draft'
+  );
+  await db.exec(
+    await readFile('supabase/migrations/007_ready_worksheets.sql', 'utf8')
   );
 });
 after(async () => {
@@ -143,11 +153,6 @@ async function worksheet(
     { difficulty: 'mudah', questionType: type },
     result,
     {},
-  ]);
-  await db.query('SELECT update_worksheet_content($1,$2,$3)', [
-    a.parent,
-    id,
-    result,
   ]);
   const qid = await scalar('SELECT id FROM questions WHERE worksheet_id=$1', [
     id,
@@ -231,6 +236,69 @@ test('migration recovers stored legacy payloads without rewriting historical sco
   ).rows[0];
   assert.equal(Number(attempt.score), 83.5);
   assert.equal(attempt.scoring_version, 1);
+});
+test('ready worksheet migration is repeatable and preserves existing draft content and quota', async () => {
+  await db.exec(
+    await readFile('supabase/migrations/007_ready_worksheets.sql', 'utf8')
+  );
+  assert.equal(
+    await scalar('SELECT status FROM worksheets WHERE id=$1', [legacyDraft.id]),
+    'generated'
+  );
+  assert.deepEqual(
+    await scalar('SELECT ai_response FROM worksheets WHERE id=$1', [
+      legacyDraft.id,
+    ]),
+    legacyDraft.result
+  );
+  const stored = (
+    await db.query<Question>('SELECT * FROM questions WHERE id=$1', [
+      legacyDraft.qid,
+    ])
+  ).rows[0];
+  assert.deepEqual(hydrateQuestion(stored), legacyDraft.result.questions[0]);
+  assert.equal(await balance(legacyDraft.parent), 9);
+  assert.equal(
+    await scalar(
+      "SELECT to_regprocedure('public.update_worksheet_content(uuid,uuid,jsonb)')"
+    ),
+    null
+  );
+});
+test('generated worksheets are immediately ready and users cannot edit content before an attempt', async () => {
+  const a = await account(),
+    w = await worksheet(a);
+  assert.equal(
+    await scalar('SELECT status FROM worksheets WHERE id=$1', [w.id]),
+    'generated'
+  );
+  await asUser(a.uid, async () => {
+    await assert.rejects(
+      db.query("UPDATE worksheets SET title='Changed' WHERE id=$1", [w.id]),
+      /permission denied/
+    );
+    for (const update of ["question='Changed'", "answer='999'", "content='{}'"])
+      await assert.rejects(
+        db.query(`UPDATE questions SET ${update} WHERE id=$1`, [w.qid]),
+        /permission denied/
+      );
+    await assert.rejects(
+      db.query('SELECT update_worksheet_content($1,$2,$3)', [
+        a.parent,
+        w.id,
+        w.result,
+      ]),
+      /does not exist/
+    );
+  });
+  await assert.rejects(
+    db.query("UPDATE worksheets SET status='draft' WHERE id=$1", [w.id]),
+    /worksheets_status_check/
+  );
+  assert.equal(
+    await scalar('SELECT answer FROM questions WHERE id=$1', [w.qid]),
+    '5'
+  );
 });
 test('quota: concurrent queued requests and duplicate keys cannot double debit or become negative', async () => {
   const a = await account(10),
@@ -322,7 +390,7 @@ test('generation: failed save rolls back worksheet and returns reservation; succ
   );
   assert.equal(content.explanation, question.explanation);
 });
-test('attempts: answers are atomic, retries reuse result, parent review determines final score, edits freeze', async () => {
+test('attempts: answers are atomic, retries reuse result, parent review determines final score', async () => {
   const a = await account(),
     other = await account(),
     w = await worksheet(a, 'essay'),
@@ -365,14 +433,6 @@ test('attempts: answers are atomic, retries reuse result, parent review determin
     [a.parent, w.id, key, records]
   );
   assert.equal(retry.id, saved.id);
-  await assert.rejects(
-    db.query('SELECT update_worksheet_content($1,$2,$3)', [
-      a.parent,
-      w.id,
-      w.result,
-    ]),
-    /ALREADY_ATTEMPTED/
-  );
   const answerId = await scalar('SELECT id FROM answers WHERE attempt_id=$1', [
     saved.id,
   ]);
@@ -447,7 +507,7 @@ test('storage and child limits: paths are owned, bucket private, parallel reques
   );
   await db.query("SELECT fail_generation($1,'FAIL','{}')", [r.id]);
 });
-test('all 16 types pass real database generation, edit, save, hydrate, answer and score', async () => {
+test('all 16 types pass real database generation, immediate practice, hydrate, answer and score', async () => {
   const a = await account(60);
   for (const fixture of fixtures) {
     const result = validateWorksheet({
@@ -463,11 +523,10 @@ test('all 16 types pass real database generation, edit, save, hydrate, answer an
       result,
       {},
     ]);
-    await db.query('SELECT update_worksheet_content($1,$2,$3)', [
-      a.parent,
-      id,
-      result,
-    ]);
+    assert.equal(
+      await scalar('SELECT status FROM worksheets WHERE id=$1', [id]),
+      'generated'
+    );
     const stored = (
       await db.query<Question>(
         'SELECT * FROM questions WHERE worksheet_id=$1',

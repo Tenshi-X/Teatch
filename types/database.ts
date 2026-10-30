@@ -102,7 +102,7 @@ type WorksheetRow = {
   objective_id: string | null;
   ai_prompt: string | null;
   ai_response: Json | null;
-  status: 'generating' | 'draft' | 'generated' | 'error';
+  status: 'generating' | 'generated' | 'error';
   schema_version: number;
   created_at: string;
 };
@@ -299,10 +299,6 @@ export type Database = {
           p_usage: Json;
         };
         Returns: string;
-      };
-      update_worksheet_content: {
-        Args: { p_parent: string; p_worksheet: string; p_result: Json };
-        Returns: undefined;
       };
       save_scored_attempt: {
         Args: {

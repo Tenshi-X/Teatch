@@ -2,6 +2,16 @@
 
 Tanggal: 30 Oktober 2026. Konteks: belum ada pengguna pelanggan; pengujian pribadi memakai akun sendiri dan data contoh. Tahap pilot pengguna dan pembayaran otomatis belum dijalankan.
 
+## Hasil generate langsung siap digunakan
+
+Alur sekarang: pilih materi → buat latihan → hasil otomatis tersimpan → kerjakan atau cetak. Tidak ada tahap draf, persetujuan, atau edit soal oleh pengguna. Laporan soal keliru dan tinjauan jawaban uraian tetap tersedia.
+
+Sebelum deploy versi ini, jalankan seluruh [007_ready_worksheets.sql](../supabase/migrations/007_ready_worksheets.sql) setelah migrasi 001-006. Migrasi mengganti `finalize_generation` agar langsung menyimpan status `generated`, menghapus RPC edit `update_worksheet_content`, dan mengubah draf lama menjadi siap digunakan tanpa mengubah isi, nilai, atau kuota. Aman dijalankan ulang; hasil akhirnya harus menunjukkan `drafts_migrated=true` dan `content_editing_disabled=true`.
+
+Migrasi 007 harus diterapkan di Supabase sebelum aplikasi diperbarui. File migrasi yang tersedia di repository belum berarti database hosting sudah diperbarui.
+
+Verifikasi lokal: 91 tes lulus, termasuk 16 tipe soal yang langsung dapat dinilai setelah finalisasi, penolakan perubahan judul/isi/kunci oleh pengguna, penghapusan RPC edit, dan migrasi draf berulang tanpa perubahan isi atau kuota. Lint, TypeScript, dan build produksi (`npm run build:verify`) lulus. Tes database menggunakan PGlite, bukan Supabase hosting.
+
 ## Pembaruan model dan fallback
 
 **Konfigurasi billing terbaru:** runtime kini memisahkan credential trial (`GEMINI_FREE_API_KEY`) dan pelanggan aktif (`GEMINI_PAID_API_KEY`) berdasarkan paket dari database. Key generik lama tidak dipakai runtime web. Siapkan dua proyek Google dengan tier yang sesuai sebelum deployment; petunjuk verifikasi Billing Trenova, environment, dan biaya per soal ada di [gemini-billing.md](gemini-billing.md). Kode tidak dapat memastikan status billing hanya dari nama model atau screenshot dropdown.
@@ -46,7 +56,7 @@ Karena belum ada pelanggan, proyek Supabase yang ada dapat dipakai untuk pengemb
 
 1. Periksa migrasi 001–005 pada proyek. Bila belum diterapkan, jalankan berurutan; jangan mengulangi migrasi yang sudah berhasil.
 2. Terapkan [006_runtime_readiness.sql](../supabase/migrations/006_runtime_readiness.sql) setelah 005. Versi perbaikan migrasi ini aman dijalankan ulang, menetapkan schema `public`, dan mempertahankan baris yang sudah ada. Jalankan **seluruh file**, termasuk `COMMIT;` dan `SELECT` terakhir. Hasil akhirnya harus berupa satu baris dengan `dashboard_ready`, `learning_ready`, `feedback_ready`, `events_ready`, `maintenance_ready`, dan `admin_ready` semuanya `true`.
-3. Sesuaikan environment lokal/hosting dari `.env.example`. Untuk mencoba dengan akun sendiri gunakan:
+3. Terapkan [007_ready_worksheets.sql](../supabase/migrations/007_ready_worksheets.sql), lalu sesuaikan environment lokal/hosting dari `.env.example`. Untuk mencoba dengan akun sendiri gunakan:
 
    ```dotenv
    TEATCH_AI_ACCESS_MODE=public
@@ -57,11 +67,11 @@ Karena belum ada pelanggan, proyek Supabase yang ada dapat dipakai untuk pengemb
    Aktifkan `TEATCH_AI_ENABLED=true` saat migrasi dan akses provider sudah siap. Nama model lain hanya diterima bila ada dalam allowlist yang diuji; penggantian model tetap membutuhkan evaluasi nyata.
 
 4. Jalankan `npm run check:runtime`. Script hanya membaca kesiapan tabel dan metadata model, tanpa menghasilkan soal atau menerapkan migrasi. HTTP berhasil pada pemeriksaan ini belum membuktikan seluruh kebijakan RLS, OAuth, atau model generasi bekerja.
-5. Login Google, lengkapi nama, tambah anak dengan kelas, lalu pilih materi. Buat 10 soal, periksa draf, terbitkan, kerjakan, lihat hasil, kirim feedback, dan coba cetak dari halaman latihan.
+5. Login Google, lengkapi nama, tambah anak dengan kelas, lalu pilih materi. Buat 10 soal; hasil otomatis tersimpan dan siap dikerjakan tanpa tahap edit atau persetujuan. Kerjakan, lihat hasil, kirim feedback, dan coba cetak dari halaman latihan.
 6. Untuk pemulihan otomatis, aktifkan `pg_cron` pada Supabase lalu jalankan [schedule-maintenance.sql](../supabase/operations/schedule-maintenance.sql). Periksa `cron.job` dan `cron.job_run_details`; script tidak dijalankan dari sesi ini. Jadwal lima menit mengembalikan reservasi berumur lebih dari 15 menit serta menghapus event mentah lebih dari 90 hari.
 7. Bila scheduler database tidak tersedia, scheduler server dapat memanggil `GET /api/internal/maintenance` dengan header `Authorization: Bearer <TEATCH_MAINTENANCE_SECRET>`. Secret harus acak, server-only, dan tidak ditempatkan pada URL. Jangan menggunakan service role sebagai secret HTTP ini.
 
-Dashboard/laporan/admin versi baru membutuhkan migrasi 006. Deploy database dahulu, kemudian versi aplikasi ini. Tidak ada push atau deployment hosting yang dilakukan oleh sesi implementasi.
+Dashboard/laporan/admin membutuhkan migrasi 006; alur soal langsung siap digunakan membutuhkan migrasi 007. Deploy database dahulu, kemudian versi aplikasi ini. Tidak ada push atau deployment hosting yang dilakukan oleh sesi implementasi.
 
 ### Jika dashboard gagal setelah login dan pengecekan migrasi masih NULL
 

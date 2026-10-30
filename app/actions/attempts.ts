@@ -27,7 +27,7 @@ export async function submitAttempt(value: unknown) {
     input.worksheetId
   );
   if (worksheet.status !== 'generated')
-    throw new Error('Setujui draf sebelum mulai latihan.');
+    throw new Error('Latihan belum siap dikerjakan.');
   if (
     Object.keys(input.answers).some((id) => !questions.some((q) => q.id === id))
   )

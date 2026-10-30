@@ -162,7 +162,7 @@ const generated = {
   worksheet: { title: 'Latihan', questions: [fixtures[2]] },
   usage,
 };
-test('pipeline saves a valid draft once; failed model and failed save return the reservation with usage', async () => {
+test('pipeline saves a valid worksheet once; failed model and failed save return the reservation with usage', async () => {
   for (const failure of ['none', 'ai', 'save']) {
     let calls = 0,
       saves = 0,

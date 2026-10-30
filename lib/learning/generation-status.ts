@@ -26,23 +26,23 @@ export async function readGenerationStatus(
     return {
       status: 'succeeded',
       worksheetId: row.worksheet_id,
-      message: 'Draf sudah tersimpan.',
+      message: 'Latihan sudah tersimpan dan siap dikerjakan.',
     };
   if (row.status === 'succeeded')
     return {
       status: 'succeeded',
       message:
-        'Draf pernah tersimpan tetapi sudah dihapus. Pembuatan berikutnya memakai kuota baru.',
+        'Latihan pernah tersimpan tetapi sudah dihapus. Pembuatan berikutnya memakai kuota baru.',
     };
   if (row.status === 'failed')
     return {
       status: 'failed',
       message:
-        'Permintaan sudah dihentikan dan kuota dikembalikan. Anda dapat membuat draf baru.',
+        'Permintaan sudah dihentikan dan kuota dikembalikan. Anda dapat membuat latihan baru.',
     };
   return {
     status: 'reserved',
     message:
-      'Draf masih diproses. Hasil diperiksa otomatis; Anda dapat kembali nanti.',
+      'Latihan masih diproses. Hasil diperiksa otomatis; Anda dapat kembali nanti.',
   };
 }

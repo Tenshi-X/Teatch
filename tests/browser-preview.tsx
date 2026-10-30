@@ -81,7 +81,7 @@ function Preview() {
         ) : (
           <div className="card space-y-4 p-6">
             <h1 className="text-2xl font-semibold">
-              Draf yang sama berhasil dipulihkan
+              Latihan yang sama berhasil dipulihkan
             </h1>
             <p>
               Hasil ini berasal dari pembacaan status, tanpa operasi AI baru.

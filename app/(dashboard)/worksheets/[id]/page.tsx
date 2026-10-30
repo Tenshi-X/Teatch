@@ -29,16 +29,6 @@ export default async function WorksheetPage({
     .select('*')
     .eq('worksheet_id', id)
     .order('order_index', { ascending: true });
-  const { count } = await supabase
-    .from('attempts')
-    .select('id', { count: 'exact', head: true })
-    .eq('worksheet_id', id);
 
-  return (
-    <WorksheetDetail
-      worksheet={worksheet}
-      questions={questions || []}
-      editable={count === 0}
-    />
-  );
+  return <WorksheetDetail worksheet={worksheet} questions={questions || []} />;
 }

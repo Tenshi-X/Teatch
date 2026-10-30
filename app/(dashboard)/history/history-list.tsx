@@ -219,11 +219,6 @@ export function HistoryList({
                             )}
                           </div>
 
-                          {ws.status === 'draft' && (
-                            <Badge variant="warning">
-                              Perlu pratinjau orang tua
-                            </Badge>
-                          )}
                           {wsAttempts.some(
                             (a) => a.status === 'pending_review'
                           ) && (

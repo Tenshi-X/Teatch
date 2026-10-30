@@ -69,8 +69,8 @@ async function main() {
               ...row,
               message:
                 row.status === 'reserved'
-                  ? 'Draf masih diproses. Hasil diperiksa otomatis.'
-                  : 'Draf tersimpan.',
+                  ? 'Latihan masih diproses. Hasil diperiksa otomatis.'
+                  : 'Latihan tersimpan dan siap dikerjakan.',
             }
           : { status: 'not_found', message: 'Permintaan belum ditemukan.' }
       );
