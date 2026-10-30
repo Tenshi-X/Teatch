@@ -2,7 +2,7 @@
 
 Platform latihan anak untuk orang tua: profil anak, worksheet, latihan interaktif, tinjauan jawaban, dan laporan perkembangan. Kuota pembuatan dihitung per soal. Penilaian serta analisis perkembangan dilakukan lokal tanpa request AI.
 
-Hasil generate otomatis tersimpan dan langsung siap dikerjakan atau dicetak. Pengguna tidak dapat mengedit soal. Terapkan migrasi 001-007 sebelum menjalankan versi ini; [migrasi 007](supabase/migrations/007_ready_worksheets.sql) juga mengubah draf lama menjadi siap digunakan tanpa mengubah isi atau kuota.
+Hasil generate otomatis tersimpan dan langsung siap dikerjakan atau dicetak. Pengguna tidak dapat mengedit soal. Terapkan migrasi 001-008 sebelum menjalankan versi ini. [Migrasi 008](supabase/migrations/008_subscription_packages.sql) menerapkan kuota dan akses laporan per paket; [panduan paket](docs/subscription-packages.md) menjelaskan saldo lama serta aktivasi manual.
 
 ## Menjalankan aplikasi
 
@@ -13,7 +13,7 @@ npm ci
 npm run dev
 ```
 
-Buka `http://localhost:3000`. Terapkan migrasi 001–007 sebelum memakai versi ini. Untuk pengujian pribadi gunakan `TEATCH_AI_ACCESS_MODE=public` dan aktifkan `TEATCH_AI_ENABLED` setelah konfigurasi provider siap. Model utama **Gemini 3.8 Flash**, dengan fallback berurutan **3.5 Flash-Lite → 3.6 Flash** ketika panggilan provider gagal. Maksimal tiga panggilan dalam 45 detik; satu hasil dan satu debit kuota per pembuatan. Di environment hosting, ubah `TEATCH_AI_MODEL` lama menjadi `gemini-3.8-flash` sebelum deployment baru.
+Buka `http://localhost:3000`. Terapkan migrasi 001-008 sebelum memakai versi ini. Untuk pengujian pribadi gunakan `TEATCH_AI_ACCESS_MODE=public` dan aktifkan `TEATCH_AI_ENABLED` setelah konfigurasi provider siap. Model utama **Gemini 3.8 Flash**, dengan fallback berurutan **3.5 Flash-Lite → 3.6 Flash** ketika panggilan provider gagal. Maksimal tiga panggilan dalam 45 detik; satu hasil dan satu debit kuota per pembuatan. Di environment hosting, ubah `TEATCH_AI_MODEL` lama menjadi `gemini-3.8-flash` sebelum deployment baru.
 
 ## Pemeriksaan
 
@@ -37,6 +37,7 @@ Pratinjau hanya tersedia pada `http://127.0.0.1:3002` dan menggunakan contoh lok
 
 ## Dokumentasi
 
+- [Paket, harga, akses fitur, dan penerapan migrasi 008](docs/subscription-packages.md).
 - [Pemisahan AI trial/pelanggan, verifikasi billing, dan estimasi biaya](docs/gemini-billing.md).
 - [Status implementasi tahap 1–3 dan cara menjalankan pengujian pribadi](docs/development-status.md).
 - [Implementation plan: urutan PR, dependensi, dan kriteria penerimaan](docs/implementation-plan.md).

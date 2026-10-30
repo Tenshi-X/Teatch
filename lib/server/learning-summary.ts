@@ -8,10 +8,13 @@ import {
 } from '@/lib/learning/report-result';
 import type { LearningTopic } from '@/lib/learning/summary';
 import { z } from 'zod';
+import { getSubscriptionAccess } from '@/lib/subscription';
 export async function getLearningSummary(): Promise<
-  ReportResult<LearningTopic[]>
+  ReportResult<LearningTopic[]> | { status: 'locked' }
 > {
-  const { supabase } = await getParent();
+  const { supabase, profile } = await getParent();
+  if (!getSubscriptionAccess(profile).learningInsights)
+    return { status: 'locked' };
   const children = await getChildren();
   if (!children.length) return { status: 'ready', data: [] };
   const response = await supabase.rpc('learning_summary', {

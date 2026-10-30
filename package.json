@@ -13,6 +13,7 @@
     "test": "node --import tsx --test tests/*.test.ts tests/*.test.tsx",
     "evaluate:cost": "tsx scripts/evaluate-ai-cost.ts",
     "evaluate:sample": "tsx scripts/sample-ai.ts",
+    "evaluate:paid": "tsx scripts/probe-paid-cost.ts",
     "evaluate:benchmark": "tsx scripts/benchmark-models.ts",
     "preview:runtime": "tsx scripts/preview-runtime.ts",
     "check:runtime": "tsx scripts/check-runtime.ts"

@@ -9,6 +9,7 @@ import { Avatar } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { buildInsights } from '@/lib/learning/insights';
 import type { RecentActivity, DashboardStats } from '@/types';
+import { PlanUpgrade } from '@/components/subscription/plan-upgrade';
 
 export interface DashboardChildData {
   stats: DashboardStats;
@@ -21,9 +22,11 @@ export interface DashboardChildData {
 export function DashboardView({
   byChild,
   summaryUnavailable = false,
+  insightsLocked = true,
 }: {
   byChild: Record<string, DashboardChildData>;
   summaryUnavailable?: boolean;
+  insightsLocked?: boolean;
 }) {
   const { activeChild, children } = useChildStore();
   const data = byChild[activeChild?.id || ''];
@@ -213,55 +216,70 @@ export function DashboardView({
               Lihat perkembangan
             </Link>
           </div>
-          <p className="mt-2 text-sm text-[var(--text-muted)]">
-            Berdasarkan jawaban yang sudah dinilai dalam 90 hari terakhir.
-          </p>
-          {summaryUnavailable ? (
-            <p role="status" className="mt-5 text-sm text-[var(--text-muted)]">
-              Ringkasan perkembangan belum dapat dimuat. Coba muat ulang
-              halaman.
-            </p>
-          ) : topics.length ? (
-            <ul className="mt-4 divide-y divide-[var(--card-border)]">
-              {topics.map((topic) => (
-                <li
-                  key={`${topic.subjectId}:${topic.objectiveId || topic.topic}:${topic.difficulty}`}
-                  className="py-4"
-                >
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <h3 className="font-semibold">{topic.topic}</h3>
-                    <Badge variant="outline">
-                      {topic.status === 'practice'
-                        ? 'Perlu latihan'
-                        : 'Sedang berkembang'}
-                    </Badge>
-                  </div>
-                  <p className="mt-1 text-sm text-[var(--text-muted)]">
-                    {topic.subject} · {topic.difficulty} · {topic.correct} dari{' '}
-                    {topic.total} jawaban benar
-                  </p>
-                  <Link
-                    href={`/worksheets/new?subject=${encodeURIComponent(topic.subjectId)}&topic=${encodeURIComponent(topic.topic)}`}
-                    className="mt-3 inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-primary-700 dark:text-primary-200"
-                  >
-                    Latih topik ini
-                    <ArrowRight size={16} aria-hidden="true" />
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <div className="mt-5 border-l-2 border-primary-300 pl-4">
-              <p className="font-medium">
-                {stats.totalAttempts
-                  ? 'Belum ada topik yang perlu ditampilkan.'
-                  : 'Catatan perkembangan akan tumbuh bersama latihan.'}
-              </p>
-              <p className="mt-2 text-sm text-[var(--text-muted)]">
-                Setelah cukup jawaban dinilai, materi yang masih perlu dilatih
-                akan muncul di sini.
-              </p>
+          {insightsLocked ? (
+            <div className="mt-4">
+              <PlanUpgrade
+                tier="pro"
+                title="Lihat penguasaan materi per topik"
+                description="Temukan topik yang sudah dikuasai dan yang masih perlu dilatih melalui laporan perkembangan Pro."
+              />
             </div>
+          ) : (
+            <>
+              <p className="mt-2 text-sm text-[var(--text-muted)]">
+                Berdasarkan jawaban yang sudah dinilai dalam 90 hari terakhir.
+              </p>
+              {summaryUnavailable ? (
+                <p
+                  role="status"
+                  className="mt-5 text-sm text-[var(--text-muted)]"
+                >
+                  Ringkasan perkembangan belum dapat dimuat. Coba muat ulang
+                  halaman.
+                </p>
+              ) : topics.length ? (
+                <ul className="mt-4 divide-y divide-[var(--card-border)]">
+                  {topics.map((topic) => (
+                    <li
+                      key={`${topic.subjectId}:${topic.objectiveId || topic.topic}:${topic.difficulty}`}
+                      className="py-4"
+                    >
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <h3 className="font-semibold">{topic.topic}</h3>
+                        <Badge variant="outline">
+                          {topic.status === 'practice'
+                            ? 'Perlu latihan'
+                            : 'Sedang berkembang'}
+                        </Badge>
+                      </div>
+                      <p className="mt-1 text-sm text-[var(--text-muted)]">
+                        {topic.subject} · {topic.difficulty} · {topic.correct}{' '}
+                        dari {topic.total} jawaban benar
+                      </p>
+                      <Link
+                        href={`/worksheets/new?subject=${encodeURIComponent(topic.subjectId)}&topic=${encodeURIComponent(topic.topic)}`}
+                        className="mt-3 inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-primary-700 dark:text-primary-200"
+                      >
+                        Latih topik ini
+                        <ArrowRight size={16} aria-hidden="true" />
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <div className="mt-5 border-l-2 border-primary-300 pl-4">
+                  <p className="font-medium">
+                    {stats.totalAttempts
+                      ? 'Belum ada topik yang perlu ditampilkan.'
+                      : 'Catatan perkembangan akan tumbuh bersama latihan.'}
+                  </p>
+                  <p className="mt-2 text-sm text-[var(--text-muted)]">
+                    Setelah cukup jawaban dinilai, materi yang masih perlu
+                    dilatih akan muncul di sini.
+                  </p>
+                </div>
+              )}
+            </>
           )}
         </section>
         <section aria-labelledby="activity-title">

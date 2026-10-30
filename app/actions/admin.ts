@@ -7,7 +7,11 @@ import { z } from 'zod';
 import type { Profile, Question } from '@/types';
 import type { Database, Json } from '@/types/database';
 
-export type AdminProfile = Profile & { usage: number; quota: number };
+export type AdminProfile = Profile & {
+  usage: number;
+  quota: number;
+  planLabel: string;
+};
 export type AdminQuestionReport =
   Database['public']['Tables']['question_reports']['Row'] & {
     questions: Question | null;
@@ -67,6 +71,7 @@ export async function getAdminDashboardData(page = 0, search = '') {
     profiles: payload.profiles.map((p) => ({
       ...p,
       quota: getTierLimits(p.subscription_tier).maxQuestions,
+      planLabel: getTierLimits(p.subscription_tier).label,
     })),
     matchedUsers: payload.matchedUsers,
     metrics: payload.metrics,
@@ -113,7 +118,9 @@ export async function updateAdminUser(userId: string, input: unknown) {
     throw new Error(
       error.message.includes('GENERATION_PENDING')
         ? 'Tunggu generasi aktif selesai sebelum mengisi ulang kuota.'
-        : 'Perubahan akun belum tersimpan.'
+        : error.message.includes('PLAN_QUOTA_MISMATCH')
+          ? 'Batas paket aplikasi dan database berbeda. Terapkan migrasi 008 sebelum mengisi kuota.'
+          : 'Perubahan akun belum tersimpan.'
     );
   revalidatePath('/admin');
   revalidatePath('/', 'layout');

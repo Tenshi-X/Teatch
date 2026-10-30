@@ -1,5 +1,9 @@
 # Status pengembangan tahap 1–3
 
+## Paket dan akses fitur terbaru
+
+Versi ini membutuhkan migrasi 001–008. Trial 30 soal/1 anak; Basic Rp69.000 per 30 hari, 1.000 soal/3 anak dan grafik nilai; Pro Rp149.000 per 30 hari, 2.500 soal/6 anak serta analisis topik, tren dan cetak laporan. Pemeriksaan akses berlaku pada server serta RPC laporan. Migrasi 008 menyesuaikan saldo lama satu kali dan mempertahankan pemakaian yang dapat ditelusuri. Lihat [panduan paket dan aktivasi](subscription-packages.md). Catatan versi 007 dan jumlah tes di bawah merupakan hasil pemeriksaan sebelumnya.
+
 Tanggal: 30 Oktober 2026. Konteks: belum ada pengguna pelanggan; pengujian pribadi memakai akun sendiri dan data contoh. Tahap pilot pengguna dan pembayaran otomatis belum dijalankan.
 
 ## Hasil generate langsung siap digunakan
@@ -18,11 +22,11 @@ Verifikasi lokal: 91 tes lulus, termasuk 16 tipe soal yang langsung dapat dinila
 
 Model utama sekarang `gemini-3.8-flash`, dengan fallback berurutan `gemini-3.5-flash-lite` lalu `gemini-3.6-flash` sesuai permintaan pemilik pada 30 Oktober 2026. Konfigurasi lokal sudah diperbarui; kredensial lain dipertahankan. Sebelum push, ubah **Vercel → Settings → Environment Variables → Production → `TEATCH_AI_MODEL=gemini-3.8-flash`**, lalu deploy versi kode ini. Variabel fallback tambahan dan migrasi database baru tidak diperlukan.
 
-| Model | Thinking level | Batas tiap percobaan |
-| --- | --- | --- |
-| 3.8 Flash | `LOW` | 20 detik |
-| 3.5 Flash-Lite | `MINIMAL` | 10 detik |
-| 3.6 Flash | `MEDIUM` | 15 detik |
+| Model          | Thinking level | Batas tiap percobaan |
+| -------------- | -------------- | -------------------- |
+| 3.8 Flash      | `LOW`          | 20 detik             |
+| 3.5 Flash-Lite | `MINIMAL`      | 10 detik             |
+| 3.6 Flash      | `MEDIUM`       | 15 detik             |
 
 Rangkaian seluruh model dibatasi 45 detik, menyisakan waktu dari limit route 60 detik untuk autentikasi, reservasi, penyimpanan, atau refund. Setiap model dipanggil sekali; retry SDK dimatikan. Model cadangan hanya dipanggil bila percobaan sebelumnya gagal akses model (403/404), rate limit (429), timeout, koneksi, atau error server. HTTP 400/401, respons terblokir, soal tidak valid, dan output terpotong menghentikan operasi. Setiap respons tetap melewati validasi yang sama.
 

@@ -98,7 +98,7 @@ export default async function AdminPage({
               />
             </div>
             <span className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-widest">
-              Soal Digunakan
+              Soal Baru Dibuat
             </span>
           </div>
           <div className="relative z-10">
@@ -106,12 +106,9 @@ export default async function AdminPage({
               <h3 className="text-4xl font-bold text-[var(--fg)]">
                 {metrics.totalUsage}
               </h3>
-              <span className="text-lg text-[var(--text-muted)]">
-                / {metrics.totalQuota}
-              </span>
             </div>
             <p className="text-sm text-[var(--text-muted)]">
-              Terpakai / Total Kuota Bulan Ini
+              Soal berhasil dibuat bulan ini
             </p>
           </div>
         </div>

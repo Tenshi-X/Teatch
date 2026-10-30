@@ -1,4 +1,4 @@
-import { PlanLink } from '@/components/feedback/plan-link';
+import { PricingSection } from '@/components/subscription/pricing-section';
 import { SUBSCRIPTION_LIMITS as PLANS } from '@/lib/subscription';
 import { enabledQuestionTypes } from '@/lib/server/features';
 import { TYPE_LABELS } from '@/components/worksheets/question-content';
@@ -18,7 +18,6 @@ import {
   BookOpen,
   GraduationCap,
   ClipboardList,
-  ShieldCheck,
   ChevronDown,
   Home,
   Star,
@@ -127,8 +126,7 @@ const audiences = [
 const faqs = [
   {
     question: 'Apakah Teatch benar-benar gratis?',
-    answer:
-      'Ya. Paket Free Trial bisa dipakai tanpa biaya — termasuk 10 soal dan 1 profil anak — tanpa perlu memasukkan kartu kredit. Upgrade ke paket Basic atau Pro hanya jika Anda membutuhkan lebih banyak kuota.',
+    answer: `Ya. Paket Free Trial bisa dipakai tanpa biaya — termasuk ${PLANS.free_trial.maxQuestions} soal dan ${PLANS.free_trial.maxChildren} profil anak selama 30 hari — tanpa perlu memasukkan kartu kredit. Basic menambahkan kuota dan grafik nilai; Pro mencakup analisis materi dan laporan perkembangan.`,
   },
   {
     question: 'Jenjang pendidikan apa saja yang didukung?',
@@ -618,174 +616,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Pricing (Flat & Soft) */}
-      <section
-        id="harga"
-        className="scroll-mt-24 py-24 px-6 bg-white dark:bg-[var(--bg)]"
-      >
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold tracking-tight mb-4">
-              Pilih Paket Belajar
-            </h2>
-            <p className="text-[var(--text-muted)] max-w-2xl mx-auto text-lg">
-              Harga transparan. Pilih rencana yang sesuai dengan kebutuhan
-              keluarga Anda.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            {/* Free Trial */}
-            <div className="card p-8 border border-[var(--card-border)] bg-white dark:bg-[var(--card-bg)] flex flex-col rounded-[var(--radius-card)] shadow-sm">
-              <div className="mb-6">
-                <h3 className="text-xl font-bold mb-2">Free Trial</h3>
-                <p className="text-[var(--text-muted)] text-sm">
-                  Untuk mencoba fitur dasar
-                </p>
-              </div>
-              <div className="mb-8">
-                <span className="text-4xl font-bold tracking-tight">Rp 0</span>
-              </div>
-              <ul className="space-y-4 mb-10 flex-1">
-                <li className="flex items-start gap-3 text-sm text-surface-600 dark:text-surface-300">
-                  <CheckCircle className="w-5 h-5 text-primary-500 shrink-0" />
-                  <span>Maksimal {PLANS.free_trial.maxQuestions} soal</span>
-                </li>
-                <li className="flex items-start gap-3 text-sm text-surface-600 dark:text-surface-300">
-                  <CheckCircle className="w-5 h-5 text-primary-500 shrink-0" />
-                  <span>{PLANS.free_trial.maxChildren} profil anak</span>
-                </li>
-                <li className="flex items-start gap-3 text-sm text-surface-600 dark:text-surface-300">
-                  <CheckCircle className="w-5 h-5 text-primary-500 shrink-0" />
-                  <span>Tipe soal yang tersedia pada tahap pengembangan</span>
-                </li>
-              </ul>
-              <Link
-                href="/login"
-                className="w-full py-3 px-4 text-center rounded-full font-semibold border-[1.5px] border-surface-200 dark:border-surface-700 text-surface-700 dark:text-surface-200 hover:bg-surface-50 dark:hover:bg-surface-800 transition-all active:translate-y-[1px]"
-              >
-                Mulai Gratis
-              </Link>
-            </div>
-
-            {/* Basic */}
-            <div className="card p-8 border-2 border-primary-500 bg-white dark:bg-[var(--card-bg)] flex flex-col rounded-[var(--radius-card)] shadow-sm relative">
-              <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary-300 text-surface-900 px-4 py-1 rounded-full text-xs font-bold uppercase tracking-widest">
-                Pendampingan harian
-              </div>
-              <div className="mb-6 mt-2">
-                <h3 className="text-xl font-bold mb-2">Basic</h3>
-                <p className="text-[var(--text-muted)] text-sm">
-                  Cocok untuk pendampingan harian
-                </p>
-              </div>
-              <div className="mb-8">
-                <span className="text-4xl font-bold tracking-tight">
-                  Rp 150rb
-                </span>
-                <span className="text-[var(--text-muted)]">/bln</span>
-              </div>
-              <ul className="space-y-4 mb-10 flex-1">
-                <li className="flex items-start gap-3 text-sm text-surface-600 dark:text-surface-300">
-                  <CheckCircle className="w-5 h-5 text-primary-500 shrink-0" />
-                  <span className="font-medium">
-                    {PLANS.basic.maxQuestions} soal
-                  </span>
-                </li>
-                <li className="flex items-start gap-3 text-sm text-surface-600 dark:text-surface-300">
-                  <CheckCircle className="w-5 h-5 text-primary-500 shrink-0" />
-                  <span>Maksimal {PLANS.basic.maxChildren} profil anak</span>
-                </li>
-                <li className="flex items-start gap-3 text-sm text-surface-600 dark:text-surface-300">
-                  <CheckCircle className="w-5 h-5 text-primary-500 shrink-0" />
-                  <span>Statistik perkembangan anak</span>
-                </li>
-                <li className="flex items-start gap-3 text-sm text-surface-600 dark:text-surface-300">
-                  <CheckCircle className="w-5 h-5 text-primary-500 shrink-0" />
-                  <span>Prioritas dukungan (Support)</span>
-                </li>
-              </ul>
-              <PlanLink
-                href="https://shopee.co.id/trenovaintelligence"
-                target="_blank"
-                rel="noreferrer"
-                className="w-full py-3 px-4 text-center rounded-full font-semibold action-primary transition-colors"
-              >
-                Berlangganan
-              </PlanLink>
-            </div>
-
-            {/* Pro */}
-            <div className="card p-8 border border-[var(--card-border)] bg-white dark:bg-[var(--card-bg)] flex flex-col rounded-[var(--radius-card)] shadow-sm">
-              <div className="mb-6">
-                <h3 className="text-xl font-bold mb-2">Pro</h3>
-                <p className="text-[var(--text-muted)] text-sm">
-                  Untuk keluarga besar &amp; intensif
-                </p>
-              </div>
-              <div className="mb-8">
-                <span className="text-4xl font-bold tracking-tight">
-                  Rp 250rb
-                </span>
-                <span className="text-[var(--text-muted)]">/bln</span>
-              </div>
-              <ul className="space-y-4 mb-10 flex-1">
-                <li className="flex items-start gap-3 text-sm text-surface-600 dark:text-surface-300">
-                  <CheckCircle className="w-5 h-5 text-primary-500 shrink-0" />
-                  <span className="font-medium">
-                    {PLANS.pro.maxQuestions} soal
-                  </span>
-                </li>
-                <li className="flex items-start gap-3 text-sm text-surface-600 dark:text-surface-300">
-                  <CheckCircle className="w-5 h-5 text-primary-500 shrink-0" />
-                  <span>Maksimal {PLANS.pro.maxChildren} profil anak</span>
-                </li>
-                <li className="flex items-start gap-3 text-sm text-surface-600 dark:text-surface-300">
-                  <CheckCircle className="w-5 h-5 text-primary-500 shrink-0" />
-                  <span>Laporan dan latihan ulang untuk setiap anak</span>
-                </li>
-                <li className="flex items-start gap-3 text-sm text-surface-600 dark:text-surface-300">
-                  <CheckCircle className="w-5 h-5 text-primary-500 shrink-0" />
-                  <span>Bantuan penggunaan melalui kontak dukungan</span>
-                </li>
-              </ul>
-              <PlanLink
-                href="https://shopee.co.id/trenovaintelligence"
-                target="_blank"
-                rel="noreferrer"
-                className="w-full py-3 px-4 text-center rounded-full font-semibold border-[1.5px] border-surface-200 dark:border-surface-700 text-surface-700 dark:text-surface-200 hover:bg-surface-50 dark:hover:bg-surface-800 transition-all active:translate-y-[1px]"
-              >
-                Berlangganan
-              </PlanLink>
-            </div>
-          </div>
-
-          <div className="max-w-2xl mx-auto mt-12 flex flex-col sm:flex-row items-center justify-center gap-3 text-sm text-[var(--text-muted)]">
-            <span className="inline-flex items-center gap-2">
-              <ShieldCheck
-                size={16}
-                className="text-secondary-600 dark:text-secondary-400"
-              />
-              Pembayaran melalui Shopee. Aktivasi paket dilakukan manual setelah
-              verifikasi.
-            </span>
-            <span className="hidden sm:block text-surface-300 dark:text-surface-600">
-              ·
-            </span>
-            <span>
-              Butuh bantuan?{' '}
-              <a
-                href="https://wa.me/6287795078879"
-                target="_blank"
-                rel="noreferrer"
-                className="font-semibold text-primary-600 dark:text-primary-400 hover:underline"
-              >
-                Hubungi via WhatsApp
-              </a>
-            </span>
-          </div>
-        </div>
-      </section>
+      <PricingSection />
 
       {/* CTA */}
       <section className="py-32 px-6 text-center bg-white dark:bg-[var(--bg)]">

@@ -78,7 +78,7 @@ export function AdminTable({ profiles }: AdminTableProps) {
               <tr className="bg-[var(--surface-subtle)]/50 text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">
                 <th className="px-6 py-4">Profil Pengguna</th>
                 <th className="px-6 py-4">Peran</th>
-                <th className="px-6 py-4">Sisa</th>
+                <th className="px-6 py-4">Kuota soal</th>
                 <th className="px-6 py-4">Langganan</th>
                 <th className="px-6 py-4 text-right">Aksi</th>
               </tr>
@@ -115,11 +115,20 @@ export function AdminTable({ profiles }: AdminTableProps) {
                   <td className="px-6 py-4">
                     <div className="flex flex-col">
                       <span className="font-medium text-[var(--text-soft)]">
-                        {profile.worksheet_quota ?? 0} soal
+                        Sisa {profile.worksheet_quota ?? 0} soal
                       </span>
                       <span className="text-xs text-[var(--text-muted)]">
-                        sisa dari {profile.quota} batas
+                        Alokasi {profile.planLabel}: {profile.quota} soal
                       </span>
+                      <span className="text-xs text-[var(--text-muted)]">
+                        {profile.usage} soal baru dibuat bulan ini
+                      </span>
+                      {profile.worksheet_quota > profile.quota && (
+                        <span className="text-xs text-amber-700 dark:text-amber-300 mt-1">
+                          Saldo melebihi alokasi paket. Periksa melalui Edit
+                          Pengguna.
+                        </span>
+                      )}
                     </div>
                   </td>
                   <td className="px-6 py-4">

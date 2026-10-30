@@ -13,6 +13,7 @@ import type { LearningTopic } from '@/lib/learning/summary';
 import { GenerateContentResponse, FinishReason } from '@google/genai';
 import { generateWorksheetWithFallback } from '@/services/ai/fallback';
 import { fulfillGeneration, PipelineError } from '@/services/ai/pipeline';
+import { SUBSCRIPTION_LIMITS, getSubscriptionAccess } from '@/lib/subscription';
 let db: PGlite;
 let legacyDraft: Awaited<ReturnType<typeof worksheet>> & { parent: string };
 const legacyQuestionId = randomUUID(),
@@ -93,6 +94,9 @@ before(async () => {
   await db.exec(
     await readFile('supabase/migrations/007_ready_worksheets.sql', 'utf8')
   );
+  await db.exec(
+    await readFile('supabase/migrations/008_subscription_packages.sql', 'utf8')
+  );
 });
 after(async () => {
   await db?.close();
@@ -134,6 +138,224 @@ const reserve = (p: string, key = randomUUID(), count = 5, hash = 'hash') =>
   ]);
 const balance = (p: string) =>
   scalar<number>('SELECT worksheet_quota FROM profiles WHERE id=$1', [p]);
+
+test('package migration preserves tracked spending, updates legacy balances once and defaults new trials to 30', async () => {
+  const migration = await readFile(
+    'supabase/migrations/008_subscription_packages.sql',
+    'utf8'
+  );
+  const cases = [
+    { tier: 'free_trial', allocation: 10, spent: 10, expected: 20 },
+    { tier: 'free_trial', allocation: 100, spent: 5, expected: 25 },
+    { tier: 'basic', allocation: 300, spent: 6, expected: 994 },
+    { tier: 'basic', allocation: 3000, spent: 6, expected: 994 },
+    { tier: 'pro', allocation: 500, spent: 10, expected: 2490 },
+    { tier: 'pro', allocation: 5000, spent: 6, expected: 2494 },
+    { tier: 'family', allocation: 500, spent: 0, expected: 2500 },
+    { tier: 'teacher', allocation: 500, spent: 0, expected: 2500 },
+    { tier: 'basic', allocation: 450, spent: 0, expected: 450 },
+    { tier: 'basic', allocation: 2994, spent: 0, expected: 1000 },
+  ];
+  const owners = [];
+  for (const c of cases) {
+    const a = await account();
+    await db.query(
+      'UPDATE profiles SET subscription_tier=$2,worksheet_quota=$3,quota_plan_version=1 WHERE id=$1',
+      [a.parent, c.tier, c.allocation]
+    );
+    if (c.spent) {
+      await db.exec('BEGIN');
+      await db.query(
+        "SELECT set_config('teatch.quota_reason','reservation',true)"
+      );
+      await db.query(
+        'UPDATE profiles SET worksheet_quota=worksheet_quota-$2 WHERE id=$1',
+        [a.parent, c.spent]
+      );
+      await db.exec('COMMIT');
+    }
+    owners.push({ ...a, ...c });
+  }
+  await db.query(
+    "UPDATE profiles SET subscription_status='past_due',subscription_period_end=now()-interval '1 day' WHERE id=$1",
+    [owners[2].parent]
+  );
+  const pending = await account(10);
+  const request = await reserve(pending.parent);
+  await assert.rejects(db.exec(migration), /GENERATION_PENDING/);
+  await db.exec('ROLLBACK');
+  assert.equal(await balance(owners[3].parent), 2994);
+  await db.query("SELECT fail_generation($1,'TEST','{}')", [request.id]);
+  const result = await db.exec(migration);
+  assert.deepEqual(result.at(-1)?.rows, [
+    {
+      trial_quota_ready: true,
+      existing_quotas_migrated: true,
+      paid_quotas_ready: true,
+      feature_access_ready: true,
+    },
+  ]);
+  for (const a of owners) assert.equal(await balance(a.parent), a.expected);
+  assert.equal(
+    await scalar('SELECT subscription_status FROM profiles WHERE id=$1', [
+      owners[2].parent,
+    ]),
+    'past_due'
+  );
+  const entries = await scalar<number>(
+    'SELECT count(*)::int FROM quota_ledger'
+  );
+  await db.exec(migration);
+  for (const a of owners) assert.equal(await balance(a.parent), a.expected);
+  assert.equal(await scalar('SELECT count(*)::int FROM quota_ledger'), entries);
+  assert.equal(
+    (await scalar<{ discrepancies: number }>('SELECT quota_audit()'))
+      .discrepancies,
+    0
+  );
+  const uid = randomUUID();
+  await db.query(
+    "INSERT INTO auth.users(id,email)VALUES($1,'new-trial@example.test')",
+    [uid]
+  );
+  const trial = await scalar<{
+    quota: number;
+    version: number;
+    activeDays: boolean;
+  }>(
+    "SELECT jsonb_build_object('quota',worksheet_quota,'version',quota_plan_version,'activeDays',subscription_period_end>now()+interval '29 days') FROM profiles WHERE auth_user_id=$1",
+    [uid]
+  );
+  assert.deepEqual(trial, { quota: 30, version: 2, activeDays: true });
+  for (const [tier, plan] of Object.entries(SUBSCRIPTION_LIMITS))
+    assert.equal(
+      await scalar('SELECT subscription_question_limit($1)', [tier]),
+      plan.maxQuestions
+    );
+});
+
+test('database entitlements agree with server policy and direct report RPCs cannot bypass the plan', async () => {
+  const a = await account(),
+    w = await worksheet(a);
+  await db.query('SELECT save_scored_attempt($1,$2,$3,10,$4)', [
+    a.parent,
+    w.id,
+    randomUUID(),
+    [{ question_id: w.qid, user_answer: '5', is_correct: true }],
+  ]);
+  for (const tier of ['free_trial', 'basic', 'pro', 'family', 'teacher']) {
+    for (const active of [true, false]) {
+      await db.query(
+        "UPDATE profiles SET subscription_tier=$2,subscription_status='active',subscription_period_end=CASE WHEN $3 THEN now()+interval '30 days' ELSE now()-interval '1 second' END WHERE id=$1",
+        [a.parent, tier, active]
+      );
+      const policy = getSubscriptionAccess({
+        subscription_tier: tier,
+        subscription_status: 'active',
+        subscription_period_end: new Date(
+          Date.now() + (active ? 86400000 : -86400000)
+        ).toISOString(),
+      });
+      await asUser(a.uid, async () => {
+        assert.equal(
+          await scalar('SELECT has_subscription_feature($1)', [
+            'progress_charts',
+          ]),
+          policy.progressCharts
+        );
+        assert.equal(
+          await scalar('SELECT has_subscription_feature($1)', [
+            'learning_insights',
+          ]),
+          policy.learningInsights
+        );
+        const topics = await scalar<LearningTopic[]>(
+          'SELECT learning_summary()'
+        );
+        assert.equal(topics.length, policy.learningInsights ? 1 : 0);
+        // Shared history and worksheet content remain available in every tier.
+        assert.equal(
+          await scalar(
+            'SELECT count(*)::int FROM attempts WHERE worksheet_id=$1',
+            [w.id]
+          ),
+          1
+        );
+        assert.equal(
+          await scalar(
+            'SELECT count(*)::int FROM questions WHERE worksheet_id=$1',
+            [w.id]
+          ),
+          1
+        );
+        await assert.rejects(
+          db.query('UPDATE profiles SET quota_plan_version=1 WHERE id=$1', [
+            a.parent,
+          ]),
+          /permission denied/
+        );
+      });
+    }
+  }
+  await db.query(
+    "UPDATE profiles SET subscription_tier='pro',subscription_status='canceled',subscription_period_end=NULL WHERE id=$1",
+    [a.parent]
+  );
+  await asUser(a.uid, async () =>
+    assert.deepEqual(await scalar('SELECT learning_summary()'), [])
+  );
+  await db.exec('SET ROLE anon');
+  try {
+    await assert.rejects(
+      db.query("SELECT has_subscription_feature('learning_insights')"),
+      /permission denied/
+    );
+  } finally {
+    await db.exec('RESET ROLE');
+  }
+});
+
+test('quota is counted per question and admin replaces legacy balances with the plan allocation', async () => {
+  const a = await account(2994);
+  const changes = {
+    role: 'user',
+    subscription_tier: 'basic',
+    subscription_status: 'active',
+    subscription_period_end: null,
+  };
+  // Editing account metadata does not silently erase a legacy or bonus balance.
+  await db.query('SELECT admin_update_profile($1,$2,NULL)', [
+    a.parent,
+    changes,
+  ]);
+  assert.equal(await balance(a.parent), 2994);
+  await assert.rejects(
+    db.query('SELECT admin_update_profile($1,$2,300)', [a.parent, changes]),
+    /PLAN_QUOTA_MISMATCH/
+  );
+  // The explicit admin quota option replaces the balance, without multiplying it.
+  await db.query('SELECT admin_update_profile($1,$2,1000)', [
+    a.parent,
+    changes,
+  ]);
+  assert.equal(await balance(a.parent), 1000);
+  const r = await reserve(a.parent, randomUUID(), 10);
+  assert.equal(await balance(a.parent), 990);
+  await assert.rejects(
+    db.query('SELECT admin_update_profile($1,$2,NULL)', [
+      a.parent,
+      { ...changes, subscription_tier: 'pro' },
+    ]),
+    /GENERATION_PENDING/
+  );
+  await db.query("SELECT fail_generation($1,'PROBE_FAILED','{}')", [r.id]);
+  assert.equal(await balance(a.parent), 1000);
+  assert.equal(
+    (await scalar<{ discrepancies: number }>('SELECT quota_audit()'))
+      .discrepancies,
+    0
+  );
+});
 const question = {
   type: 'short_answer',
   question: '2 + 3 = ?',
@@ -689,6 +911,9 @@ test('database summaries match local scoring rules, exclude legacy/pending/old e
     b = await account(),
     w = await worksheet(a),
     other = await worksheet(b);
+  await db.query("UPDATE profiles SET subscription_tier='pro' WHERE id=$1", [
+    a.parent,
+  ]);
   await db.query("UPDATE worksheets SET topic='',objective_id='' WHERE id=$1", [
     w.id,
   ]);
@@ -826,6 +1051,11 @@ test('migration 006 repairs a partial installation, commits in public and preser
   } finally {
     await db.exec('RESET search_path');
   }
+
+  // A repair with an earlier migration must be followed by newer migrations.
+  await db.exec(
+    await readFile('supabase/migrations/008_subscription_packages.sql', 'utf8')
+  );
 
   assert.equal(await balance(a.parent), quota);
   assert.equal(

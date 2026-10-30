@@ -1,5 +1,7 @@
 # Peluncuran roadmap Teatch
 
+> Paket terbaru memerlukan [migrasi 008](../supabase/migrations/008_subscription_packages.sql) setelah 001–007, sebelum deploy aplikasi. Trial 30/1, Basic 1.000/3 dengan grafik, Pro 2.500/6 dengan laporan topik; lihat [panduan penerapan dan saldo lama](subscription-packages.md). Harga dan kuota lama dalam catatan historis di bawah sudah digantikan.
+
 > Alur terbaru membutuhkan [migrasi 007](../supabase/migrations/007_ready_worksheets.sql): hasil generate langsung tersimpan dan siap dikerjakan, tanpa editor atau persetujuan soal. Draf lama diubah menjadi siap digunakan dengan isi dan kuota tetap sama. Terapkan migrasi sebelum deploy aplikasi; lihat [petunjuk terbaru](development-status.md#hasil-generate-langsung-siap-digunakan). Penyebutan editor/draf/terbit pada catatan migrasi 005 di bawah bersifat historis.
 
 > Pembaruan 30 Oktober 2026: kode tahap 1–3 telah dikembangkan untuk kondisi belum ada pelanggan. Gunakan [status pengembangan](development-status.md) untuk migrasi 006, konfigurasi akses pribadi, hasil pemeriksaan, dan keterbatasan aktual. Bagian berikut berasal dari rollout migrasi 005; keterangan historis bukan bukti deployment terbaru.
@@ -8,15 +10,15 @@
 
 Kode aplikasi dan migrasi sudah tersedia secara lokal. Database produksi belum diubah dan aplikasi belum diterbitkan. Tes menggunakan PostgreSQL lokal melalui PGlite, klien model tiruan, dan contoh soal; tidak ada panggilan Gemini berbayar selama pemeriksaan ini.
 
-| Area            | Implementasi                                                                                          | Gate sebelum produksi                                                                 |
-| --------------- | ----------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
-| Paket dan kuota | Free Trial 10 soal/1 anak, Basic 300/3, Pro 500/6; Family/Teacher lama 500/6 tetap terbaca            | Tinjau paket akun lama; saldo lama dipertahankan                                      |
-| Generasi        | Reservasi atomik, Gemini 3.8 Flash dengan fallback 3.5 Flash-Lite lalu 3.6 Flash, idempotensi, validasi dan draf, pengembalian kuota | Uji dua koneksi database, akses setiap model dan kegagalan jaringan pada staging |
-| Keamanan        | Izin kolom profil, prosedur hanya server, foto privat dan validasi file                               | Jalankan migrasi, cek kebijakan tambahan di proyek, rotasi kunci                      |
-| Soal            | Kontrak lengkap 16 tipe, payload JSON, aset lokal, pemulihan respons lama                             | Buka setiap tipe setelah penerimaan staging dan peninjauan mutu                       |
-| Penilaian       | Aturan lokal versi 2, uraian dengan rubrik dan tinjauan orang tua                                     | Uji alur login → draf → terbit → latihan → tinjau → cetak                             |
-| Perkembangan    | Bukti jawaban, minimal 5 per tujuan, tren 5 latihan vs 5 sebelumnya, latihan ulang dan laporan cetak  | Uji data akun staging; ringkasan hanya memakai hasil baru yang selesai dinilai        |
-| Biaya           | Token dan percobaan tiap model tercatat; evaluasi satu model tanpa fallback; runtime maksimal tiga percobaan | Pengukuran baseline/kandidat dan biaya fallback dengan tarif yang terverifikasi belum dilakukan |
+| Area            | Implementasi                                                                                                                         | Gate sebelum produksi                                                                           |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------- |
+| Paket dan kuota | Free Trial 10 soal/1 anak, Basic 300/3, Pro 500/6; Family/Teacher lama 500/6 tetap terbaca                                           | Tinjau paket akun lama; saldo lama dipertahankan                                                |
+| Generasi        | Reservasi atomik, Gemini 3.8 Flash dengan fallback 3.5 Flash-Lite lalu 3.6 Flash, idempotensi, validasi dan draf, pengembalian kuota | Uji dua koneksi database, akses setiap model dan kegagalan jaringan pada staging                |
+| Keamanan        | Izin kolom profil, prosedur hanya server, foto privat dan validasi file                                                              | Jalankan migrasi, cek kebijakan tambahan di proyek, rotasi kunci                                |
+| Soal            | Kontrak lengkap 16 tipe, payload JSON, aset lokal, pemulihan respons lama                                                            | Buka setiap tipe setelah penerimaan staging dan peninjauan mutu                                 |
+| Penilaian       | Aturan lokal versi 2, uraian dengan rubrik dan tinjauan orang tua                                                                    | Uji alur login → draf → terbit → latihan → tinjau → cetak                                       |
+| Perkembangan    | Bukti jawaban, minimal 5 per tujuan, tren 5 latihan vs 5 sebelumnya, latihan ulang dan laporan cetak                                 | Uji data akun staging; ringkasan hanya memakai hasil baru yang selesai dinilai                  |
+| Biaya           | Token dan percobaan tiap model tercatat; evaluasi satu model tanpa fallback; runtime maksimal tiga percobaan                         | Pengukuran baseline/kandidat dan biaya fallback dengan tarif yang terverifikasi belum dilakukan |
 
 ## 1. Persiapan dan migrasi
 
@@ -83,7 +85,7 @@ Isi tarif positif dengan tarif produksi saat pengukuran, bukan angka contoh 0. S
 
 ```json
 {
-    "model": "gemini-3.8-flash",
+  "model": "gemini-3.8-flash",
   "level": "SD",
   "subject": "Matematika",
   "questionType": "short_answer",

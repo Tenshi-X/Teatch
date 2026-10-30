@@ -4,13 +4,23 @@ import { useState } from 'react';
 import { updateAdminUser } from '@/app/actions/admin';
 import { Loader2, X } from 'lucide-react';
 import type { Profile } from '@/types';
-import { SUBSCRIPTION_LIMITS } from '@/lib/subscription';
+import {
+  getTierLimits,
+  SUBSCRIPTION_LIMITS,
+  formatPlanPrice,
+} from '@/lib/subscription';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 
 interface EditUserModalProps {
   user: Profile;
   onClose: () => void;
+}
+
+function localDateTime(date: Date) {
+  return new Date(date.getTime() - date.getTimezoneOffset() * 60000)
+    .toISOString()
+    .slice(0, 16);
 }
 
 export function EditUserModal({ user, onClose }: EditUserModalProps) {
@@ -21,9 +31,10 @@ export function EditUserModal({ user, onClose }: EditUserModalProps) {
   const [role, setRole] = useState<'admin' | 'user'>(user.role || 'user');
   const [tier, setTier] = useState(user.subscription_tier || 'free_trial');
   const [status, setStatus] = useState(user.subscription_status || 'active');
+  const selectedLimit = getTierLimits(tier).maxQuestions;
   const [endDate, setEndDate] = useState(
     user.subscription_period_end
-      ? new Date(user.subscription_period_end).toISOString().split('T')[0]
+      ? localDateTime(new Date(user.subscription_period_end))
       : ''
   );
 
@@ -97,12 +108,18 @@ export function EditUserModal({ user, onClose }: EditUserModalProps) {
             </label>
             <select
               value={tier}
-              onChange={(e) => setTier(e.target.value)}
+              onChange={(e) => {
+                setTier(e.target.value);
+                setResetQuota(true);
+                setStatus('active');
+                setEndDate(localDateTime(new Date(Date.now() + 30 * 86400000)));
+              }}
               className="input-base text-sm"
             >
               {Object.entries(SUBSCRIPTION_LIMITS).map(([value, plan]) => (
                 <option key={value} value={value}>
-                  {plan.label} — {plan.maxQuestions} soal
+                  {plan.label} - {plan.maxQuestions.toLocaleString('id-ID')}{' '}
+                  soal - {formatPlanPrice(plan.priceIDR)}/30 hari
                 </option>
               ))}
             </select>
@@ -125,14 +142,25 @@ export function EditUserModal({ user, onClose }: EditUserModalProps) {
 
           <div>
             <label className="block text-sm font-medium text-[var(--text-soft)] mb-1.5">
-              Tanggal Berakhir (Masa Aktif)
+              Tanggal dan jam berakhir (waktu perangkat)
             </label>
             <input
-              type="date"
+              type="datetime-local"
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
               className="input-base text-sm"
             />
+            <button
+              type="button"
+              className="mt-2 text-sm underline"
+              onClick={() => {
+                setEndDate(localDateTime(new Date(Date.now() + 30 * 86400000)));
+                setStatus('active');
+                setResetQuota(true);
+              }}
+            >
+              Aktifkan 30 hari dari hari ini dan isi kuota paket
+            </button>
           </div>
 
           <label className="flex items-center gap-2 text-sm text-[var(--text-soft)]">
@@ -141,8 +169,21 @@ export function EditUserModal({ user, onClose }: EditUserModalProps) {
               checked={resetQuota}
               onChange={(e) => setResetQuota(e.target.checked)}
             />
-            Isi ulang kuota sesuai paket (opsional)
+            Tetapkan sisa kuota menjadi {selectedLimit} soal
           </label>
+          <p className="text-xs text-[var(--text-muted)]">
+            Sisa saat ini: {user.worksheet_quota} soal. Jika dicentang, saldo
+            diganti menjadi {selectedLimit} soal, bukan ditambahkan. Membuat 10
+            soal mengurangi 10 kuota; mengerjakan ulang dan mencetak tidak
+            mengurangi kuota.
+          </p>
+          {user.worksheet_quota > selectedLimit && (
+            <p className="text-sm text-amber-700 dark:text-amber-300">
+              Saldo saat ini melebihi alokasi paket yang dipilih. Periksa apakah
+              ini saldo lama atau tambahan yang disengaja. Centang penetapan
+              kuota untuk menyesuaikannya dengan paket.
+            </p>
+          )}
           <div className="pt-4 flex items-center justify-end gap-3">
             <button
               type="button"

@@ -66,6 +66,7 @@ type ProfileRow = {
   subscription_period_start: string | null;
   subscription_period_end: string | null;
   worksheet_quota: number;
+  quota_plan_version: number;
   created_at: string;
   updated_at: string;
 };

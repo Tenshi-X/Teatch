@@ -80,6 +80,7 @@ export default async function DashboardPage() {
       <DashboardView
         byChild={byChild}
         summaryUnavailable={summary.status === 'unavailable'}
+        insightsLocked={summary.status === 'locked'}
       />
       <div className="mx-auto max-w-6xl">
         <FeedbackForm />
