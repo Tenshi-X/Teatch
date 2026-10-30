@@ -10,7 +10,7 @@ export default async function StatisticsPage() {
   const children = await getChildren();
   const childIds = (children || []).map((c) => c.id);
   if (!childIds.length) return <p>Tambahkan profil anak terlebih dahulu.</p>;
-  const topics = await getLearningSummary();
+  const summary = await getLearningSummary();
   const { data: recent, error } = await supabase
     .from('attempts')
     .select('*, worksheets(title, subjects(name, icon))')
@@ -21,7 +21,10 @@ export default async function StatisticsPage() {
   return (
     <div className="max-w-5xl mx-auto space-y-6">
       <h1 className="text-2xl font-bold">Statistik Perkembangan</h1>
-      <LearningSummary topics={topics} />
+      <LearningSummary
+        topics={summary.status === 'ready' ? summary.data : []}
+        unavailable={summary.status === 'unavailable'}
+      />
       <StatisticsView attempts={recent || []} />
     </div>
   );

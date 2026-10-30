@@ -21,7 +21,7 @@ Tanggal: 30 Oktober 2026. Konteks: belum ada pengguna pelanggan; pengujian priba
 Karena belum ada pelanggan, proyek Supabase yang ada dapat dipakai untuk pengembangan dengan data contoh. Tidak perlu menunggu perekrutan pengguna atau membuat proyek staging terpisah untuk mencoba kode.
 
 1. Periksa migrasi 001–005 pada proyek. Bila belum diterapkan, jalankan berurutan; jangan mengulangi migrasi yang sudah berhasil.
-2. Terapkan [006_runtime_readiness.sql](../supabase/migrations/006_runtime_readiness.sql) sekali setelah 005. Migrasi menambah agregasi, feedback, event, dan fungsi maintenance tanpa menghapus data historis.
+2. Terapkan [006_runtime_readiness.sql](../supabase/migrations/006_runtime_readiness.sql) setelah 005. Versi perbaikan migrasi ini aman dijalankan ulang, menetapkan schema `public`, dan mempertahankan baris yang sudah ada. Jalankan **seluruh file**, termasuk `COMMIT;` dan `SELECT` terakhir. Hasil akhirnya harus berupa satu baris dengan `dashboard_ready`, `learning_ready`, `feedback_ready`, `events_ready`, `maintenance_ready`, dan `admin_ready` semuanya `true`.
 3. Sesuaikan environment lokal/hosting dari `.env.example`. Untuk mencoba dengan akun sendiri gunakan:
 
    ```dotenv
@@ -39,6 +39,18 @@ Karena belum ada pelanggan, proyek Supabase yang ada dapat dipakai untuk pengemb
 
 Dashboard/laporan/admin versi baru membutuhkan migrasi 006. Deploy database dahulu, kemudian versi aplikasi ini. Tidak ada push atau deployment hosting yang dilakukan oleh sesi implementasi.
 
+### Jika dashboard gagal setelah login dan pengecekan migrasi masih NULL
+
+`to_regprocedure('public.dashboard_overview()')` yang menghasilkan `NULL` berarti fungsi tersebut tidak ditemukan di schema `public` pada database yang sedang diperiksa. Ini pemeriksaan katalog PostgreSQL, bukan cache API. Pesan lama aplikasi "Periksa migrasi database 006" terlalu umum: pesan itu sebelumnya dipakai untuk setiap kegagalan RPC laporan.
+
+1. Gunakan SQL Editor pada proyek yang sama dengan `NEXT_PUBLIC_SUPABASE_URL` di environment Production Vercel. Pastikan cabang database yang dipilih juga sesuai bila memakai branching.
+2. Buka query baru. Salin seluruh versi terbaru file 006 dari repository, dari `BEGIN;` sampai `SELECT` verifikasi terakhir. Hapus seleksi sebagian teks sebelum menekan Run agar semua perintah dijalankan. Script memeriksa prasyarat 005, memperbarui/membuat fungsi di `public`, memasang ulang izin/kebijakan terkait, lalu commit. Tidak ada penghapusan tabel/data atau penjadwalan ulang cron.
+3. Hasil akhir harus enam kolom `true`, bukan hanya "Success. No rows returned". Bila gagal, simpan pesan error SQL lengkap; jangan lanjut ke deployment. Bila pengecekan terpisah masih `NULL`, cocokkan proyek/cabang dan pastikan script telah dijalankan sampai `COMMIT;`.
+4. Script juga mengirim `NOTIFY pgrst, 'reload schema';` ketika commit. Reload cache membantu API mengenali fungsi yang sudah tersimpan; tidak dapat menciptakan fungsi yang masih hilang dari katalog.
+5. Commit dan push perbaikan aplikasi, tunggu deployment Ready, lalu muat ulang dashboard. Kegagalan RPC kini menghasilkan status laporan belum tersedia dan tautan latihan, bukan menjatuhkan halaman setelah login. Log Vercel dengan awalan `[reports]` mencatat nama RPC, kode, pesan, serta hint database; diagnostik ini tidak dikirim sebagai props ke browser.
+
+Pemeriksaan koneksi baca saja dari sesi perbaikan masih gagal DNS `ENOTFOUND`, sehingga penerapan database produksi dan penyebab pasti migrasi yang belum tersimpan belum dapat dibuktikan dari lingkungan ini.
+
 ## Pemeriksaan dan build
 
 ```sh
@@ -49,7 +61,7 @@ npm run build
 npm audit --omit=dev --audit-level=high
 ```
 
-Hasil terakhir yang sudah diperiksa: 67 tes lulus, lint lulus, typecheck lulus. Build produksi penuh melalui Webpack berhasil pada direktori `.next-verify`. Build normal sempat mendapat `EPERM` ketika worker Windows membuat folder output; mode verifikasi menyiapkan folder di proses utama dan memakai satu worker:
+Hasil terakhir yang sudah diperiksa: 71 tes lulus, lint lulus, typecheck lulus. Tes tambahan membuktikan pemulihan instalasi 006 parsial, pengulangan migrasi dari search path berbeda, pelestarian data/kuota/isolasi akun, serta status laporan gagal yang dibedakan dari laporan kosong. Build produksi penuh melalui Webpack berhasil pada direktori `.next-verify`. Build normal sempat mendapat `EPERM` ketika worker Windows membuat folder output; mode verifikasi menyiapkan folder di proses utama dan memakai satu worker:
 
 ```sh
 npm run build:verify

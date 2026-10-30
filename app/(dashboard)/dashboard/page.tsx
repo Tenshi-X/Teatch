@@ -3,6 +3,8 @@ import { DashboardView, type DashboardChildData } from './dashboard-view';
 import { getLearningSummary } from '@/lib/server/learning-summary';
 import { FeedbackForm } from '@/components/feedback/feedback-form';
 import { z } from 'zod';
+import Link from 'next/link';
+import { parseReportResult } from '@/lib/learning/report-result';
 
 const overviewSchema = z.record(
   z.string(),
@@ -30,15 +32,35 @@ const overviewSchema = z.record(
 );
 export default async function DashboardPage() {
   const { supabase } = await getParent();
-  const [overview, topics] = await Promise.all([
+  const [overview, summary] = await Promise.all([
     supabase.rpc('dashboard_overview', {}),
     getLearningSummary(),
   ]);
-  if (overview.error)
-    throw new Error(
-      'Dashboard belum dapat dimuat. Periksa migrasi database 006.'
+  const result = parseReportResult(
+    'dashboard_overview',
+    overview,
+    overviewSchema
+  );
+  if (result.status === 'unavailable')
+    return (
+      <section className="mx-auto max-w-6xl space-y-5">
+        <h1 className="text-2xl font-bold">Ruang belajar keluarga</h1>
+        <p role="status">
+          Ringkasan dashboard belum dapat dimuat. Coba muat ulang halaman. Anda
+          tetap dapat membuka atau membuat latihan.
+        </p>
+        <div className="flex flex-wrap gap-5">
+          <Link href="/worksheets/new" className="underline">
+            Buat latihan
+          </Link>
+          <Link href="/history" className="underline">
+            Riwayat latihan
+          </Link>
+        </div>
+      </section>
     );
-  const rows = overviewSchema.parse(overview.data);
+  const rows = result.data;
+  const topics = summary.status === 'ready' ? summary.data : [];
   const byChild: Record<string, DashboardChildData> = Object.fromEntries(
     Object.entries(rows).map(([id, value]) => [
       id,
@@ -55,7 +77,10 @@ export default async function DashboardPage() {
   );
   return (
     <div className="space-y-8">
-      <DashboardView byChild={byChild} />
+      <DashboardView
+        byChild={byChild}
+        summaryUnavailable={summary.status === 'unavailable'}
+      />
       <div className="mx-auto max-w-6xl">
         <FeedbackForm />
       </div>

@@ -618,6 +618,116 @@ test('database summaries match local scoring rules, exclude legacy/pending/old e
   });
 });
 
+test('migration 006 repairs a partial installation, commits in public and preserves data and permissions when rerun', async () => {
+  const a = await account(),
+    b = await account();
+  const feedback = await scalar(
+    'SELECT submit_product_feedback($1,NULL,$2,$3)',
+    [a.parent, 'idea', 'Keep this feedback']
+  );
+  const eventKey = randomUUID();
+  await db.query('SELECT record_product_event($1,$2,$3,NULL)', [
+    a.parent,
+    eventKey,
+    'visit',
+  ]);
+  const quota = await balance(a.parent);
+  const migration = await readFile(
+    'supabase/migrations/006_runtime_readiness.sql',
+    'utf8'
+  );
+
+  // Reproduce the reported state: other objects exist but the overview is absent.
+  await db.exec(
+    'DROP FUNCTION public.dashboard_overview(); CREATE SCHEMA migration_editor; SET search_path=migration_editor,public'
+  );
+  try {
+    for (let run = 0; run < 2; run++) {
+      const results = await db.exec(migration);
+      assert.deepEqual(results.at(-1)?.rows, [
+        {
+          dashboard_ready: true,
+          learning_ready: true,
+          feedback_ready: true,
+          events_ready: true,
+          maintenance_ready: true,
+          admin_ready: true,
+        },
+      ]);
+      assert.equal(await scalar('SELECT current_schema()'), 'migration_editor');
+    }
+    assert.equal(
+      await scalar(
+        "SELECT count(*)::int FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace WHERE n.nspname='migration_editor'"
+      ),
+      0
+    );
+  } finally {
+    await db.exec('RESET search_path');
+  }
+
+  assert.equal(await balance(a.parent), quota);
+  assert.equal(
+    await scalar('SELECT id FROM public.product_feedback WHERE id=$1', [
+      feedback,
+    ]),
+    feedback
+  );
+  assert.equal(
+    await scalar(
+      'SELECT count(*)::int FROM public.product_events WHERE event_key=$1',
+      [eventKey]
+    ),
+    1
+  );
+  await asUser(a.uid, async () => {
+    const overview = await scalar<Record<string, unknown>>(
+      'SELECT public.dashboard_overview()'
+    );
+    assert.deepEqual(Object.keys(overview), [a.child]);
+    assert.deepEqual(
+      await scalar(
+        'SELECT public.learning_summary(p_since => $1::timestamptz)',
+        [new Date().toISOString()]
+      ),
+      []
+    );
+    assert.equal(
+      await scalar(
+        'SELECT count(*)::int FROM public.product_feedback WHERE id=$1',
+        [feedback]
+      ),
+      1
+    );
+    await assert.rejects(
+      db.query('SELECT public.maintain_runtime()'),
+      /permission denied/
+    );
+  });
+  await asUser(b.uid, async () => {
+    assert.equal(
+      await scalar(
+        'SELECT count(*)::int FROM public.product_feedback WHERE id=$1',
+        [feedback]
+      ),
+      0
+    );
+  });
+  await db.exec('SET ROLE anon');
+  try {
+    await assert.rejects(
+      db.query('SELECT public.dashboard_overview()'),
+      /permission denied/
+    );
+    await assert.rejects(
+      db.query('SELECT public.learning_summary()'),
+      /permission denied/
+    );
+  } finally {
+    await db.exec('RESET ROLE');
+  }
+});
+
 test('feedback/events enforce ownership, service-only writes, duplicate keys, rate limits and maintenance retention', async () => {
   const a = await account(),
     b = await account(),

@@ -20,8 +20,10 @@ export interface DashboardChildData {
 
 export function DashboardView({
   byChild,
+  summaryUnavailable = false,
 }: {
   byChild: Record<string, DashboardChildData>;
+  summaryUnavailable?: boolean;
 }) {
   const { activeChild, children } = useChildStore();
   const data = byChild[activeChild?.id || ''];
@@ -214,7 +216,12 @@ export function DashboardView({
           <p className="mt-2 text-sm text-[var(--text-muted)]">
             Berdasarkan jawaban yang sudah dinilai dalam 90 hari terakhir.
           </p>
-          {topics.length ? (
+          {summaryUnavailable ? (
+            <p role="status" className="mt-5 text-sm text-[var(--text-muted)]">
+              Ringkasan perkembangan belum dapat dimuat. Coba muat ulang
+              halaman.
+            </p>
+          ) : topics.length ? (
             <ul className="mt-4 divide-y divide-[var(--card-border)]">
               {topics.map((topic) => (
                 <li

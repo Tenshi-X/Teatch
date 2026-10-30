@@ -1,7 +1,17 @@
+-- Supabase SQL Editor: run this ENTIRE file, from BEGIN through the final SELECT.
+-- Safe to rerun after a partial/manual installation; existing rows are preserved.
 BEGIN;
+SET LOCAL search_path = public, extensions, pg_temp;
+
+DO $$ BEGIN
+  IF to_regclass('public.generation_requests') IS NULL
+    OR to_regprocedure('public.reconcile_generation_reservations()') IS NULL THEN
+    RAISE EXCEPTION 'Migration 005 must be installed in public before migration 006';
+  END IF;
+END $$;
 
 -- Invoker functions keep both explicit ownership checks and the caller's RLS.
-CREATE FUNCTION learning_summary(p_since timestamptz DEFAULT now()-interval '90 days') RETURNS jsonb
+CREATE OR REPLACE FUNCTION public.learning_summary(p_since timestamptz DEFAULT now()-interval '90 days') RETURNS jsonb
 LANGUAGE sql STABLE SECURITY INVOKER SET search_path=public,pg_temp AS $$
 WITH raw AS (
   SELECT x.id, x.is_correct, a.id attempt_id, a.child_id, coalesce(a.score,0) score, a.created_at,
@@ -33,7 +43,7 @@ SELECT coalesce(jsonb_agg(jsonb_build_object(
 FROM totals t JOIN trends r USING(child_id,subject_id,group_key,difficulty);
 $$;
 
-CREATE FUNCTION dashboard_overview() RETURNS jsonb LANGUAGE sql STABLE SECURITY INVOKER SET search_path=public,pg_temp AS $$
+CREATE OR REPLACE FUNCTION public.dashboard_overview() RETURNS jsonb LANGUAGE sql STABLE SECURITY INVOKER SET search_path=public,pg_temp AS $$
 SELECT coalesce(jsonb_object_agg(c.id,jsonb_build_object(
   'stats',jsonb_build_object('totalWorksheets',(SELECT count(*) FROM worksheets w WHERE w.child_id=c.id),
     'totalAttempts',stats.total,'averageScore',stats.average,'totalQuestions',stats.questions),
@@ -60,14 +70,14 @@ $$;
 REVOKE ALL ON FUNCTION learning_summary(timestamptz),dashboard_overview() FROM PUBLIC,anon;
 GRANT EXECUTE ON FUNCTION learning_summary(timestamptz),dashboard_overview() TO authenticated;
 
-CREATE TABLE product_feedback (
+CREATE TABLE IF NOT EXISTS public.product_feedback (
   id uuid PRIMARY KEY DEFAULT uuid_generate_v4(), parent_id uuid NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
   worksheet_id uuid REFERENCES worksheets(id) ON DELETE SET NULL,
   category text NOT NULL CHECK(category IN ('helpful','problem','idea')),
   comment text NOT NULL DEFAULT '' CHECK(length(comment)<=1000),
   status text NOT NULL DEFAULT 'open' CHECK(status IN ('open','resolved')),created_at timestamptz NOT NULL DEFAULT now()
 );
-CREATE TABLE product_events (
+CREATE TABLE IF NOT EXISTS public.product_events (
   id uuid PRIMARY KEY DEFAULT uuid_generate_v4(), parent_id uuid NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
   event_key uuid NOT NULL, kind text NOT NULL CHECK(kind IN ('visit','attempt_started','plan_clicked')),
   worksheet_id uuid REFERENCES worksheets(id) ON DELETE SET NULL,created_at timestamptz NOT NULL DEFAULT now(),UNIQUE(parent_id,event_key)
@@ -76,14 +86,16 @@ ALTER TABLE product_feedback ENABLE ROW LEVEL SECURITY;
 ALTER TABLE product_events ENABLE ROW LEVEL SECURITY;
 REVOKE ALL ON product_feedback,product_events FROM anon,authenticated;
 GRANT SELECT ON product_feedback,product_events TO authenticated;
-CREATE POLICY feedback_own ON product_feedback FOR SELECT TO authenticated USING(parent_id IN (SELECT id FROM profiles WHERE auth_user_id=auth.uid()) OR is_admin());
-CREATE POLICY events_own ON product_events FOR SELECT TO authenticated USING(parent_id IN (SELECT id FROM profiles WHERE auth_user_id=auth.uid()) OR is_admin());
+DROP POLICY IF EXISTS feedback_own ON public.product_feedback;
+CREATE POLICY feedback_own ON public.product_feedback FOR SELECT TO authenticated USING(parent_id IN (SELECT id FROM profiles WHERE auth_user_id=auth.uid()) OR is_admin());
+DROP POLICY IF EXISTS events_own ON public.product_events;
+CREATE POLICY events_own ON public.product_events FOR SELECT TO authenticated USING(parent_id IN (SELECT id FROM profiles WHERE auth_user_id=auth.uid()) OR is_admin());
 GRANT ALL ON product_feedback,product_events TO service_role;
-CREATE INDEX product_feedback_parent_time ON product_feedback(parent_id,created_at DESC);
-CREATE INDEX product_events_parent_time ON product_events(parent_id,created_at DESC);
-CREATE INDEX product_events_created ON product_events(created_at);
+CREATE INDEX IF NOT EXISTS product_feedback_parent_time ON public.product_feedback(parent_id,created_at DESC);
+CREATE INDEX IF NOT EXISTS product_events_parent_time ON public.product_events(parent_id,created_at DESC);
+CREATE INDEX IF NOT EXISTS product_events_created ON public.product_events(created_at);
 
-CREATE FUNCTION submit_product_feedback(p_parent uuid,p_worksheet uuid,p_category text,p_comment text) RETURNS uuid
+CREATE OR REPLACE FUNCTION public.submit_product_feedback(p_parent uuid,p_worksheet uuid,p_category text,p_comment text) RETURNS uuid
 LANGUAGE plpgsql SECURITY DEFINER SET search_path=public,pg_temp AS $$
 DECLARE result uuid;
 BEGIN
@@ -94,7 +106,7 @@ BEGIN
   INSERT INTO product_feedback(parent_id,worksheet_id,category,comment) VALUES(p_parent,p_worksheet,p_category,trim(p_comment)) RETURNING id INTO result;
   RETURN result;
 END; $$;
-CREATE FUNCTION record_product_event(p_parent uuid,p_key uuid,p_kind text,p_worksheet uuid) RETURNS void
+CREATE OR REPLACE FUNCTION public.record_product_event(p_parent uuid,p_key uuid,p_kind text,p_worksheet uuid) RETURNS void
 LANGUAGE plpgsql SECURITY DEFINER SET search_path=public,pg_temp AS $$
 BEGIN
   PERFORM 1 FROM profiles WHERE id=p_parent FOR UPDATE;
@@ -104,7 +116,7 @@ BEGIN
   IF (SELECT count(*) FROM product_events WHERE parent_id=p_parent AND created_at>now()-interval '1 hour')>=60 THEN RAISE EXCEPTION 'RATE_LIMIT'; END IF;
   INSERT INTO product_events(parent_id,event_key,kind,worksheet_id) VALUES(p_parent,p_key,p_kind,p_worksheet);
 END; $$;
-CREATE FUNCTION maintain_runtime() RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path=public,pg_temp AS $$
+CREATE OR REPLACE FUNCTION public.maintain_runtime() RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path=public,pg_temp AS $$
 DECLARE refunded integer; removed integer;
 BEGIN
   refunded:=reconcile_generation_reservations();
@@ -115,7 +127,7 @@ END; $$;
 REVOKE ALL ON FUNCTION submit_product_feedback(uuid,uuid,text,text),record_product_event(uuid,uuid,text,uuid),maintain_runtime() FROM PUBLIC,anon,authenticated;
 GRANT EXECUTE ON FUNCTION submit_product_feedback(uuid,uuid,text,text),record_product_event(uuid,uuid,text,uuid),maintain_runtime() TO service_role;
 
-CREATE FUNCTION admin_runtime_summary(p_offset integer DEFAULT 0,p_search text DEFAULT '') RETURNS jsonb
+CREATE OR REPLACE FUNCTION public.admin_runtime_summary(p_offset integer DEFAULT 0,p_search text DEFAULT '') RETURNS jsonb
 LANGUAGE sql STABLE SECURITY DEFINER SET search_path=public,pg_temp AS $$
 WITH usage AS (
  SELECT parent_id,sum(question_count) FILTER(WHERE status='succeeded') used FROM generation_requests
@@ -139,4 +151,15 @@ SELECT jsonb_build_object('profiles',coalesce((SELECT jsonb_agg(to_jsonb(page)) 
 $$;
 REVOKE ALL ON FUNCTION admin_runtime_summary(integer,text) FROM PUBLIC,anon,authenticated;
 GRANT EXECUTE ON FUNCTION admin_runtime_summary(integer,text) TO service_role;
+-- Notify only when this transaction commits; this cannot repair missing functions.
+NOTIFY pgrst, 'reload schema';
 COMMIT;
+
+-- The SQL editor must return this row, not only "Success. No rows returned".
+SELECT
+  to_regprocedure('public.dashboard_overview()') IS NOT NULL AS dashboard_ready,
+  to_regprocedure('public.learning_summary(timestamp with time zone)') IS NOT NULL AS learning_ready,
+  to_regclass('public.product_feedback') IS NOT NULL AS feedback_ready,
+  to_regclass('public.product_events') IS NOT NULL AS events_ready,
+  to_regprocedure('public.maintain_runtime()') IS NOT NULL AS maintenance_ready,
+  to_regprocedure('public.admin_runtime_summary(integer,text)') IS NOT NULL AS admin_ready;

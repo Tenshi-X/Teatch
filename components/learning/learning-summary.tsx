@@ -12,7 +12,13 @@ const labels = {
   practice: 'Perlu latihan',
   developing: 'Sedang berkembang',
 };
-export function LearningSummary({ topics }: { topics: LearningTopic[] }) {
+export function LearningSummary({
+  topics,
+  unavailable = false,
+}: {
+  topics: LearningTopic[];
+  unavailable?: boolean;
+}) {
   const { activeChild } = useChildStore();
   const ref = useRef<HTMLDivElement>(null);
   const print = useReactToPrint({
@@ -24,7 +30,12 @@ export function LearningSummary({ topics }: { topics: LearningTopic[] }) {
     <Card padding="lg">
       <div className="flex flex-wrap justify-between gap-3 mb-4">
         <h2 className="text-lg font-bold">Ringkasan belajar</h2>
-        <Button size="sm" variant="outline" onClick={() => print()}>
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={() => print()}
+          disabled={unavailable}
+        >
           Cetak laporan
         </Button>
       </div>
@@ -36,7 +47,11 @@ export function LearningSummary({ topics }: { topics: LearningTopic[] }) {
           90 hari terakhir. Ringkasan dihitung dari jawaban yang sudah dinilai
           dengan sistem baru. Data tiap topik dipisahkan menurut kesulitan.
         </p>
-        {insights.length === 0 ? (
+        {unavailable ? (
+          <p role="status">
+            Ringkasan perkembangan belum dapat dimuat. Coba muat ulang halaman.
+          </p>
+        ) : insights.length === 0 ? (
           <p>
             Belum ada jawaban yang selesai dinilai. Kerjakan latihan atau{' '}
             <Link href="/review" className="underline">
