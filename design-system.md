@@ -63,7 +63,7 @@ Gunakan bahasa Indonesia konkret: Buat latihan, Buka latihan, Tinjau jawaban, La
 
 Dialog menggunakan elemen native `dialog` agar fokus terkunci di dalamnya, Escape menutup, dan fokus kembali ke pemicu. Navigasi mobile mengunci fokus dan menonaktifkan isi di belakangnya. Menu akun dan pemilih anak dapat ditutup dengan Escape. Tautan lewati navigasi tersedia bagi pengguna keyboard.
 
-Halaman depan menampilkan contoh soal interaktif yang jelas ditandai sebagai contoh. Angka nilai, poin, dan testimoni tanpa sumber tidak ditampilkan. Harga mengikuti konfigurasi paket aplikasi.
+Halaman depan mempertahankan tampilan pengenalan sebelumnya sesuai pilihan pengguna, termasuk susunan bagian harga. Pembaruan desain berfokus pada dashboard orang tua, formulir, dan layar latihan. Harga mengikuti konfigurasi paket aplikasi.
 
 Transisi singkat 150–200ms untuk perubahan keadaan; jangan menambahkan gerak pada seluruh kartu. Hormati `prefers-reduced-motion`. Semua tindakan dapat diakses melalui keyboard; teks dan tata letak harus terbaca di mode terang, gelap, dan layar kecil.
 
