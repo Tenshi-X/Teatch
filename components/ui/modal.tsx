@@ -1,7 +1,7 @@
 'use client';
 
 import { cn } from '@/lib/utils';
-import { useEffect, useRef } from 'react';
+import { useEffect, useId, useRef } from 'react';
 import { X } from 'lucide-react';
 
 export interface ModalProps {
@@ -13,26 +13,28 @@ export interface ModalProps {
   className?: string;
 }
 
-export function Modal({ isOpen, onClose, title, children, size = 'md', className }: ModalProps) {
-  const overlayRef = useRef<HTMLDivElement>(null);
+export function Modal({
+  isOpen,
+  onClose,
+  title,
+  children,
+  size = 'md',
+  className,
+}: ModalProps) {
+  const dialogRef = useRef<HTMLDialogElement>(null);
+  const titleId = useId();
 
   useEffect(() => {
-    const handleEsc = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-
-    if (isOpen) {
-      document.addEventListener('keydown', handleEsc);
-      document.body.style.overflow = 'hidden';
-    }
-
+    const dialog = dialogRef.current;
+    if (!dialog || !isOpen) return;
+    const previousOverflow = document.body.style.overflow;
+    dialog.showModal();
+    document.body.style.overflow = 'hidden';
     return () => {
-      document.removeEventListener('keydown', handleEsc);
-      document.body.style.overflow = '';
+      dialog.close();
+      document.body.style.overflow = previousOverflow;
     };
-  }, [isOpen, onClose]);
-
-  if (!isOpen) return null;
+  }, [isOpen]);
 
   const sizes = {
     sm: 'max-w-md',
@@ -41,38 +43,49 @@ export function Modal({ isOpen, onClose, title, children, size = 'md', className
   };
 
   return (
-    <div
-      ref={overlayRef}
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      onClick={(e) => e.target === overlayRef.current && onClose()}
+    <dialog
+      ref={dialogRef}
+      aria-labelledby={title ? titleId : undefined}
+      aria-label={title ? undefined : 'Dialog Teatch'}
+      className={cn('teatch-dialog', sizes[size], className)}
+      onCancel={(event) => {
+        event.preventDefault();
+        onClose();
+      }}
+      onClick={(event) => {
+        if (event.target !== dialogRef.current) return;
+        const bounds = event.currentTarget.getBoundingClientRect();
+        if (
+          event.clientX < bounds.left ||
+          event.clientX > bounds.right ||
+          event.clientY < bounds.top ||
+          event.clientY > bounds.bottom
+        )
+          onClose();
+      }}
     >
-      {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm animate-fade-in" />
-
-      {/* Modal content */}
-      <div
-        className={cn(
-          'relative w-full bg-[var(--card-bg)] rounded-2xl shadow-xl animate-scale-in',
-          sizes[size],
-          className
-        )}
-      >
-        {/* Header */}
-        {title && (
-          <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--card-border)]">
-            <h2 className="text-lg font-semibold">{title}</h2>
+      {isOpen && (
+        <>
+          <header className="flex items-center justify-between gap-3 border-b border-[var(--card-border)] px-5 py-3 sm:px-6">
+            {title ? (
+              <h2 id={titleId} className="text-xl font-semibold">
+                {title}
+              </h2>
+            ) : (
+              <span />
+            )}
             <button
+              type="button"
               onClick={onClose}
-              className="p-1.5 rounded-lg hover:bg-surface-100 dark:hover:bg-surface-800 transition-colors cursor-pointer"
+              aria-label="Tutup dialog"
+              className="icon-button"
             >
-              <X size={20} />
+              <X size={20} aria-hidden="true" />
             </button>
-          </div>
-        )}
-
-        {/* Body */}
-        <div className="px-6 py-4">{children}</div>
-      </div>
-    </div>
+          </header>
+          <div className="px-5 py-5 sm:px-6">{children}</div>
+        </>
+      )}
+    </dialog>
   );
 }

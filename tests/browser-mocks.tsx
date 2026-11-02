@@ -15,6 +15,9 @@ export const subjects = [
   },
 ];
 export const objective = getObjectives('Matematika', 'SD', 'Kelas 2')[0];
+export function enabledQuestionTypes() {
+  return ['multiple_choice', 'short_answer', 'true_false'] as const;
+}
 export function createClient() {
   return {
     from: () => ({

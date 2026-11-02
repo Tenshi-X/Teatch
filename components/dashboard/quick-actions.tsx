@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Users, BarChart3, History, ArrowUpRight } from 'lucide-react';
+import { Users, BarChart3, History } from 'lucide-react';
 
 const actions = [
   { href: '/children', label: 'Profil anak', icon: Users },
@@ -21,7 +21,6 @@ export function QuickActions() {
         >
           <action.icon size={17} aria-hidden="true" />
           {action.label}
-          <ArrowUpRight size={14} aria-hidden="true" />
         </Link>
       ))}
     </nav>

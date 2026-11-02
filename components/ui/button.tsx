@@ -7,6 +7,31 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   isLoading?: boolean;
 }
 
+export function buttonStyles({
+  variant = 'primary',
+  size = 'md',
+  className,
+}: Pick<ButtonProps, 'variant' | 'size' | 'className'> = {}) {
+  const variants = {
+    primary: 'action-primary border border-transparent',
+    secondary:
+      'bg-[var(--card-bg)] border border-[var(--input-border)] text-[var(--fg)] hover:bg-[var(--surface-subtle)]',
+    outline:
+      'border border-[var(--input-border)] text-[var(--fg)] hover:bg-[var(--surface-subtle)]',
+    ghost:
+      'text-[var(--text-soft)] hover:bg-[var(--surface-subtle)] bg-transparent border border-transparent',
+    danger:
+      'bg-danger-600 text-white hover:bg-danger-700 border border-transparent',
+    ai: 'action-primary border border-transparent',
+  };
+  const sizes = {
+    sm: 'min-h-11 px-4 py-2 text-sm',
+    md: 'min-h-12 px-5 py-3 text-base',
+    lg: 'min-h-12 px-6 py-3.5 text-lg',
+  };
+  return cn('button-base', variants[variant], sizes[size], className);
+}
+
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   (
     {
@@ -20,38 +45,17 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     },
     ref
   ) => {
-    const baseStyles =
-      'inline-flex items-center justify-center gap-2 font-medium rounded-[var(--radius-button)] transition-colors duration-150 ease-out focus-visible:ring-2 focus-visible:ring-[var(--accent-color)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg)] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer';
-
-    const variants = {
-      primary: 'action-primary border border-transparent',
-      secondary:
-        'bg-[var(--card-bg)] border border-[var(--input-border)] text-[var(--fg)] hover:bg-[var(--surface-subtle)]',
-      outline:
-        'border border-[var(--input-border)] text-[var(--fg)] hover:bg-[var(--surface-subtle)]',
-      ghost:
-        'text-[var(--text-soft)] hover:bg-[var(--surface-subtle)] bg-transparent border border-transparent',
-      danger:
-        'bg-danger-600 text-white hover:bg-danger-700 border border-transparent',
-      ai: 'action-primary border border-transparent',
-    };
-
-    const sizes = {
-      sm: 'px-4 py-2 text-sm',
-      md: 'px-6 py-3 text-sm font-semibold',
-      lg: 'px-8 py-3.5 text-base font-semibold',
-    };
-
     return (
       <button
         ref={ref}
-        className={cn(baseStyles, variants[variant], sizes[size], className)}
+        className={buttonStyles({ variant, size, className })}
         disabled={disabled || isLoading}
         aria-busy={isLoading || undefined}
         {...props}
       >
         {isLoading && (
           <svg
+            aria-hidden="true"
             className="animate-spin h-4 w-4"
             xmlns="http://www.w3.org/2000/svg"
             fill="none"

@@ -13,9 +13,7 @@ export const WorksheetPrintable = forwardRef<
     style={{ width: '100%', maxWidth: '190mm', margin: '0 auto' }}
   >
     <header className="border-b border-gray-300 pb-5">
-      <p className="text-sm tracking-widest uppercase">
-        Teatch · Lembar belajar
-      </p>
+      <p className="text-sm font-semibold">Teatch · Lembar belajar</p>
       <h1 className="mt-2 text-2xl font-semibold">{worksheet.title}</h1>
       <p className="mt-2 text-sm">
         {questions.length} soal · {worksheet.difficulty}
@@ -29,7 +27,7 @@ export const WorksheetPrintable = forwardRef<
         <div className="my-8 break-inside-avoid" key={row.id}>
           <b>{i + 1}.</b>
           {q ? (
-            <QuestionContent question={q} showAnswer={showAnswers} print />
+            <QuestionContent question={q} showAnswer={showAnswers} />
           ) : (
             <div>
               <MathText content={row.question} />

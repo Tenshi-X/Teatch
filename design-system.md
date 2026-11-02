@@ -2,6 +2,17 @@
 
 Teatch membantu orang tua menyiapkan latihan, mendampingi anak, meninjau jawaban, dan memahami perkembangan belajar. Identitasnya mengambil karakter buku belajar modern: jelas, ramah, dan terstruktur. Prinsip interaksi mengacu pada Adobe Spectrum; komponen menggunakan implementasi lokal Teatch.
 
+Dial: ENERGY 2 / RHYTHM 2 / MOTION 1. Kehangatan datang dari palet keluarga dan bahasa pendampingan; komposisi mengikuti pekerjaan pengguna; gerak hanya memberi respons pada perubahan keadaan.
+
+## Alasan pilihan visual
+
+- Teal menandai tindakan utama; mint menjadi turunannya di mode gelap. Krem membantu membaca panduan, oranye memberi apresiasi setelah latihan selesai.
+- Source Sans 3 dipertahankan agar formulir, soal, dan angka memiliki satu suara tipografi yang mudah dibaca.
+- Pemisah header pada lembar latihan mengingatkan struktur buku kerja sekaligus membedakan konteks dan isi. Kartu dipakai untuk lembar soal dan tindakan utama; tinjauan serta ringkasan memakai susunan yang lebih ringan.
+- Jarak kelipatan 4px menyatukan komponen. Ruang lebih luas di sekitar soal membantu anak memusatkan perhatian.
+- Ikon buku menandai latihan, clipboard menandai tinjauan, printer menandai cetak. Ikon yang ada dipertahankan untuk konsistensi, selalu disertai teks ketika menjadi tindakan.
+- Bayangan hanya menandai menu dan dialog yang berada di atas halaman; latar besar tetap netral.
+
 ## Tipografi
 
 - Source Sans 3, dimuat melalui `next/font`, menjadi font utama aplikasi.
@@ -35,19 +46,24 @@ Topik menggunakan `buildInsights` dan sumber bukti yang sama dengan laporan: jaw
 
 - Satu soal menjadi pusat perhatian. Navigasi orang tua dan informasi kuota disembunyikan selama pengerjaan.
 - Pilihan jawaban dan potongan mempunyai area tekan minimal 48px, fokus keyboard terlihat, dan status pilihan disertai tanda.
+- Tombol umum berukuran minimal 48px; tombol kecil dan ikon minimal 44px. Tautan berbentuk tombol menggunakan `buttonStyles`, tanpa menumpuk elemen tombol di dalam tautan.
 - Tombol sebelumnya dan selanjutnya selalu jelas. Seluruh nomor soal dapat dibuka melalui bagian yang dapat diperluas.
 - Jawaban tetap tersimpan di perangkat selama latihan. Tampilan hasil membedakan nilai final dari jawaban yang masih menunggu tinjauan.
 - Ilustrasi menjelaskan soal atau materi. Hindari karakter dan dekorasi yang tidak berhubungan dengan aktivitas.
 
 ## Formulir, laporan, dan cetak
 
-Form pembuatan terbagi menjadi materi belajar, bentuk latihan, dan ringkasan sebelum membuat draf. Label berada di atas input. Informasi kuota serta status draf tetap terlihat.
+Form pembuatan terbagi menjadi materi belajar, bentuk latihan, dan ringkasan sebelum membuat soal. Label berada di atas input; bantuan dan kesalahan terhubung melalui `aria-describedby`. Pilihan materi menampilkan status terpilih. Hasil otomatis tersimpan dan tidak dapat diedit; informasi kuota dan status pemrosesan tetap terlihat.
 
 Laporan menampilkan topik, jumlah jawaban yang menjadi bukti, kesulitan, dan tindakan berikutnya. Grafik memakai token warna identitas. Worksheet cetak memakai tinta gelap di atas kertas putih, penomoran jelas, dan ruang untuk jawaban.
 
 ## Bahasa dan gerak
 
-Gunakan bahasa Indonesia konkret: Buat latihan, Buka latihan, Tinjau jawaban, Latih topik ini. Kehangatan muncul dari bantuan dan umpan balik yang jelas. AI dijelaskan ketika relevan dengan pembuatan atau pemeriksaan draf.
+Gunakan bahasa Indonesia konkret: Buat latihan, Buka latihan, Tinjau jawaban, Latih topik ini. Kehangatan muncul dari bantuan dan umpan balik yang jelas. AI dijelaskan ketika relevan dengan pembuatan soal.
+
+Dialog menggunakan elemen native `dialog` agar fokus terkunci di dalamnya, Escape menutup, dan fokus kembali ke pemicu. Navigasi mobile mengunci fokus dan menonaktifkan isi di belakangnya. Menu akun dan pemilih anak dapat ditutup dengan Escape. Tautan lewati navigasi tersedia bagi pengguna keyboard.
+
+Halaman depan menampilkan contoh soal interaktif yang jelas ditandai sebagai contoh. Angka nilai, poin, dan testimoni tanpa sumber tidak ditampilkan. Harga mengikuti konfigurasi paket aplikasi.
 
 Transisi singkat 150–200ms untuk perubahan keadaan; jangan menambahkan gerak pada seluruh kartu. Hormati `prefers-reduced-motion`. Semua tindakan dapat diakses melalui keyboard; teks dan tata letak harus terbaca di mode terang, gelap, dan layar kecil.
 

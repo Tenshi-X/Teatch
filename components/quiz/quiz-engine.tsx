@@ -9,7 +9,7 @@ import {
 import { ArrowLeft, ArrowRight, CheckCircle, Check } from 'lucide-react';
 import { submitAttempt } from '@/app/actions/attempts';
 import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { Button, buttonStyles } from '@/components/ui/button';
 import { MathText } from '@/components/ui/math-text';
 import { QuestionInput } from './interactions';
 import type { GeneratedQuestion } from '@/lib/learning/contracts';
@@ -173,11 +173,9 @@ export function QuizEngine({
   if (result)
     return (
       <Card padding="lg" className="max-w-xl mx-auto space-y-5">
-        <CheckCircle
-          size={32}
-          className="text-primary-600 dark:text-primary-300"
-          aria-hidden="true"
-        />
+        <span className="inline-flex rounded-lg bg-motivation-500 p-3 text-surface-900">
+          <CheckCircle size={32} aria-hidden="true" />
+        </span>
         <p className="learning-eyebrow">Catatan latihan</p>
         <h1 className="text-3xl font-semibold">
           Latihan selesai. Terima kasih sudah mencoba!
@@ -202,15 +200,21 @@ export function QuizEngine({
         </p>
         <div className="flex flex-wrap gap-3 border-t border-[var(--card-border)] pt-5">
           {result.status === 'pending_review' && (
-            <Link href="/review">
-              <Button>Tinjau jawaban</Button>
+            <Link href="/review" className={buttonStyles()}>
+              Tinjau jawaban
             </Link>
           )}
-          <Link href={`/worksheets/${worksheetId}`}>
-            <Button variant="outline">Lihat pembahasan</Button>
+          <Link
+            href={`/worksheets/${worksheetId}`}
+            className={buttonStyles({ variant: 'outline' })}
+          >
+            Lihat pembahasan
           </Link>
-          <Link href="/dashboard">
-            <Button variant="outline">Kembali ke ruang belajar</Button>
+          <Link
+            href="/dashboard"
+            className={buttonStyles({ variant: 'outline' })}
+          >
+            Kembali ke ruang belajar
           </Link>
         </div>
         <FeedbackForm worksheetId={worksheetId} />
@@ -232,7 +236,7 @@ export function QuizEngine({
           <p className="learning-eyebrow">
             Waktu belajar{child ? ` · ${child.name}` : ''}
           </p>
-          <p className="text-sm text-[var(--text-muted)]">
+          <p role="status" className="text-sm text-[var(--text-muted)]">
             {answered} dari {questions.length} soal dijawab
           </p>
         </div>
@@ -248,7 +252,7 @@ export function QuizEngine({
           aria-valuenow={answered}
         >
           <div
-            className="h-full bg-primary-500 transition-[width] duration-200"
+            className="h-full bg-[var(--accent-color)] transition-[width] duration-150"
             style={{ width: `${(answered / questions.length) * 100}%` }}
           />
         </div>
@@ -263,7 +267,7 @@ export function QuizEngine({
             id="question-heading"
             ref={questionHeading}
             tabIndex={-1}
-            className="learning-eyebrow outline-none"
+            className="learning-eyebrow rounded-sm border-b border-[var(--card-border)] pb-4"
           >
             Soal {index + 1} dari {questions.length}
           </h2>
@@ -287,28 +291,40 @@ export function QuizEngine({
           </fieldset>
         </div>
       </section>
-      <div className="flex flex-wrap justify-between gap-3">
+      <nav
+        aria-label="Navigasi latihan"
+        className="sticky bottom-0 z-10 flex flex-wrap justify-between gap-3 border-y border-[var(--card-border)] bg-[var(--bg)] py-4"
+      >
         <Button
           variant="outline"
           disabled={index === 0 || busy}
           onClick={() => update({ index: index - 1 })}
+          className="flex-1 sm:flex-none"
         >
           <ArrowLeft size={18} aria-hidden="true" />
           Sebelumnya
         </Button>
         {index < questions.length - 1 ? (
-          <Button disabled={busy} onClick={() => update({ index: index + 1 })}>
+          <Button
+            disabled={busy}
+            className="flex-1 sm:flex-none"
+            onClick={() => update({ index: index + 1 })}
+          >
             Selanjutnya
             <ArrowRight size={18} aria-hidden="true" />
           </Button>
         ) : (
-          <Button isLoading={busy} onClick={submit}>
+          <Button
+            isLoading={busy}
+            className="flex-1 sm:flex-none"
+            onClick={submit}
+          >
             Selesaikan latihan
           </Button>
         )}
-      </div>
-      <details className="border-t border-[var(--card-border)] pt-4">
-        <summary className="cursor-pointer py-2 text-sm font-medium">
+      </nav>
+      <details>
+        <summary className="min-h-11 cursor-pointer py-2 text-base font-medium">
           Lihat semua nomor soal
         </summary>
         <nav aria-label="Nomor soal" className="mt-3 flex flex-wrap gap-2">
@@ -324,7 +340,7 @@ export function QuizEngine({
                 disabled={busy}
                 aria-current={index === i ? 'step' : undefined}
                 aria-label={`Soal ${i + 1}${complete ? ', sudah dijawab' : ', belum dijawab'}`}
-                className={`inline-flex min-h-11 min-w-11 items-center justify-center gap-1 rounded-lg border px-3 ${index === i ? 'border-primary-600 bg-primary-600 text-white' : 'border-[var(--card-border)]'}`}
+                className={`button-base min-h-12 min-w-12 border px-3 ${index === i ? 'action-primary border-transparent' : 'border-[var(--input-border)] hover:bg-[var(--surface-subtle)]'}`}
                 onClick={() => update({ index: i })}
               >
                 {i + 1}

@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { buildInsights } from '@/lib/learning/insights';
 import type { RecentActivity, DashboardStats } from '@/types';
 import { PlanUpgrade } from '@/components/subscription/plan-upgrade';
+import { buttonStyles } from '@/components/ui/button';
 
 export interface DashboardChildData {
   stats: DashboardStats;
@@ -35,9 +36,7 @@ export function DashboardView({
     return (
       <section className="mx-auto max-w-2xl py-10 sm:py-16">
         <p className="learning-eyebrow">Belajar bersama Teatch</p>
-        <h1 className="mt-3 text-3xl sm:text-4xl font-semibold tracking-tight">
-          Mulai dari mengenal anak.
-        </h1>
+        <h1 className="workbook-heading mt-3">Mulai dari mengenal anak.</h1>
         <p className="mt-4 text-lg text-[var(--text-muted)]">
           Tambahkan profil anak untuk menyiapkan latihan sesuai kelas dan materi
           yang ingin dipelajari.
@@ -55,7 +54,9 @@ export function DashboardView({
             'Lihat perkembangan',
           ].map((label, index) => (
             <li key={label}>
-              <span className="learning-eyebrow">0{index + 1}</span>
+              <span className="text-sm text-[var(--text-muted)]">
+                {index + 1}.
+              </span>
               <p className="mt-1 font-medium">{label}</p>
             </li>
           ))}
@@ -64,7 +65,7 @@ export function DashboardView({
     );
 
   if (!activeChild || !data)
-    return <p role="status">Menyiapkan ringkasan belajar…</p>;
+    return <p role="status">Menyiapkan ringkasan belajar.</p>;
   const { stats, activities, pendingReviews, latestWorksheet, topics } = data;
   const metrics = [
     {
@@ -84,7 +85,7 @@ export function DashboardView({
     },
     {
       label: 'Rata-rata nilai',
-      value: stats.totalAttempts ? `${stats.averageScore}%` : '—',
+      value: stats.totalAttempts ? `${stats.averageScore}%` : 'Belum ada',
       detail: 'dari latihan yang selesai',
     },
   ];
@@ -94,7 +95,7 @@ export function DashboardView({
       <header className="flex flex-wrap items-center justify-between gap-5 border-b border-[var(--card-border)] pb-6">
         <div className="min-w-0">
           <p className="learning-eyebrow">Ruang belajar keluarga</p>
-          <h1 className="mt-2 text-3xl sm:text-4xl font-semibold tracking-tight">
+          <h1 className="workbook-heading mt-2">
             Belajar bersama {activeChild.name}
           </h1>
           <p className="mt-2 text-[var(--text-muted)]">
@@ -119,11 +120,18 @@ export function DashboardView({
 
       <section
         aria-label="Langkah berikutnya"
-        className="grid gap-5 lg:grid-cols-[1.5fr_1fr]"
+        className="grid gap-6 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]"
       >
-        <div className="card p-5 sm:p-7">
-          <p className="learning-eyebrow">Latihan berikutnya</p>
-          <h2 className="mt-3 text-2xl font-semibold">
+        <article className="card min-w-0 p-5 sm:p-7">
+          <header className="flex items-center justify-between gap-4 border-b border-[var(--card-border)] pb-4">
+            <p className="learning-eyebrow">Latihan berikutnya</p>
+            <BookOpen
+              size={24}
+              className="text-[var(--accent-color)]"
+              aria-hidden="true"
+            />
+          </header>
+          <h2 className="mt-5 max-w-xl text-2xl sm:text-3xl font-semibold leading-snug break-words">
             {latestWorksheet
               ? latestWorksheet.title
               : 'Apa yang ingin dipelajari hari ini?'}
@@ -140,23 +148,21 @@ export function DashboardView({
                   ? `/worksheets/${latestWorksheet.id}`
                   : '/worksheets/new'
               }
-              className="inline-flex min-h-12 items-center gap-2 rounded-[var(--radius-button)] action-primary px-5 py-3 font-semibold"
+              className={buttonStyles()}
             >
-              <BookOpen size={18} aria-hidden="true" />
               {latestWorksheet ? 'Buka latihan' : 'Buat latihan'}
-              <ArrowRight size={18} aria-hidden="true" />
             </Link>
             {latestWorksheet && (
               <Link
                 href="/worksheets/new"
-                className="text-sm font-semibold text-primary-700 dark:text-primary-200 underline underline-offset-4"
+                className="inline-flex min-h-11 items-center text-sm font-semibold underline underline-offset-4"
               >
                 Buat latihan baru
               </Link>
             )}
           </div>
-        </div>
-        <div className="card flex flex-col justify-between p-5 sm:p-7">
+        </article>
+        <aside className="flex min-w-0 flex-col justify-center border-t border-[var(--card-border)] pt-5 lg:border-t-0 lg:pl-2 lg:pt-0">
           <div>
             <span className="inline-flex rounded-lg bg-[var(--note-bg)] p-2 text-[var(--note-text)]">
               <ClipboardCheck size={24} aria-hidden="true" />
@@ -174,12 +180,11 @@ export function DashboardView({
           </div>
           <Link
             href="/review"
-            className="mt-5 inline-flex min-h-11 items-center gap-2 font-semibold text-[var(--accent-color)] underline underline-offset-4"
+            className="mt-4 inline-flex min-h-11 items-center gap-2 font-semibold underline underline-offset-4"
           >
             Tinjau jawaban
-            <ArrowRight size={16} aria-hidden="true" />
           </Link>
-        </div>
+        </aside>
       </section>
 
       <section aria-labelledby="summary-title">
@@ -192,7 +197,9 @@ export function DashboardView({
               <dt className="text-sm text-[var(--text-muted)]">
                 {metric.label}
               </dt>
-              <dd className="mt-1 text-3xl font-semibold tabular-nums">
+              <dd
+                className={`mt-1 font-semibold tabular-nums ${typeof metric.value === 'string' && metric.value === 'Belum ada' ? 'text-lg leading-9' : 'text-3xl'}`}
+              >
                 {metric.value}
               </dd>
               <p className="mt-1 text-sm text-[var(--text-muted)]">
@@ -203,7 +210,7 @@ export function DashboardView({
         </dl>
       </section>
 
-      <div className="grid gap-8 lg:grid-cols-[1.2fr_1fr]">
+      <div className="grid gap-8 xl:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
         <section aria-labelledby="topics-title">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <h2 id="topics-title" className="text-xl font-semibold">
@@ -267,7 +274,7 @@ export function DashboardView({
                   ))}
                 </ul>
               ) : (
-                <div className="mt-5 border-l-2 border-primary-300 pl-4">
+                <div className="mt-5 rounded-[var(--radius-card)] bg-[var(--surface-subtle)] p-5">
                   <p className="font-medium">
                     {stats.totalAttempts
                       ? 'Belum ada topik yang perlu ditampilkan.'

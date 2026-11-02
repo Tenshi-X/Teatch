@@ -3,7 +3,7 @@ import { useEffect, useState, useSyncExternalStore } from 'react';
 import { useRouter } from 'next/navigation';
 import { useChildStore } from '@/lib/stores/child-store';
 import { createClient } from '@/lib/supabase/client';
-import { Button } from '@/components/ui/button';
+import { Button, buttonStyles } from '@/components/ui/button';
 import { Select } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
@@ -129,8 +129,8 @@ export function WorksheetBuilder({
         title="Pilih profil anak"
         description="Tambahkan atau pilih anak untuk membuat latihan."
         action={
-          <Link href="/children/new">
-            <Button>Tambah anak</Button>
+          <Link href="/children/new" className={buttonStyles()}>
+            Tambah anak
           </Link>
         }
       />
@@ -223,7 +223,7 @@ export function WorksheetBuilder({
     <div className="max-w-4xl mx-auto space-y-5">
       <header className="border-b border-[var(--card-border)] pb-5">
         <p className="learning-eyebrow">Siapkan materi belajar</p>
-        <h1 className="mt-2 text-3xl font-semibold">
+        <h1 className="workbook-heading mt-2">
           Buat latihan untuk {activeChild.name}
         </h1>
         <p className="mt-2 text-[var(--text-muted)]">
@@ -231,7 +231,7 @@ export function WorksheetBuilder({
           dikerjakan.
         </p>
       </header>
-      <Card padding="lg">
+      <Card className="p-5 sm:p-7" padding="none">
         <h2 className="text-lg font-semibold">Mulai dari materi pilihan</h2>
         <p className="mt-1 text-sm text-[var(--text-muted)]">
           Pilih pelajaran, lalu tujuan belajar sesuai kelas. Pilihan ini
@@ -243,7 +243,13 @@ export function WorksheetBuilder({
             .map((s) => (
               <Button
                 key={s.id}
-                variant={subject?.id === s.id ? 'primary' : 'outline'}
+                variant="outline"
+                aria-pressed={subject?.id === s.id}
+                className={
+                  subject?.id === s.id
+                    ? 'border-[var(--selection-border)] bg-[var(--selection-bg)] text-[var(--selection-text)]'
+                    : undefined
+                }
                 disabled={busy || !!requestKey}
                 onClick={() => {
                   setSubjectId(s.id);
@@ -255,12 +261,14 @@ export function WorksheetBuilder({
               </Button>
             ))}
         </div>
-        <div className="mt-3 grid gap-2 sm:grid-cols-3">
+        <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
           {objectives.map((o) => (
             <button
+              type="button"
               key={o.id}
+              aria-pressed={validObjective === o.id}
               disabled={busy || !!requestKey}
-              className="rounded-lg border border-[var(--card-border)] p-3 text-left text-sm hover:bg-[var(--surface-subtle)] disabled:opacity-50"
+              className={`min-h-12 cursor-pointer rounded-lg border p-3 text-left text-sm hover:bg-[var(--surface-subtle)] disabled:cursor-not-allowed disabled:opacity-50 ${validObjective === o.id ? 'border-[var(--selection-border)] bg-[var(--selection-bg)] text-[var(--selection-text)]' : 'border-[var(--input-border)]'}`}
               onClick={() => {
                 setObjectiveId(o.id);
                 setTopic(o.label);
@@ -274,7 +282,7 @@ export function WorksheetBuilder({
           ))}
         </div>
       </Card>
-      <Card padding="lg">
+      <Card className="p-5 sm:p-7" padding="none">
         {scopeMessage && (
           <p role="status" className="mb-4 text-sm">
             {scopeMessage}
@@ -366,7 +374,7 @@ export function WorksheetBuilder({
               Jumlah soal: <b>{actualCount}</b>
               <input
                 aria-label="Jumlah soal"
-                className="block w-full my-3"
+                className="block min-h-11 w-full cursor-pointer my-1"
                 type="range"
                 min={1}
                 max={maxCount}

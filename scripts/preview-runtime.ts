@@ -20,10 +20,13 @@ async function main() {
           builder.onResolve(
             {
               filter:
-                /^(?:@\/app\/actions\/|@\/lib\/supabase\/client$|next\/navigation$|next\/link$)/,
+                /^(?:@\/app\/actions\/|@\/lib\/supabase\/client$|@\/lib\/server\/features$|next\/navigation$|next\/link$)/,
             },
             () => ({ path: resolve('tests/browser-mocks.tsx') })
           );
+          builder.onResolve({ filter: /^next\/image$/ }, () => ({
+            path: resolve('tests/browser-image.tsx'),
+          }));
         },
       },
     ],
@@ -43,7 +46,7 @@ async function main() {
   ).join('\n');
   await writeFile(resolve(folder, 'styles.css'), css);
   const html =
-    '<html lang="id"><head><meta name="viewport" content="width=device-width,initial-scale=1"/><link rel="stylesheet" href="/styles.css"/></head><body><div id="root"></div><script src="/preview.js"></script></body></html>';
+    '<!doctype html><html lang="id"><head><title>Teatch · Pratinjau lokal</title><meta name="viewport" content="width=device-width,initial-scale=1"/><link rel="stylesheet" href="/styles.css"/><style>@font-face{font-family:SourceSansQA;src:url(/fonts/SourceSans3VF-Upright.woff2);font-weight:200 900;font-display:swap}:root{--font-source-sans:SourceSansQA}</style></head><body><div id="root"></div><script src="/preview.js"></script></body></html>';
   const requests = new Map<string, { status: string; worksheetId?: string }>();
   let operations = 0,
     statusReads = 0;

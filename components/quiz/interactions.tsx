@@ -16,7 +16,6 @@ const mapValue = (v: unknown): Record<string, string> =>
   v && typeof v === 'object' && !Array.isArray(v)
     ? (v as Record<string, string>)
     : {};
-const choiceClass = () => 'answer-choice';
 
 export function QuestionInput({
   question: q,
@@ -35,12 +34,14 @@ export function QuestionInput({
       <div className="grid gap-3" role="group" aria-label="Pilihan jawaban">
         {options.map((o, i) => (
           <button
+            type="button"
             key={i}
-            className={`${choiceClass()} flex items-center gap-3`}
+            className="answer-choice flex items-center gap-3"
             aria-pressed={value === o}
             onClick={() => onChange(o)}
           >
             <span
+              data-answer-label
               className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-[var(--surface-subtle)] text-sm font-semibold"
               aria-hidden="true"
             >
@@ -74,7 +75,7 @@ export function QuestionInput({
     return (
       <div className="space-y-4">
         <p className="text-sm">
-          Klik potongan sesuai urutan. Klik kembali untuk menghapus.
+          Pilih potongan sesuai urutan. Pilih kembali untuk menghapus.
         </p>
         <div className="min-h-20 border-2 border-dashed rounded-lg p-3 flex flex-wrap gap-2">
           {selected.map((s, i) => (
@@ -121,7 +122,7 @@ export function QuestionInput({
             {q.pairs.map((p) => (
               <button
                 key={p.left}
-                className={choiceClass()}
+                className="answer-choice"
                 onClick={() => setSelectedLeft(p.left)}
                 aria-pressed={selectedLeft === p.left}
               >
@@ -200,7 +201,7 @@ export function QuestionInput({
             key={id}
             aria-label={`Pilih gambar ${ASSETS[id].label}`}
             aria-pressed={value === id}
-            className={choiceClass()}
+            className="answer-choice"
             onClick={() => onChange(id)}
           >
             <AssetVisual id={id} />

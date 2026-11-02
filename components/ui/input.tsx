@@ -1,5 +1,7 @@
+'use client';
+
 import { cn } from '@/lib/utils';
-import { InputHTMLAttributes, forwardRef } from 'react';
+import { InputHTMLAttributes, forwardRef, useId } from 'react';
 
 export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   label?: string;
@@ -8,8 +10,21 @@ export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
 }
 
 const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({ className, label, error, helperText, id, ...props }, ref) => {
-    const inputId = id || label?.toLowerCase().replace(/\s+/g, '-');
+  (
+    {
+      className,
+      label,
+      error,
+      helperText,
+      id,
+      'aria-describedby': describedBy,
+      ...props
+    },
+    ref
+  ) => {
+    const generatedId = useId();
+    const inputId = id || generatedId;
+    const messageId = `${inputId}-message`;
 
     return (
       <div className="w-full">
@@ -25,6 +40,11 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
           ref={ref}
           id={inputId}
           aria-invalid={error ? true : undefined}
+          aria-describedby={
+            [describedBy, (error || helperText) && messageId]
+              .filter(Boolean)
+              .join(' ') || undefined
+          }
           className={cn(
             'input-base',
             error &&
@@ -34,10 +54,12 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
           {...props}
         />
         {error && (
-          <p className="mt-1.5 text-sm text-[var(--error-text)]">{error}</p>
+          <p id={messageId} className="mt-1.5 text-sm text-[var(--error-text)]">
+            {error}
+          </p>
         )}
         {helperText && !error && (
-          <p className="mt-1.5 text-sm text-[var(--text-muted)]">
+          <p id={messageId} className="mt-1.5 text-sm text-[var(--text-muted)]">
             {helperText}
           </p>
         )}

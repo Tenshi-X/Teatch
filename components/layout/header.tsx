@@ -1,10 +1,10 @@
 'use client';
 
-import { Menu, Moon, Sun, LogOut } from 'lucide-react';
+import { Menu, LogOut } from 'lucide-react';
 import { ChildSelector } from './child-selector';
-import { useTheme } from '@/components/providers/theme-provider';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { logout } from '@/lib/device-session';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useId } from 'react';
 import { format } from 'date-fns';
 import { id } from 'date-fns/locale';
 import { Avatar } from '@/components/ui/avatar';
@@ -14,6 +14,7 @@ import { t } from '@/lib/i18n';
 
 interface HeaderProps {
   onMenuToggle: () => void;
+  menuOpen?: boolean;
   userName: string;
   avatarUrl?: string;
   worksheetQuota?: number;
@@ -22,15 +23,17 @@ interface HeaderProps {
 
 export function Header({
   onMenuToggle,
+  menuOpen,
   userName,
   avatarUrl,
   worksheetQuota,
   subscriptionPeriodEnd,
 }: HeaderProps) {
-  const { isDark, toggle } = useTheme();
   const { language } = useLanguageStore();
   const [showUserMenu, setShowUserMenu] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const menuId = useId();
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -47,14 +50,18 @@ export function Header({
       <div className="flex items-center justify-between px-4 lg:px-6 py-3">
         {/* Left: Menu button */}
         <button
+          type="button"
+          aria-label={menuOpen ? 'Sembunyikan navigasi' : 'Buka navigasi'}
+          aria-expanded={menuOpen}
+          aria-controls="main-navigation"
           onClick={onMenuToggle}
-          className="p-2 rounded-lg hover:bg-surface-100 dark:hover:bg-surface-800 transition-colors cursor-pointer mr-2"
+          className="icon-button mr-2"
         >
           <Menu size={22} />
         </button>
 
         {/* Center: Child selector */}
-        <div className="flex-1 flex justify-center lg:justify-start lg:ml-0">
+        <div className="flex-1 min-w-0 flex justify-start">
           <ChildSelector />
         </div>
 
@@ -62,7 +69,7 @@ export function Header({
         <div className="flex items-center gap-2">
           {/* Active Period Widget */}
           {subscriptionPeriodEnd && (
-            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-surface-100 dark:bg-surface-800 rounded-lg mr-1 border border-surface-200 dark:border-surface-700">
+            <div className="hidden xl:flex items-center gap-2 px-3 py-1.5 bg-surface-100 dark:bg-surface-800 rounded-lg mr-1 border border-surface-200 dark:border-surface-700">
               <span className="text-sm font-medium text-surface-600 dark:text-surface-300">
                 Aktif s.d:
               </span>
@@ -76,7 +83,7 @@ export function Header({
 
           {/* Quota Widget */}
           {worksheetQuota !== undefined && (
-            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-surface-100 dark:bg-surface-800 rounded-lg mr-1 border border-surface-200 dark:border-surface-700">
+            <div className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-surface-100 dark:bg-surface-800 rounded-lg mr-1 border border-surface-200 dark:border-surface-700">
               <span className="text-sm font-medium text-surface-600 dark:text-surface-300">
                 {t('header.quota', language)}
               </span>
@@ -93,27 +100,42 @@ export function Header({
             </div>
           )}
 
-          <button
-            onClick={toggle}
-            className="p-2 rounded-lg hover:bg-surface-100 dark:hover:bg-surface-800 transition-colors cursor-pointer"
-            aria-label="Toggle dark mode"
-          >
-            {isDark ? <Sun size={20} /> : <Moon size={20} />}
-          </button>
+          <ThemeToggle />
 
           {/* User menu */}
-          <div className="relative" ref={menuRef}>
+          <div
+            className="relative"
+            ref={menuRef}
+            onKeyDown={(event) => {
+              if (event.key === 'Escape' && showUserMenu) {
+                setShowUserMenu(false);
+                triggerRef.current?.focus();
+              }
+            }}
+            onBlur={(event) => {
+              if (!event.currentTarget.contains(event.relatedTarget))
+                setShowUserMenu(false);
+            }}
+          >
             <button
+              type="button"
+              ref={triggerRef}
+              aria-label={`Akun ${userName}`}
+              aria-expanded={showUserMenu}
+              aria-controls={menuId}
               onClick={() => setShowUserMenu(!showUserMenu)}
-              className="p-1 rounded-lg hover:bg-surface-100 dark:hover:bg-surface-800 transition-colors cursor-pointer"
+              className="icon-button"
             >
               <Avatar name={userName} src={avatarUrl} size="sm" />
             </button>
 
             {showUserMenu && (
-              <div className="absolute right-0 top-full mt-2 w-56 card p-2 shadow-sm border border-[var(--card-border)] animate-scale-in">
+              <div
+                id={menuId}
+                className="absolute right-0 top-full mt-2 w-56 max-w-[calc(100vw-2rem)] card p-2 shadow-md border border-[var(--card-border)]"
+              >
                 <div className="px-3 py-2 border-b border-[var(--card-border)] mb-2">
-                  <p className="text-sm font-medium">{userName}</p>
+                  <p className="break-words text-sm font-medium">{userName}</p>
                   <p className="text-xs text-[var(--text-muted)]">
                     {t('header.parentAccount', language)}
                   </p>
@@ -123,7 +145,7 @@ export function Header({
                     setShowUserMenu(false);
                     void logout();
                   }}
-                  className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-danger-600 dark:text-danger-500 hover:bg-danger-50 dark:hover:bg-danger-500/10 transition-colors cursor-pointer"
+                  className="min-h-11 w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-[var(--error-text)] hover:bg-[var(--surface-subtle)] transition-colors cursor-pointer"
                 >
                   <LogOut size={16} />
                   {t('header.logout', language)}

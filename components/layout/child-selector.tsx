@@ -3,7 +3,7 @@
 import { useChildStore } from '@/lib/stores/child-store';
 import { Avatar } from '@/components/ui/avatar';
 import { ChevronDown, Plus, Check } from 'lucide-react';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useId } from 'react';
 import Link from 'next/link';
 import { cn, calculateAge } from '@/lib/utils';
 import { useLanguageStore } from '@/lib/stores/language-store';
@@ -14,6 +14,8 @@ export function ChildSelector() {
   const { language } = useLanguageStore();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const listId = useId();
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -41,10 +43,33 @@ export function ChildSelector() {
   }
 
   return (
-    <div className="relative" ref={dropdownRef}>
+    <div
+      className="relative min-w-0"
+      ref={dropdownRef}
+      onKeyDown={(event) => {
+        if (event.key === 'Escape' && isOpen) {
+          event.stopPropagation();
+          setIsOpen(false);
+          triggerRef.current?.focus();
+        }
+      }}
+      onBlur={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget))
+          setIsOpen(false);
+      }}
+    >
       <button
+        type="button"
+        ref={triggerRef}
+        aria-label={
+          activeChild
+            ? `Pilih anak, saat ini ${activeChild.name}`
+            : 'Pilih anak'
+        }
+        aria-expanded={isOpen}
+        aria-controls={listId}
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-surface-100 dark:hover:bg-surface-800 transition-colors cursor-pointer"
+        className="flex min-h-12 max-w-full items-center gap-2 px-2 sm:px-3 py-2 rounded-[var(--radius-button)] hover:bg-[var(--surface-subtle)] transition-colors cursor-pointer"
       >
         {activeChild && (
           <>
@@ -53,11 +78,11 @@ export function ChildSelector() {
               name={activeChild.name}
               size="sm"
             />
-            <div className="text-left hidden sm:block">
-              <p className="text-sm font-medium leading-tight">
+            <div className="min-w-0 text-left">
+              <p className="max-w-24 sm:max-w-44 truncate text-sm sm:text-base font-semibold leading-tight">
                 {activeChild.name}
               </p>
-              <p className="text-xs text-[var(--text-muted)]">
+              <p className="hidden sm:block text-sm text-[var(--text-muted)]">
                 {activeChild.level} • {calculateAge(activeChild.birth_date)}{' '}
                 {t('childSelector.yearsOld', language)}
               </p>
@@ -65,7 +90,7 @@ export function ChildSelector() {
             <ChevronDown
               size={16}
               className={cn(
-                'text-[var(--text-muted)] transition-transform',
+                'shrink-0 text-[var(--text-muted)] transition-transform',
                 isOpen && 'rotate-180'
               )}
             />
@@ -75,21 +100,27 @@ export function ChildSelector() {
 
       {/* Dropdown */}
       {isOpen && (
-        <div className="absolute left-1/2 -translate-x-1/2 lg:left-0 lg:translate-x-0 top-full mt-2 w-64 card p-2 shadow-xl animate-scale-in z-50">
-          <p className="px-3 py-1.5 text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider">
+        <div
+          id={listId}
+          className="absolute left-0 top-full mt-2 w-64 max-w-[calc(100vw-5.5rem)] card p-2 shadow-md z-50"
+        >
+          <p className="px-3 py-2 text-sm font-medium text-[var(--text-muted)]">
             {t('childSelector.select', language)}
           </p>
           {children.map((child) => (
             <button
+              type="button"
               key={child.id}
+              aria-pressed={child.id === activeChild?.id}
               onClick={() => {
                 setActiveChild(child.id);
                 setIsOpen(false);
+                triggerRef.current?.focus();
               }}
               className={cn(
-                'w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors cursor-pointer',
+                'min-h-12 w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors cursor-pointer',
                 child.id === activeChild?.id
-                  ? 'bg-primary-50 dark:bg-primary-900/20'
+                  ? 'bg-[var(--selection-bg)] text-[var(--selection-text)]'
                   : 'hover:bg-surface-50 dark:hover:bg-surface-800/50'
               )}
             >
@@ -112,7 +143,7 @@ export function ChildSelector() {
             <Link
               href="/children/new"
               onClick={() => setIsOpen(false)}
-              className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors"
+              className="flex min-h-11 items-center gap-2 px-3 py-2 rounded-lg text-sm text-[var(--accent-color)] hover:bg-[var(--surface-subtle)] transition-colors"
             >
               <Plus size={16} />
               {t('childSelector.addNew', language)}

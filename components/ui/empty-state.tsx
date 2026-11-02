@@ -18,12 +18,12 @@ export function EmptyState({
   return (
     <div
       className={cn(
-        'flex flex-col items-center justify-center py-16 px-6 text-center',
+        'flex flex-col items-center justify-center py-10 sm:py-16 px-5 text-center',
         className
       )}
     >
       {icon && (
-        <div className="mb-4 text-surface-300 dark:text-surface-600">
+        <div aria-hidden="true" className="mb-4 text-[var(--text-muted)]">
           {icon}
         </div>
       )}

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useSyncExternalStore } from 'react';
+import { useState, useEffect, useSyncExternalStore, useCallback } from 'react';
 import { usePathname } from 'next/navigation';
 import { Sidebar } from '@/components/layout/sidebar';
 import { Header } from '@/components/layout/header';
@@ -44,6 +44,7 @@ export function DashboardShell({
     () => true
   );
   const sidebarOpen = sidebarOverride ?? desktop;
+  const closeSidebar = useCallback(() => setSidebarOverride(false), []);
   const { setChildren } = useChildStore();
 
   useEffect(() => {
@@ -53,7 +54,7 @@ export function DashboardShell({
 
   if (practicing) {
     return (
-      <main className="min-h-dvh px-4 py-6 sm:px-6 sm:py-10">
+      <main id="main-content" className="min-h-dvh px-4 py-6 sm:px-6 sm:py-10">
         <RuntimeSignals ownerId={ownerId} />
         {children}
       </main>
@@ -62,21 +63,38 @@ export function DashboardShell({
 
   return (
     <div className="flex h-dvh overflow-hidden">
+      <a
+        href="#main-content"
+        className="skip-link button-base action-primary min-h-12 px-5"
+      >
+        Langsung ke isi halaman
+      </a>
       <RuntimeSignals ownerId={ownerId} />
       <Sidebar
         isOpen={sidebarOpen}
-        onClose={() => setSidebarOverride(false)}
+        onClose={closeSidebar}
+        isMobile={!desktop}
         userRole={userRole}
       />
-      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+      <div
+        className="flex-1 flex flex-col min-w-0 overflow-hidden"
+        inert={!desktop && sidebarOpen}
+      >
         <Header
           onMenuToggle={() => setSidebarOverride(!sidebarOpen)}
+          menuOpen={sidebarOpen}
           userName={userName}
           avatarUrl={avatarUrl}
           worksheetQuota={worksheetQuota}
           subscriptionPeriodEnd={subscriptionPeriodEnd}
         />
-        <main className="flex-1 overflow-y-auto p-4 lg:p-6">{children}</main>
+        <main
+          id="main-content"
+          tabIndex={-1}
+          className="flex-1 overflow-y-auto p-4 sm:p-6 xl:p-8"
+        >
+          {children}
+        </main>
       </div>
     </div>
   );

@@ -221,6 +221,7 @@ body {
   transition: all 0.2s ease-out;
   outline: none;
   width: 100%;
+  min-height: 48px;
 }
 
 .input-base::placeholder {
@@ -255,7 +256,7 @@ body {
   border-right: 1px solid var(--sidebar-border);
 }
 
-:where(a, button, input, select, textarea):focus-visible {
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
   outline: 2px solid var(--accent-color);
   outline-offset: 4px;
 }
@@ -275,11 +276,85 @@ input[type='radio'] {
   background: var(--action-hover);
 }
 
+@layer components {
+  .button-base {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: var(--radius-button);
+    font-weight: 600;
+    line-height: 1.5;
+    text-align: center;
+    cursor: pointer;
+    transition:
+      background-color 150ms ease-out,
+      border-color 150ms ease-out;
+  }
+
+  .button-base:active:not(:disabled) {
+    filter: brightness(0.95);
+  }
+
+  .button-base:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .icon-button {
+    display: inline-flex;
+    min-width: 44px;
+    min-height: 44px;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-button);
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  .icon-button:hover,
+  .icon-button[aria-expanded='true'] {
+    background: var(--surface-subtle);
+  }
+
+  .icon-button:active {
+    background: var(--card-border);
+  }
+
+  .teatch-dialog {
+    width: calc(100% - 2rem);
+    max-height: calc(100dvh - 2rem);
+    margin: auto;
+    padding: 0;
+    overflow-y: auto;
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-modal);
+    color: var(--fg);
+    background: var(--card-bg);
+    box-shadow: var(--shadow-xl);
+  }
+
+  .teatch-dialog::backdrop {
+    background: rgb(0 0 0 / 50%);
+  }
+
+  .skip-link {
+    position: fixed;
+    top: 1rem;
+    left: 1rem;
+    z-index: 100;
+    transform: translateY(-200%);
+  }
+
+  .skip-link:focus {
+    transform: translateY(0);
+  }
+}
+
 .nav-active {
   background: var(--selection-bg);
-  border-color: transparent;
+  border-color: var(--selection-border);
   color: var(--selection-text);
-  box-shadow: inset 3px 0 0 var(--selection-border);
 }
 
 /* Preserve the existing logo shape with a neutral treatment. */
@@ -291,8 +366,15 @@ input[type='radio'] {
   color: var(--text-muted);
   font-size: 0.875rem;
   font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  line-height: 1.5;
+}
+
+.workbook-heading {
+  font-size: clamp(1.75rem, 2.5vw + 0.75rem, 2.25rem);
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  overflow-wrap: anywhere;
 }
 
 .practice-sheet {
@@ -331,8 +413,25 @@ input[type='radio'] {
 
 .answer-choice[aria-pressed='true'] {
   border-color: var(--selection-border);
-  box-shadow: inset 3px 0 0 var(--selection-border);
+  box-shadow: inset 0 0 0 1px var(--selection-border);
   background: var(--selection-bg);
+  color: var(--selection-text);
+}
+
+.practice-sheet [data-answer-label] {
+  color: var(--text-muted);
+}
+
+.practice-sheet .answer-choice[aria-pressed='true'] [data-answer-label] {
+  color: var(--selection-text);
+}
+
+.worksheet-paper {
+  color-scheme: light;
+  --fg: #292824;
+  --text-muted: #625f59;
+  --card-bg: #ffffff;
+  --card-border: #d2cfc7;
 }
 
 .answer-choice:disabled,
